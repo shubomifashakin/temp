@@ -191,19 +191,19 @@ export class AuthService {
       }),
     });
 
-    if(!req.ok){
+    if (!req.ok) {
       const errorText = await req.text();
       this.logger.error({
         message: 'Failed to exchange OAuth code for tokens',
         error: makeError(`HTTP ${req.status}: ${errorText}`),
       });
-      
+
       throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 
     const res = (await req.json()) as {
       scope: string;
-      id_token: string;
+      id_token?: string;
       access_token: string;
       refresh_token: string;
     };
@@ -215,6 +215,15 @@ export class AuthService {
         message: 'Failed to delete oauth state from cache',
         error: deleted.error,
       });
+    }
+
+    if (!res.id_token) {
+      this.logger.error({
+        message: 'Google OAuth token exchange did not return id_token',
+        error: makeError('Google OAuth token exchange did not return id_token'),
+      });
+
+      throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
     }
 
     const decodedInfo = this.jwtService.decode<{
@@ -348,15 +357,15 @@ export class AuthService {
       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
     }
 
+    if (new Date() > refreshExists.expires_at) {
+      throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
+    }
+
     await this.databaseService.refreshToken.delete({
       where: {
         token_id: refreshTokenId,
       },
     });
-
-    if (new Date() > refreshExists.expires_at) {
-      throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
-    }
 
     const {
       data: tokens,
