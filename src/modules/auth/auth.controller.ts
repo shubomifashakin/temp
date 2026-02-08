@@ -121,8 +121,10 @@ export class AuthController {
   })
   @ApiCookieAuth('refresh_token')
   @ApiResponse({ status: 200, description: 'Tokens refreshed successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized (missing or invalid refresh token)',
+  })
   @Post('refresh')
   @HttpCode(200)
   async refresh(

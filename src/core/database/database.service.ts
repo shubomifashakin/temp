@@ -11,6 +11,7 @@ export class DatabaseService extends PrismaClient implements OnModuleDestroy {
     super({
       transactionOptions: { maxWait: 5000, timeout: 15000 },
       adapter: new PrismaPg({
+        application_name: 'Temp-Backend',
         connectionString: configService.get<string>('DATABASE_URL'),
       }),
     });

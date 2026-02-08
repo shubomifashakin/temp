@@ -4,26 +4,21 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
-
 import { JwtService } from '@nestjs/jwt';
-
 import { ConfigService } from '@nestjs/config';
 
 import { v4 as uuid } from 'uuid';
 
 import { RedisService } from '../../core/redis/redis.service';
-
 import { DatabaseService } from '../../core/database/database.service';
 
 import { makeBlacklistedKey, makeOauthStateKey } from '../../common/utils';
-
 import {
   DEFAULT_JWT_ALG,
   MESSAGES,
   MINUTES_1,
   TOKEN,
 } from '../../common/constants';
-
 import { makeError } from '../../common/utils';
 
 import { FnResult } from '../../types/common.types';

@@ -16,7 +16,7 @@ async function bootstrap() {
     cors: {
       methods: '*',
       credentials: true,
-      origin: 'http://localhost:3000',
+      origin: process.env.FRONTEND_URL,
     },
     bufferLogs: true,
   });
