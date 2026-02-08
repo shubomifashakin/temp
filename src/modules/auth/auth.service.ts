@@ -191,6 +191,16 @@ export class AuthService {
       }),
     });
 
+    if(!req.ok){
+      const errorText = await req.text();
+      this.logger.error({
+        message: 'Failed to exchange OAuth code for tokens',
+        error: makeError(`HTTP ${req.status}: ${errorText}`),
+      });
+      
+      throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
+    }
+
     const res = (await req.json()) as {
       scope: string;
       id_token: string;
