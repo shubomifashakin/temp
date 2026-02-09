@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import {
   IsDate,
   IsEnum,
@@ -11,7 +11,7 @@ import { FileStatus } from '../../../../generated/prisma/enums';
 
 import { UploadFileDto } from './upload-file.dto';
 
-export class GetFileDto extends UploadFileDto {
+export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   @ApiProperty({ description: 'The id of the file' })
   @IsString()
   id: string;

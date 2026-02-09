@@ -14,4 +14,8 @@ export class UploadFileDto implements Pick<Files, 'description'> {
   @MinLength(5, { message: 'File description is too short' })
   @MaxLength(100, { message: 'File description is too long' })
   description: string;
+
+  @ApiProperty({ description: 'How long the file should be stored' })
+  @IsString({ message: 'Invalid lifetime' })
+  lifetime: 'short' | 'long' | 'medium';
 }
