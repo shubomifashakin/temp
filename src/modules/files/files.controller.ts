@@ -34,6 +34,7 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @ApiOperation({ summary: 'Upload a file' })
+  @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),

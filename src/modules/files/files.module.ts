@@ -3,12 +3,14 @@ import { Module } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
 
+import { S3Module } from '../../core/s3/s3.module';
+import { SqsModule } from '../../core/sqs/sqs.module';
 import { RedisModule } from '../../core/redis/redis.module';
 import { DatabaseModule } from '../../core/database/database.module';
 
 @Module({
   providers: [FilesService],
   controllers: [FilesController],
-  imports: [DatabaseModule, RedisModule],
+  imports: [DatabaseModule, RedisModule, S3Module, SqsModule],
 })
 export class FilesModule {}

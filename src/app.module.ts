@@ -13,6 +13,8 @@ import { UsersModule } from './modules/users/users.module';
 import { FilesModule } from './modules/files/files.module';
 import { HealthModule } from './modules/health/health.module';
 
+import { S3Module } from './core/s3/s3.module';
+import { SqsModule } from './core/sqs/sqs.module';
 import { RedisModule } from './core/redis/redis.module';
 import { RedisService } from './core/redis/redis.service';
 import { DatabaseModule } from './core/database/database.module';
@@ -166,6 +168,8 @@ import { validateConfig } from './common/utils';
     }),
     RedisModule,
     DatabaseModule,
+    SqsModule,
+    S3Module,
     AuthModule,
     HealthModule,
     UsersModule,

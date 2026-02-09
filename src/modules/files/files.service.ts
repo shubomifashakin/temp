@@ -54,16 +54,20 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    await this.databaseService.files.create({
+    const response = await this.databaseService.files.create({
       data: {
         s3_key: key,
         user_id: userId,
         description: dto.description,
       },
     });
+
+    return { id: response.id };
   }
 
-  async getFiles(userId: string) {}
+  async getFiles(userId: string) {
+    return { message: 'success' };
+  }
 
   async getSingleFile(userId: string, fileId: string): Promise<GetFileDto> {
     const cached = await this.redisService.get<GetFileDto>(
