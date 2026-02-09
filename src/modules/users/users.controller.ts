@@ -26,8 +26,8 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly configService: ConfigService,
     private readonly UsersService: UsersService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Get('me')
