@@ -10,6 +10,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { FilesModule } from './modules/files/files.module';
 import { HealthModule } from './modules/health/health.module';
 
 import { RedisModule } from './core/redis/redis.module';
@@ -168,6 +169,7 @@ import { validateConfig } from './common/utils';
     AuthModule,
     HealthModule,
     UsersModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
