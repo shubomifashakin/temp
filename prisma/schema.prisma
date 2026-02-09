@@ -13,36 +13,59 @@ enum Provider {
   google
 }
 
+enum FileStatus {
+  safe
+  unsafe
+  pending
+}
+
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  name String
-  picture String?
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String
+  picture    String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  accounts Accounts[]
+  files          Files[]
+  accounts       Accounts[]
   refresh_tokens RefreshToken[]
 }
 
 model Accounts {
-  id String @id @default(uuid())
-  user_id String
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider Provider
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  provider    Provider
   provider_id String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   @@index(name: "accounts_user_id_idx", fields: [user_id])
 }
 
 model RefreshToken {
-  id String @id @default(uuid())
-  user_id String
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  token_id String @unique
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token_id   String   @unique
   expires_at DateTime
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model Files {
+  id          String @id @default(uuid())
+  description String @db.VarChar(100)
+  view_count  Int    @default(0)
+  s3_key      String
+
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @updatedAt
+  deleted_at      DateTime?
+  last_accesed_at DateTime?
+  status          FileStatus @default(pending)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
