@@ -103,6 +103,6 @@ export function makeOauthStateKey(token: string): string {
   return `oauth_state:${token}`;
 }
 
-export function makeAccountKey(userId: string): string {
-  return `account:${userId}`;
+export function makeUserKey(userId: string): string {
+  return `user:${userId}`;
 }
