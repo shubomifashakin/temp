@@ -58,7 +58,7 @@ async function bootstrap() {
       exceptionFactory: (errors: ValidationError[] = []) => {
         const firstError = errors[0];
 
-        let message = 'Validation failed';
+        let message = 'Invalid Payload';
 
         if (firstError?.constraints) {
           message = Object.values(firstError.constraints)[0];
