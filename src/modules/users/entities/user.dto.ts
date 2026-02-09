@@ -9,7 +9,12 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class CachedUserInfo {
+import { UserCreateInput } from '../../../../generated/prisma/models';
+
+export class CachedUserInfo implements Pick<
+  UserCreateInput,
+  'name' | 'email' | 'picture' | 'created_at' | 'updated_at'
+> {
   @ApiProperty({
     description: 'The name of the user',
     example: 'John Doe',
