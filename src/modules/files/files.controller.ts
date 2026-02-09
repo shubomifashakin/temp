@@ -9,6 +9,7 @@ import {
   Patch,
   Delete,
   HttpCode,
+  UseGuards,
   Controller,
   UploadedFile,
   UseInterceptors,
@@ -25,6 +26,9 @@ import { UploadFileDto } from './dtos/upload-file.dto';
 
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from './common/constants';
 
+import { AuthGuard } from '../../common/guards/auth.guard';
+
+@UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
