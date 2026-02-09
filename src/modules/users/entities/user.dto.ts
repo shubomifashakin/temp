@@ -28,18 +28,27 @@ export class CachedUserInfo {
   @IsEmail({}, { message: 'Invalid email' })
   email: string;
 
-  @ApiProperty({ description: 'The date the users account was created' })
+  @ApiProperty({
+    description: 'The date the users account was created',
+    example: new Date().toISOString(),
+  })
   @IsDate({ message: 'Invalid date' })
   created_at: Date;
 
   @ApiProperty({
     description: 'The picture of the user gotten from google, if any',
+    nullable: true,
+    required: false,
+    example: 'https://example.com/avatar.png',
   })
   @IsUrl({}, { message: 'Invalid picture url' })
   @IsOptional()
   picture: string | null;
 
-  @ApiProperty({ description: 'The date the users account was last updated' })
+  @ApiProperty({
+    description: 'The date the users account was last updated',
+    example: new Date().toISOString(),
+  })
   @IsDate({ message: 'Invalid date' })
   updated_at: Date;
 }
