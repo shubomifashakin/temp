@@ -9,6 +9,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import { HealthModule } from './modules/health/health.module';
 
 import { RedisModule } from './core/redis/redis.module';
@@ -162,10 +163,11 @@ import { validateConfig } from './common/utils';
         };
       },
     }),
-    HealthModule,
-    AuthModule,
     RedisModule,
     DatabaseModule,
+    AuthModule,
+    HealthModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

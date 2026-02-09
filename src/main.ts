@@ -1,11 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ShutdownSignal, ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  ShutdownSignal,
+  ValidationPipe,
+  VersioningType,
+  BadRequestException,
+} from '@nestjs/common';
 
 import { Logger } from 'nestjs-pino';
 
 import cookieParser from 'cookie-parser';
+import { ValidationError } from 'class-validator';
 
 import { AppModule } from './app.module';
 import { PrismaClientKnownRequestFilterFilter } from './common/filters/prisma-client-known-request.filter';
@@ -49,6 +55,17 @@ async function bootstrap() {
       transform: true,
       stopAtFirstError: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors: ValidationError[] = []) => {
+        const firstError = errors[0];
+
+        let message = 'Validation failed';
+
+        if (firstError?.constraints) {
+          message = Object.values(firstError.constraints)[0];
+        }
+
+        return new BadRequestException(message);
+      },
     }),
   );
   app.enableShutdownHooks([ShutdownSignal.SIGINT, ShutdownSignal.SIGTERM]);
