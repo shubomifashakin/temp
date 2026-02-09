@@ -16,7 +16,7 @@ import {
   ParseUUIDPipe,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { memoryStorage } from 'multer';
@@ -67,7 +67,15 @@ export class FilesController {
     return this.filesService.uploadFile(file, body, req.user.id);
   }
 
-  @ApiOperation({ description: 'Get files metadata in chunks' })
+  @ApiOperation({
+    summary: 'Get list of files',
+    description: 'Get files metadata in chunks',
+  })
+  @ApiQuery({
+    description: 'Cursor to start from',
+    name: 'cursor',
+  })
+  @ApiResponse({ status: 200, description: 'Files retrieved' })
   @Get()
   getFiles(
     @Req() req: Request,
@@ -78,7 +86,11 @@ export class FilesController {
 
   @ApiResponse({ status: 200, type: GetFileDto })
   @ApiResponse({ status: 404, description: 'File does not exist' })
-  @ApiOperation({ description: 'Get metadata of a single file' })
+  @ApiOperation({ summary: 'Get metadata of a single file' })
+  @ApiParam({
+    description: 'Id of the file to be gotten',
+    name: 'id',
+  })
   @Get(':id')
   getSingleFile(@Req() req: Request, @Param('id') fileId: string) {
     return this.filesService.getSingleFile(req.user.id, fileId);
@@ -86,7 +98,11 @@ export class FilesController {
 
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404, description: 'File does not exist' })
-  @ApiOperation({ description: 'Delete a file immediately' })
+  @ApiOperation({ summary: 'Delete a file immediately' })
+  @ApiParam({
+    description: 'Id of the file to be deleted',
+    name: 'id',
+  })
   @Delete(':id')
   deleteSingleFile(@Req() req: Request, @Param('id') fileId: string) {
     return this.filesService.deleteSingleFile(req.user.id, fileId);
@@ -95,7 +111,11 @@ export class FilesController {
   @ApiResponse({ status: 200, type: GetFileDto })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiOperation({
-    description: 'Update the description of a file',
+    summary: 'Update the description of a file',
+  })
+  @ApiParam({
+    description: 'Id of the file to be updated',
+    name: 'id',
   })
   @Patch(':id')
   updateSingleFile(
