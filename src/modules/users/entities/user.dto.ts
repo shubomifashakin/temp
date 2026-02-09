@@ -1,17 +1,17 @@
 import {
-  Max,
-  Min,
   IsUrl,
   IsDate,
   IsEmail,
   IsString,
   IsOptional,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 
 export class CachedUserInfo {
   @IsString({ message: 'Invalid name' })
-  @Min(3, { message: 'Name is too short' })
-  @Max(30, { message: 'Name is too long' })
+  @MinLength(3, { message: 'Name is too short' })
+  @MaxLength(30, { message: 'Name is too long' })
   name: string;
 
   @IsEmail({}, { message: 'Invalid email' })
