@@ -8,6 +8,7 @@ import {
 import { v4 as uuid } from 'uuid';
 
 import { makeFileCacheKey } from './common/utils';
+import { ALLOWED_LIFETIMES } from './common/constants';
 
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
@@ -58,15 +59,52 @@ export class FilesService {
       data: {
         s3_key: key,
         user_id: userId,
+        size: file.size,
         description: dto.description,
+        expires_at: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
       },
     });
 
     return { id: response.id };
   }
 
-  async getFiles(userId: string) {
-    return { message: 'success' };
+  async getFiles(userId: string, cursor?: string) {
+    const limit = 10;
+
+    const files = await this.databaseService.files.findMany({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        id: true,
+        size: true,
+        status: true,
+        view_count: true,
+        expires_at: true,
+        description: true,
+        last_accesed_at: true,
+      },
+      ...(cursor && {
+        cursor: {
+          id: cursor,
+        },
+        skip: 1,
+      }),
+      take: limit + 1,
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    const hasNextPage = files.length > limit;
+    const data = files.slice(0, limit);
+    const nextCursor = hasNextPage ? data[data.length - 1].id : null;
+
+    return {
+      data,
+      hasNextPage,
+      cursor: nextCursor,
+    };
   }
 
   async getSingleFile(userId: string, fileId: string): Promise<GetFileDto> {
@@ -92,6 +130,7 @@ export class FilesService {
       },
       select: {
         id: true,
+        size: true,
         status: true,
         user_id: true,
         deleted_at: true,
@@ -99,6 +138,7 @@ export class FilesService {
         view_count: true,
         created_at: true,
         updated_at: true,
+        expires_at: true,
         last_accesed_at: true,
       },
     });
@@ -170,6 +210,7 @@ export class FilesService {
       },
       select: {
         id: true,
+        size: true,
         status: true,
         user_id: true,
         deleted_at: true,
@@ -177,6 +218,7 @@ export class FilesService {
         view_count: true,
         created_at: true,
         updated_at: true,
+        expires_at: true,
         last_accesed_at: true,
       },
     });

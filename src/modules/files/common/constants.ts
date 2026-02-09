@@ -26,3 +26,17 @@ export const ALLOWED_MIME_TYPES = [
   'video/mp4',
   'video/quicktime',
 ];
+
+export const LIFETIMES = {
+  LONG: 'long',
+  SHORT: 'short',
+  MEDIUM: 'medium',
+} as const;
+
+export type Lifetime = (typeof LIFETIMES)[keyof typeof LIFETIMES];
+
+export const ALLOWED_LIFETIMES: Record<Lifetime, number> = {
+  [LIFETIMES.SHORT]: 7 * 24 * 60 * 60 * 1000,
+  [LIFETIMES.MEDIUM]: 14 * 24 * 60 * 60 * 1000,
+  [LIFETIMES.LONG]: 31 * 24 * 60 * 60 * 1000,
+};

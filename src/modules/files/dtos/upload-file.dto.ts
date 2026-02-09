@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 
 import { Files } from '../../../../generated/prisma/client';
+
+import { LIFETIMES, type Lifetime } from '../common/constants';
 
 export class UploadFileDto implements Pick<Files, 'description'> {
   @ApiProperty({
@@ -15,7 +17,11 @@ export class UploadFileDto implements Pick<Files, 'description'> {
   @MaxLength(100, { message: 'File description is too long' })
   description: string;
 
-  @ApiProperty({ description: 'How long the file should be stored' })
-  @IsString({ message: 'Invalid lifetime' })
-  lifetime: 'short' | 'long' | 'medium';
+  @ApiProperty({
+    enum: LIFETIMES,
+    example: LIFETIMES.LONG,
+    description: 'How long the file should be stored',
+  })
+  @IsEnum(LIFETIMES, { message: 'Invalid lifetime' })
+  lifetime: Lifetime;
 }

@@ -7,11 +7,13 @@ import {
   Post,
   Param,
   Patch,
+  Query,
   Delete,
   HttpCode,
   UseGuards,
   Controller,
   UploadedFile,
+  ParseUUIDPipe,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -67,8 +69,11 @@ export class FilesController {
 
   @ApiOperation({ description: 'Get files metadata in chunks' })
   @Get()
-  getFiles(@Req() req: Request) {
-    return this.filesService.getFiles(req.user.id);
+  getFiles(
+    @Req() req: Request,
+    @Query('cursor', ParseUUIDPipe) cursor?: string,
+  ) {
+    return this.filesService.getFiles(req.user.id, cursor);
   }
 
   @ApiResponse({ status: 200, type: GetFileDto })

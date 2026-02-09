@@ -63,6 +63,8 @@ model Files {
   created_at      DateTime   @default(now())
   updated_at      DateTime   @updatedAt
   deleted_at      DateTime?
+  expires_at      DateTime
+  size            Int
   last_accesed_at DateTime?
   status          FileStatus @default(pending)
 

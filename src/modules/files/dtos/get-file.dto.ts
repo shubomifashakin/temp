@@ -24,11 +24,25 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   view_count: number;
 
   @ApiProperty({
+    example: 100000,
+    description: 'The size of the file in bytes',
+  })
+  @IsNumber()
+  size: number;
+
+  @ApiProperty({
     example: new Date().toISOString(),
     description: 'The date the file was uploaded',
   })
   @IsDate()
   created_at: Date;
+
+  @ApiProperty({
+    example: new Date().toISOString(),
+    description: 'The date the file expires',
+  })
+  @IsDate()
+  expires_at: Date;
 
   @ApiProperty({
     example: new Date().toISOString(),
