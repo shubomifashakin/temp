@@ -14,11 +14,11 @@ export class CachedUserInfo {
     description: 'The name of the user',
     example: 'John Doe',
     minLength: 3,
-    maxLength: 30,
+    maxLength: 50,
   })
   @IsString({ message: 'Invalid name' })
   @MinLength(3, { message: 'Name is too short' })
-  @MaxLength(30, { message: 'Name is too long' })
+  @MaxLength(50, { message: 'Name is too long' })
   name: string;
 
   @ApiProperty({
