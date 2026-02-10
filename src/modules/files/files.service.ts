@@ -346,6 +346,8 @@ export class FilesService {
         file: {
           select: {
             s3_key: true,
+            deleted_at: true,
+            expires_at: true,
           },
         },
       },
@@ -353,6 +355,14 @@ export class FilesService {
 
     if (fileFound.expires_at && new Date() > fileFound.expires_at) {
       throw new BadRequestException('This link has expired');
+    }
+
+    if (fileFound.file.deleted_at) {
+      throw new BadRequestException('This file has been deleted');
+    }
+
+    if (fileFound.file.expires_at && new Date() > fileFound.file.expires_at) {
+      throw new BadRequestException('This file no longer exists');
     }
 
     if (fileFound.password) {
