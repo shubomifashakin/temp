@@ -1,11 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
-import {
-  SQSClient,
-  SendMessageCommand,
-  SendMessageCommandInput,
-} from '@aws-sdk/client-sqs';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
@@ -24,9 +20,20 @@ export class SqsService implements OnModuleDestroy {
     });
   }
 
-  async pushMessage(input: SendMessageCommandInput): Promise<FnResult<null>> {
+  async pushMessage({
+    queueUrl,
+    message,
+  }: {
+    queueUrl: string;
+    message: object;
+  }): Promise<FnResult<null>> {
     try {
-      await this.sqsClient.send(new SendMessageCommand(input));
+      await this.sqsClient.send(
+        new SendMessageCommand({
+          QueueUrl: queueUrl,
+          MessageBody: JSON.stringify(message),
+        }),
+      );
 
       return { success: true, error: null, data: null };
     } catch (error) {

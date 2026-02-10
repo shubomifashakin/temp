@@ -161,8 +161,8 @@ export class FilesService {
 
   async deleteSingleFile(userId: string, fileId: string) {
     const queued = await this.sqsService.pushMessage({
-      MessageBody: JSON.stringify({ userId, fileId }),
-      QueueUrl: this.configService.getOrThrow('SQS_QUEUE_URL'),
+      message: { userId, fileId },
+      queueUrl: this.configService.getOrThrow('SQS_QUEUE_URL'),
     });
 
     if (!queued.success) {
