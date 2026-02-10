@@ -442,7 +442,7 @@ export class FilesService {
     });
 
     return {
-      s3Link: data,
+      fileUrl: data,
     };
   }
 }

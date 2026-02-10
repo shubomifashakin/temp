@@ -168,6 +168,6 @@ export class FilesController {
   ) {
     const url = await this.filesService.getSharedFile(fileId, shareId, dto);
 
-    res.redirect(url.s3Link);
+    res.redirect(url.fileUrl);
   }
 }
