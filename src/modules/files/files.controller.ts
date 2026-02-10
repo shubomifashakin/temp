@@ -3,6 +3,7 @@ import { type Response, type Request } from 'express';
 import {
   Req,
   Get,
+  Res,
   Body,
   Post,
   Param,
@@ -15,7 +16,6 @@ import {
   UploadedFile,
   ParseUUIDPipe,
   UseInterceptors,
-  Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -150,11 +150,20 @@ export class FilesController {
   }
 
   @Public()
+  @Get(':id/share/:shareId')
+  async getShareLinkDetails(
+    @Param('id', ParseUUIDPipe) fileId: string,
+    @Param('shareId') shareId: string,
+  ) {
+    return this.filesService.getShareLinkDetails(fileId, shareId);
+  }
+
+  @Public()
   @Post(':id/share/:shareId')
   async getSharedFile(
     @Res() res: Response,
     @Body() dto: GetSharedFile,
-    @Param('id') fileId: string,
+    @Param('id', ParseUUIDPipe) fileId: string,
     @Param('shareId') shareId: string,
   ) {
     const url = await this.filesService.getSharedFile(fileId, shareId, dto);

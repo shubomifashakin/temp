@@ -302,6 +302,39 @@ export class FilesService {
     };
   }
 
+  async getShareLinkDetails(fileId: string, shareId: string) {
+    const link = await this.databaseService.shareLinks.findUniqueOrThrow({
+      where: {
+        id: shareId,
+        file_id: fileId,
+        revoked_at: null,
+      },
+      select: {
+        expires_at: true,
+        created_at: true,
+        file: {
+          select: {
+            status: true,
+            deleted_at: true,
+            description: true,
+            user: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      created_at: link.created_at,
+      expires_at: link.expires_at,
+      file_creator: link.file.user.name,
+      file_status: link.file.status,
+      file_description: link.file.description,
+      file_deleted: link.file.deleted_at !== null,
+    };
+  }
+
   async getSharedFile(fileId: string, shareId: string, dto: GetSharedFile) {
     const fileFound = await this.databaseService.shareLinks.findUniqueOrThrow({
       where: {
