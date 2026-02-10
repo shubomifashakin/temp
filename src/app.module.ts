@@ -20,6 +20,7 @@ import { RedisService } from './core/redis/redis.service';
 import { DatabaseModule } from './core/database/database.module';
 
 import { validateConfig } from './common/utils';
+import { HasherModule } from './core/hasher/hasher.module';
 
 @Module({
   imports: [
@@ -169,6 +170,7 @@ import { validateConfig } from './common/utils';
     RedisModule,
     DatabaseModule,
     SqsModule,
+    HasherModule,
     S3Module,
     AuthModule,
     HealthModule,
