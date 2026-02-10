@@ -329,8 +329,12 @@ export class FilesService {
         revoked_at: null,
       },
       select: {
+        password: true,
         expires_at: true,
         created_at: true,
+        click_count: true,
+        description: true,
+        last_accessed_at: true,
         file: {
           select: {
             status: true,
@@ -347,6 +351,11 @@ export class FilesService {
     return {
       created_at: link.created_at,
       expires_at: link.expires_at,
+      description: link.description,
+      click_count: link.click_count,
+      last_accessed_at: link.last_accessed_at,
+      password_protected: link.password !== null,
+
       file_creator: link.file.user.name,
       file_status: link.file.status,
       file_description: link.file.description,
