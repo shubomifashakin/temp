@@ -2,6 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
+  BadRequestException,
+  UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
 
@@ -13,6 +15,8 @@ import { ALLOWED_LIFETIMES } from './common/constants';
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
 import { UpdateFileDto } from './dtos/update-file.dto';
+import { GenerateLinkDto } from './dtos/generate-link.dto';
+import { GetSharedFile } from './dtos/get-shared-file.dto';
 
 import { MINUTES_10 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
@@ -237,5 +241,125 @@ export class FilesService {
     }
 
     return file;
+  }
+
+  async generateShareLink(
+    userId: string,
+    fileId: string,
+    dto: GenerateLinkDto,
+  ) {
+    const file = await this.databaseService.files.findUniqueOrThrow({
+      where: {
+        id: fileId,
+        user_id: userId,
+      },
+    });
+
+    if (file.status !== 'safe') {
+      throw new BadRequestException('File is not safe');
+    }
+
+    if (file.deleted_at) {
+      throw new BadRequestException('File has been deleted');
+    }
+
+    //FIXME: HASH THE PASSWORD
+
+    const link = await this.databaseService.shareLinks.create({
+      data: {
+        file_id: fileId,
+        password: dto.password,
+        description: dto.description,
+      },
+    });
+
+    return {
+      id: link.id,
+    };
+  }
+
+  async revokeShareLink(userId: string, fileId: string, shareId: string) {
+    await this.databaseService.files.findUniqueOrThrow({
+      where: {
+        id: fileId,
+        user_id: userId,
+      },
+    });
+
+    await this.databaseService.shareLinks.update({
+      where: {
+        id: shareId,
+        file_id: fileId,
+      },
+      data: {
+        revoked_at: new Date(),
+      },
+    });
+
+    return {
+      message: 'success',
+    };
+  }
+
+  async getSharedFile(fileId: string, shareId: string, dto: GetSharedFile) {
+    const fileFound = await this.databaseService.shareLinks.findUniqueOrThrow({
+      where: {
+        id: shareId,
+        file_id: fileId,
+        revoked_at: null,
+      },
+      include: {
+        file: {
+          select: {
+            s3_key: true,
+          },
+        },
+      },
+    });
+
+    if (fileFound.password) {
+      if (!dto.password) {
+        throw new UnauthorizedException('Please enter the password');
+      }
+
+      //FIXME: COMPARE THE PASSWORD SENT WITH THE HASH, IF NOT THE SAME THROW UNAUTHORIZED
+    }
+
+    const { success, data, error } =
+      await this.s3Service.generatePresignedGetUrl({
+        ttl: 3600 / 2,
+        key: fileFound.file.s3_key,
+        bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
+      });
+
+    if (!success) {
+      this.logger.error({
+        error,
+        message: 'Failed to generate presigned get url',
+      });
+
+      throw new InternalServerErrorException();
+    }
+
+    await this.databaseService.shareLinks.update({
+      where: {
+        id: shareId,
+        file_id: fileId,
+      },
+      data: {
+        last_accessed_at: new Date(),
+        click_count: { increment: 1 },
+        file: {
+          update: {
+            last_accesed_at: new Date(),
+            view_count: { increment: 1 },
+          },
+        },
+      },
+    });
+
+    return {
+      s3Link: data,
+    };
   }
 }

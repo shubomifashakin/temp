@@ -70,4 +70,28 @@ model Files {
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  links ShareLinks[]
+}
+
+
+model ShareLinks {
+  id String @id @default(nanoid(13))
+
+  click_count Int @default(0)
+
+  description String @db.VarChar(100)
+
+  file_id String
+  file Files @relation(fields: [file_id], references: [id])
+
+  last_accessed_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  revoked_at DateTime?
+
+  password String?
+
+  @@unique(name: "id_file_id_unique",[id,file_id])
 }

@@ -1,4 +1,4 @@
-import { type Request } from 'express';
+import { type Response, type Request } from 'express';
 
 import {
   Req,
@@ -15,6 +15,7 @@ import {
   UploadedFile,
   ParseUUIDPipe,
   UseInterceptors,
+  Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,6 +30,10 @@ import { UploadFileDto } from './dtos/upload-file.dto';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from './common/constants';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { Public } from '../../common/decorators/public.decorator';
+
+import { GenerateLinkDto } from './dtos/generate-link.dto';
+import { GetSharedFile } from './dtos/get-shared-file.dto';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -124,5 +129,36 @@ export class FilesController {
     @Body() dto: UploadFileDto,
   ) {
     return this.filesService.updateSingleFile(req.user.id, fileId, dto);
+  }
+
+  @Post(':id/share')
+  async generateShareLink(
+    @Req() req: Request,
+    @Param('id') fileId: string,
+    dto: GenerateLinkDto,
+  ) {
+    return this.filesService.generateShareLink(req.user.id, fileId, dto);
+  }
+
+  @Delete(':id/share/:shareId')
+  async revokeShareLink(
+    @Req() req: Request,
+    @Param('id') fileId: string,
+    @Param('shareId') shareId: string,
+  ) {
+    return this.filesService.revokeShareLink(req.user.id, fileId, shareId);
+  }
+
+  @Public()
+  @Post(':id/share/:shareId')
+  async getSharedFile(
+    @Res() res: Response,
+    @Body() dto: GetSharedFile,
+    @Param('id') fileId: string,
+    @Param('shareId') shareId: string,
+  ) {
+    const url = await this.filesService.getSharedFile(fileId, shareId, dto);
+
+    res.redirect(url.s3Link);
   }
 }
