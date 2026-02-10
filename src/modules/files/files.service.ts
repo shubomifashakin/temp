@@ -40,10 +40,10 @@ export class FilesService {
     const key = uuid();
 
     const { success, error } = await this.s3Service.uploadToS3({
-      Key: key,
-      Body: file.buffer,
-      Tagging: `lifetime=${dto.lifetime}`,
-      Bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
+      key: key,
+      body: file,
+      tags: `lifetime=${dto.lifetime}`,
+      bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
     });
 
     if (!success) {

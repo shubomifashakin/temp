@@ -1,11 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
-import {
-  S3Client,
-  PutObjectCommand,
-  PutObjectCommandInput,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
@@ -24,9 +20,26 @@ export class S3Service implements OnModuleDestroy {
     });
   }
 
-  async uploadToS3(input: PutObjectCommandInput): Promise<FnResult<null>> {
+  async uploadToS3({
+    body,
+    tags,
+    bucket,
+    key,
+  }: {
+    body: Express.Multer.File;
+    tags: string;
+    bucket: string;
+    key: string;
+  }): Promise<FnResult<null>> {
     try {
-      await this.s3Client.send(new PutObjectCommand(input));
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Key: key,
+          Tagging: tags,
+          Bucket: bucket,
+          Body: body.buffer,
+        }),
+      );
 
       return { success: true, error: null, data: null };
     } catch (error) {
