@@ -383,11 +383,10 @@ export class FilesService {
       throw new BadRequestException('This link has expired');
     }
 
-    if (fileFound.file.deleted_at) {
-      throw new BadRequestException('This file has been deleted');
-    }
-
-    if (fileFound.file.expires_at && new Date() > fileFound.file.expires_at) {
+    if (
+      fileFound.file.deleted_at ||
+      (fileFound.file.expires_at && new Date() > fileFound.file.expires_at)
+    ) {
       throw new BadRequestException('This file no longer exists');
     }
 
