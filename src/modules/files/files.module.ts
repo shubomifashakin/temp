@@ -6,11 +6,12 @@ import { FilesController } from './files.controller';
 import { S3Module } from '../../core/s3/s3.module';
 import { SqsModule } from '../../core/sqs/sqs.module';
 import { RedisModule } from '../../core/redis/redis.module';
+import { HasherModule } from '../../core/hasher/hasher.module';
 import { DatabaseModule } from '../../core/database/database.module';
 
 @Module({
   providers: [FilesService],
   controllers: [FilesController],
-  imports: [DatabaseModule, RedisModule, S3Module, SqsModule],
+  imports: [DatabaseModule, RedisModule, S3Module, SqsModule, HasherModule],
 })
 export class FilesModule {}

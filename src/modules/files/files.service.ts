@@ -23,6 +23,7 @@ import { S3Service } from '../../core/s3/s3.service';
 import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisService } from '../../core/redis/redis.service';
 import { DatabaseService } from '../../core/database/database.service';
+import { HasherService } from '../../core/hasher/hasher.service';
 
 @Injectable()
 export class FilesService {
@@ -33,6 +34,7 @@ export class FilesService {
     private readonly sqsService: SqsService,
     private readonly redisService: RedisService,
     private readonly configService: ConfigService,
+    private readonly hasherService: HasherService,
     private readonly databaseService: DatabaseService,
   ) {}
 
@@ -263,12 +265,29 @@ export class FilesService {
       throw new BadRequestException('File has been deleted');
     }
 
-    //FIXME: HASH THE PASSWORD
+    let password = dto.password;
+
+    if (dto.password) {
+      const { success, data, error } = await this.hasherService.hashPassword(
+        dto.password,
+      );
+
+      if (!success) {
+        this.logger.error({
+          error,
+          message: 'Failed to hash link password',
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      password = data;
+    }
 
     const link = await this.databaseService.shareLinks.create({
       data: {
+        password,
         file_id: fileId,
-        password: dto.password,
         expires_at: dto.expiresAt,
         description: dto.description,
       },
@@ -370,7 +389,23 @@ export class FilesService {
         throw new UnauthorizedException('Please enter the password');
       }
 
-      //FIXME: COMPARE THE PASSWORD SENT WITH THE HASH, IF NOT THE SAME THROW UNAUTHORIZED
+      const { success, error, data } = await this.hasherService.verifyPassword(
+        dto.password,
+        fileFound.password,
+      );
+
+      if (!success) {
+        this.logger.error({
+          error,
+          message: 'Failed to verify link password',
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      if (!data) {
+        throw new UnauthorizedException('Incorrect password');
+      }
     }
 
     const { success, data, error } =
