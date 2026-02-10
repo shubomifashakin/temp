@@ -150,23 +150,19 @@ export class FilesController {
   }
 
   @Public()
-  @Get(':id/share/:shareId')
-  async getShareLinkDetails(
-    @Param('id', ParseUUIDPipe) fileId: string,
-    @Param('shareId') shareId: string,
-  ) {
-    return this.filesService.getShareLinkDetails(fileId, shareId);
+  @Get('share/:shareId')
+  async getShareLinkDetails(@Param('shareId') shareId: string) {
+    return this.filesService.getShareLinkDetails(shareId);
   }
 
   @Public()
-  @Post(':id/share/:shareId')
+  @Post('share/:shareId')
   async getSharedFile(
     @Res() res: Response,
     @Body() dto: GetSharedFile,
-    @Param('id', ParseUUIDPipe) fileId: string,
     @Param('shareId') shareId: string,
   ) {
-    const url = await this.filesService.getSharedFile(fileId, shareId, dto);
+    const url = await this.filesService.getSharedFile(shareId, dto);
 
     res.redirect(url.fileUrl);
   }

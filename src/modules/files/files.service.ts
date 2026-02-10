@@ -321,11 +321,10 @@ export class FilesService {
     };
   }
 
-  async getShareLinkDetails(fileId: string, shareId: string) {
+  async getShareLinkDetails(shareId: string) {
     const link = await this.databaseService.shareLinks.findUniqueOrThrow({
       where: {
         id: shareId,
-        file_id: fileId,
         revoked_at: null,
       },
       select: {
@@ -363,11 +362,10 @@ export class FilesService {
     };
   }
 
-  async getSharedFile(fileId: string, shareId: string, dto: GetSharedFile) {
+  async getSharedFile(shareId: string, dto: GetSharedFile) {
     const fileFound = await this.databaseService.shareLinks.findUniqueOrThrow({
       where: {
         id: shareId,
-        file_id: fileId,
         revoked_at: null,
       },
       include: {
@@ -436,7 +434,6 @@ export class FilesService {
     await this.databaseService.shareLinks.update({
       where: {
         id: shareId,
-        file_id: fileId,
       },
       data: {
         last_accessed_at: new Date(),
