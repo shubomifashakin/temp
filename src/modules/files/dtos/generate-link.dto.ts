@@ -5,6 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsStrongPassword,
+  IsDate,
 } from 'class-validator';
 
 export class GenerateLinkDto {
@@ -24,4 +25,8 @@ export class GenerateLinkDto {
   @IsOptional()
   @IsStrongPassword({ minLength: 6 })
   password?: string;
+
+  @IsOptional()
+  @IsDate({ message: 'Invalid date' })
+  expiresAt?: Date;
 }

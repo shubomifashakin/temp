@@ -269,6 +269,7 @@ export class FilesService {
       data: {
         file_id: fileId,
         password: dto.password,
+        expires_at: dto.expiresAt,
         description: dto.description,
       },
     });
@@ -316,6 +317,10 @@ export class FilesService {
         },
       },
     });
+
+    if (fileFound.expires_at && new Date() > fileFound.expires_at) {
+      throw new BadRequestException('This link has expired');
+    }
 
     if (fileFound.password) {
       if (!dto.password) {
