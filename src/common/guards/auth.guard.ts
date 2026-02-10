@@ -8,6 +8,9 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 import { RedisService } from '../../core/redis/redis.service';
 
@@ -21,9 +24,17 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(ctx: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      ctx.getHandler(),
+      ctx.getClass(),
+    ]);
+
+    if (isPublic) return true;
+
     const requestType = ctx.getType();
 
     if (requestType === 'http') {
