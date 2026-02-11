@@ -36,6 +36,7 @@ import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
 
 @UseGuards(AuthGuard)
@@ -81,20 +82,20 @@ export class FilesController {
   })
   @ApiQuery({
     name: 'cursor',
-    description: 'Pagination cursor',
     required: false,
+    description: 'Pagination cursor',
   })
   @ApiResponse({
     status: 200,
+    type: GetFilesResponseDto,
     description: 'Files retrieved',
-    //FIXME: Add response dto
   })
   @Get()
   getFiles(
     @Req() req: Request,
     @Query('cursor', new ParseUUIDPipe({ optional: true, version: '4' }))
     cursor?: string,
-  ) {
+  ): Promise<GetFilesResponseDto> {
     return this.filesService.getFiles(req.user.id, cursor);
   }
 

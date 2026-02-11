@@ -19,6 +19,7 @@ import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
 
 import { MINUTES_10 } from '../../common/constants';
@@ -77,7 +78,10 @@ export class FilesService {
     return { id: response.id };
   }
 
-  async getFiles(userId: string, cursor?: string) {
+  async getFiles(
+    userId: string,
+    cursor?: string,
+  ): Promise<GetFilesResponseDto> {
     const limit = 10;
 
     const files = await this.databaseService.files.findMany({
