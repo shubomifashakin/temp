@@ -181,7 +181,8 @@ export class FilesController {
   async getFileShareLinks(
     @Req() req: Request,
     @Param('id') fileId: string,
-    @Query('cursor', ParseUUIDPipe) cursor?: string,
+    @Query('cursor', new ParseUUIDPipe({ version: '4', optional: true }))
+    cursor?: string,
   ) {
     return this.filesService.getFileShareLinks(req.user.id, fileId, cursor);
   }
