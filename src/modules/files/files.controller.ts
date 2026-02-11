@@ -83,7 +83,11 @@ export class FilesController {
     description: 'Cursor to start from',
     name: 'cursor',
   })
-  @ApiResponse({ status: 200, description: 'Files retrieved' })
+  @ApiResponse({
+    status: 200,
+    description: 'Files retrieved',
+    //FIXME: Add response dto
+  })
   @Get()
   getFiles(
     @Req() req: Request,
