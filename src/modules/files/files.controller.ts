@@ -132,6 +132,11 @@ export class FilesController {
   }
 
   //FIXME: ADD RESPONSE DTO
+  @ApiOperation({ summary: 'Generate share link for a file' })
+  @ApiParam({
+    name: 'id',
+    description: 'Id of the file to generate share link for',
+  })
   @Post(':id/share')
   async generateShareLink(
     @Req() req: Request,
