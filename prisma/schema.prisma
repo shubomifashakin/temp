@@ -52,6 +52,8 @@ model RefreshToken {
   expires_at DateTime
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@index(name: "refresh_tokens_user_id_idx", fields: [user_id])
 }
 
 model Files {
@@ -72,6 +74,8 @@ model Files {
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   links ShareLinks[]
+
+  @@index(name: "files_user_id_idx", fields: [user_id])
 }
 
 model ShareLinks {
