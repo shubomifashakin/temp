@@ -131,6 +131,7 @@ export class FilesController {
     return this.filesService.updateSingleFile(req.user.id, fileId, dto);
   }
 
+  //FIXME: ADD RESPONSE DTO
   @Post(':id/share')
   async generateShareLink(
     @Req() req: Request,
@@ -140,6 +141,7 @@ export class FilesController {
     return this.filesService.generateShareLink(req.user.id, fileId, dto);
   }
 
+  //FIXME: ADD RESPONSE DTO
   @ApiOperation({ summary: 'Get share links for a file' })
   @ApiParam({
     name: 'id',
@@ -154,6 +156,17 @@ export class FilesController {
     return this.filesService.getFileShareLinks(req.user.id, fileId, cursor);
   }
 
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'File does not exist' })
+  @ApiOperation({ summary: 'Revoke a share link' })
+  @ApiParam({
+    name: 'id',
+    description: 'Id of the file to revoke share link for',
+  })
+  @ApiParam({
+    name: 'shareId',
+    description: 'Id of the share link to revoke',
+  })
   @Delete(':id/share/:shareId')
   async revokeShareLink(
     @Req() req: Request,
@@ -163,12 +176,22 @@ export class FilesController {
     return this.filesService.revokeShareLink(req.user.id, fileId, shareId);
   }
 
+  //FIXME: ADD RESPONSE DTO
+  @ApiOperation({ summary: 'Get share link details' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'Share link does not exist' })
   @Public()
   @Get('share/:shareId')
   async getShareLinkDetails(@Param('shareId') shareId: string) {
     return this.filesService.getShareLinkDetails(shareId);
   }
 
+  @ApiOperation({
+    summary: 'Get shared file',
+    description: 'Redirects to the file URL',
+  })
+  @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
+  @ApiResponse({ status: 404, description: 'Share link does not exist' })
   @Public()
   @Post('share/:shareId')
   async getSharedFile(
@@ -178,6 +201,6 @@ export class FilesController {
   ) {
     const url = await this.filesService.getSharedFile(shareId, dto);
 
-    res.redirect(url.fileUrl);
+    res.redirect(302, url.fileUrl);
   }
 }
