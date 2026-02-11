@@ -33,12 +33,12 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 
 import { UpdateFileDto } from './dtos/update-file.dto';
-import { GenerateLinkDto } from './dtos/generate-link.dto';
+import { CreateLinkDto } from './dtos/create-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { UpdateShareLinkDto } from './dtos/update-share-link.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
-import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
+import { CreateShareIdResponseDto } from './dtos/create-share-id.dto';
 import { GetFileShareLinksResponseDto } from './dtos/get-file-share-links-response.dto';
 
 @UseGuards(AuthGuard)
@@ -147,7 +147,7 @@ export class FilesController {
   }
 
   @ApiOperation({ summary: 'Generate shareId for a file' })
-  @ApiResponse({ status: 200, type: GenerateShareIdResponseDto })
+  @ApiResponse({ status: 200, type: CreateShareIdResponseDto })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiParam({
     name: 'id',
@@ -162,12 +162,12 @@ export class FilesController {
     description: 'File does not exist',
   })
   @Post(':id/share')
-  async generateShareId(
+  async createShareId(
     @Req() req: Request,
     @Param('id') fileId: string,
-    @Body() dto: GenerateLinkDto,
-  ): Promise<GenerateShareIdResponseDto> {
-    return this.filesService.generateShareId(req.user.id, fileId, dto);
+    @Body() dto: CreateLinkDto,
+  ): Promise<CreateShareIdResponseDto> {
+    return this.filesService.createShareId(req.user.id, fileId, dto);
   }
 
   @ApiOperation({ summary: 'Get share links for a file' })

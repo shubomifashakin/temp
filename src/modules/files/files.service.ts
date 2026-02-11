@@ -16,12 +16,12 @@ import { makeFileCacheKey, makePresignedUrlCacheKey } from './common/utils';
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
 import { UpdateFileDto } from './dtos/update-file.dto';
-import { GenerateLinkDto } from './dtos/generate-link.dto';
+import { CreateLinkDto } from './dtos/create-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { UpdateShareLinkDto } from './dtos/update-share-link.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
-import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
+import { CreateShareIdResponseDto } from './dtos/create-share-id.dto';
 import { GetFileShareLinksResponseDto } from './dtos/get-file-share-links-response.dto';
 
 import { MINUTES_10 } from '../../common/constants';
@@ -257,11 +257,11 @@ export class FilesService {
     return file;
   }
 
-  async generateShareId(
+  async createShareId(
     userId: string,
     fileId: string,
-    dto: GenerateLinkDto,
-  ): Promise<GenerateShareIdResponseDto> {
+    dto: CreateLinkDto,
+  ): Promise<CreateShareIdResponseDto> {
     const file = await this.databaseService.files.findUniqueOrThrow({
       where: {
         id: fileId,

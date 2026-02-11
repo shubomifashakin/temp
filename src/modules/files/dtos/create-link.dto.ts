@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
   IsString,
   MaxLength,
   MinLength,
   IsOptional,
   IsStrongPassword,
-  IsDate,
 } from 'class-validator';
 
-export class GenerateLinkDto {
+export class CreateLinkDto {
   @ApiProperty({
     minLength: 5,
     maxLength: 100,

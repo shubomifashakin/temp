@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/swagger';
 
-import { GenerateLinkDto } from './generate-link.dto';
+import { CreateLinkDto } from './create-link.dto';
 
-export class GetSharedFile extends PickType(GenerateLinkDto, ['password']) {}
+export class GetSharedFile extends PickType(CreateLinkDto, ['password']) {}

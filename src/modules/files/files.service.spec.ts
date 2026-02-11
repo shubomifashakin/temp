@@ -266,7 +266,7 @@ describe('FilesService', () => {
 
     const testUserId = 'test-user-id';
 
-    const res = await service.generateShareId(testUserId, testFileId, {
+    const res = await service.createShareId(testUserId, testFileId, {
       description: 'Test file',
       expiresAt: new Date(),
       password: undefined,
@@ -299,7 +299,7 @@ describe('FilesService', () => {
       error: null,
     });
 
-    const res = await service.generateShareId(testUserId, testFileId, {
+    const res = await service.createShareId(testUserId, testFileId, {
       description: 'Test file',
       expiresAt: new Date(),
       password: 'test-password',
@@ -324,7 +324,7 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.generateShareId(testUserId, testFileId, {
+      service.createShareId(testUserId, testFileId, {
         description: 'Test file',
         expiresAt: new Date(),
         password: 'test-password',
@@ -345,7 +345,7 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.generateShareId(testUserId, testFileId, {
+      service.createShareId(testUserId, testFileId, {
         description: 'Test file',
         expiresAt: new Date(),
         password: 'test-password',
@@ -366,7 +366,7 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.generateShareId(testUserId, testFileId, {
+      service.createShareId(testUserId, testFileId, {
         description: 'Test file',
         expiresAt: new Date(),
         password: 'test-password',
