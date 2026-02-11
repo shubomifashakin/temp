@@ -144,19 +144,11 @@ export class FilesController {
   })
   @ApiResponse({
     status: 400,
-    description: 'File is not safe',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input',
+    description: 'Bad request',
   })
   @ApiResponse({
     status: 404,
     description: 'File does not exist',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'File has been deleted',
   })
   @Post(':id/share')
   async generateShareLink(
