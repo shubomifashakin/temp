@@ -267,6 +267,10 @@ export class FilesService {
       throw new NotFoundException('File has been deleted');
     }
 
+    if (new Date() > file.expires_at) {
+      throw new NotFoundException('File has expired');
+    }
+
     let password = dto.password;
 
     if (dto.password) {
