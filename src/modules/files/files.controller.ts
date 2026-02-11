@@ -34,6 +34,7 @@ import { Public } from '../../common/decorators/public.decorator';
 
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
+import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -181,9 +182,8 @@ export class FilesController {
     return this.filesService.revokeShareLink(req.user.id, fileId, shareId);
   }
 
-  //FIXME: ADD RESPONSE DTO
   @ApiOperation({ summary: 'Get share link details' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: ShareLinkDetailsDto })
   @ApiResponse({ status: 404, description: 'Share link does not exist' })
   @Public()
   @Get('share/:shareId')

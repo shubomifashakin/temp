@@ -24,6 +24,7 @@ import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisService } from '../../core/redis/redis.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { HasherService } from '../../core/hasher/hasher.service';
+import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 
 @Injectable()
 export class FilesService {
@@ -364,7 +365,7 @@ export class FilesService {
     };
   }
 
-  async getShareLinkDetails(shareId: string) {
+  async getShareLinkDetails(shareId: string): Promise<ShareLinkDetailsDto> {
     const link = await this.databaseService.shareLinks.findUniqueOrThrow({
       where: {
         id: shareId,
