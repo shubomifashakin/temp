@@ -108,7 +108,10 @@ export class FilesController {
     name: 'id',
   })
   @Get(':id')
-  getSingleFile(@Req() req: Request, @Param('id') fileId: string) {
+  getSingleFile(
+    @Req() req: Request,
+    @Param('id') fileId: string,
+  ): Promise<GetFileDto> {
     return this.filesService.getSingleFile(req.user.id, fileId);
   }
 
@@ -138,7 +141,7 @@ export class FilesController {
     @Req() req: Request,
     @Param('id') fileId: string,
     @Body() dto: UpdateFileDto,
-  ) {
+  ): Promise<GetFileDto> {
     return this.filesService.updateSingleFile(req.user.id, fileId, dto);
   }
 
@@ -162,7 +165,7 @@ export class FilesController {
     @Req() req: Request,
     @Param('id') fileId: string,
     @Body() dto: GenerateLinkDto,
-  ) {
+  ): Promise<GenerateShareIdResponseDto> {
     return this.filesService.generateShareId(req.user.id, fileId, dto);
   }
 
