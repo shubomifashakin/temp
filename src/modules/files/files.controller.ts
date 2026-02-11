@@ -18,7 +18,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 import { memoryStorage } from 'multer';
 
@@ -129,6 +135,7 @@ export class FilesController {
   }
 
   @ApiResponse({ status: 200, type: GetFileDto })
+  @ApiBody({ type: UpdateFileDto })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiOperation({
     summary: 'Update the description of a file',
@@ -153,6 +160,7 @@ export class FilesController {
     name: 'id',
     description: 'Id of the file to generate shareId for',
   })
+  @ApiBody({ type: CreateLinkDto })
   @ApiResponse({
     status: 400,
     description: 'Bad request',
@@ -226,6 +234,7 @@ export class FilesController {
     name: 'shareId',
     description: 'Id of the share link to update',
   })
+  @ApiBody({ type: UpdateShareLinkDto })
   @Patch(':id/share/:shareId')
   async updateShareLink(
     @Req() req: Request,
@@ -249,6 +258,7 @@ export class FilesController {
     summary: 'Get shared file',
     description: 'Redirects to the file URL',
   })
+  @ApiBody({ type: GetSharedFile })
   @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
   @ApiResponse({ status: 404, description: 'Share link does not exist' })
   @Public()
