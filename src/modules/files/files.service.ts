@@ -98,7 +98,7 @@ export class FilesService {
       }),
       take: limit + 1,
       orderBy: {
-        id: 'asc',
+        created_at: 'desc',
       },
     });
 
@@ -295,6 +295,49 @@ export class FilesService {
 
     return {
       id: link.id,
+    };
+  }
+
+  async getFileShareLinks(userId: string, fileId: string, cursor?: string) {
+    const limit = 10;
+
+    const files = await this.databaseService.shareLinks.findMany({
+      where: {
+        file_id: fileId,
+        file: {
+          user_id: userId,
+        },
+      },
+      select: {
+        id: true,
+        password: true,
+        revoked_at: true,
+        created_at: true,
+        click_count: true,
+        expires_at: true,
+        description: true,
+        last_accessed_at: true,
+      },
+      ...(cursor && {
+        cursor: {
+          id: cursor,
+        },
+        skip: 1,
+      }),
+      take: limit + 1,
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    const hasNextPage = files.length > limit;
+    const data = files.slice(0, limit);
+    const nextCursor = hasNextPage ? data[data.length - 1].id : null;
+
+    return {
+      data,
+      hasNextPage,
+      cursor: nextCursor,
     };
   }
 

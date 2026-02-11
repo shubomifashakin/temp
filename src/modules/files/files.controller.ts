@@ -140,6 +140,20 @@ export class FilesController {
     return this.filesService.generateShareLink(req.user.id, fileId, dto);
   }
 
+  @ApiOperation({ summary: 'Get share links for a file' })
+  @ApiParam({
+    name: 'id',
+    description: 'Id of the file to get share links for',
+  })
+  @Get(':id/share')
+  async getFileShareLinks(
+    @Req() req: Request,
+    @Param('id') fileId: string,
+    @Query('cursor', ParseUUIDPipe) cursor?: string,
+  ) {
+    return this.filesService.getFileShareLinks(req.user.id, fileId, cursor);
+  }
+
   @Delete(':id/share/:shareId')
   async revokeShareLink(
     @Req() req: Request,
