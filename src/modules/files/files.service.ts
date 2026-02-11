@@ -19,6 +19,7 @@ import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
 
 import { MINUTES_10 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
@@ -250,7 +251,11 @@ export class FilesService {
     return file;
   }
 
-  async generateShareId(userId: string, fileId: string, dto: GenerateLinkDto) {
+  async generateShareId(
+    userId: string,
+    fileId: string,
+    dto: GenerateLinkDto,
+  ): Promise<GenerateShareIdResponseDto> {
     const file = await this.databaseService.files.findUniqueOrThrow({
       where: {
         id: fileId,

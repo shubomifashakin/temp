@@ -36,6 +36,7 @@ import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -134,9 +135,8 @@ export class FilesController {
     return this.filesService.updateSingleFile(req.user.id, fileId, dto);
   }
 
-  //FIXME: ADD RESPONSE DTO
   @ApiOperation({ summary: 'Generate shareId for a file' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: GenerateShareIdResponseDto })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiParam({
     name: 'id',
