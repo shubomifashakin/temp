@@ -250,11 +250,7 @@ export class FilesService {
     return file;
   }
 
-  async generateShareLink(
-    userId: string,
-    fileId: string,
-    dto: GenerateLinkDto,
-  ) {
+  async generateShareId(userId: string, fileId: string, dto: GenerateLinkDto) {
     const file = await this.databaseService.files.findUniqueOrThrow({
       where: {
         id: fileId,

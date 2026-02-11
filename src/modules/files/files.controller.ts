@@ -135,12 +135,12 @@ export class FilesController {
   }
 
   //FIXME: ADD RESPONSE DTO
-  @ApiOperation({ summary: 'Generate share link for a file' })
+  @ApiOperation({ summary: 'Generate shareId for a file' })
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiParam({
     name: 'id',
-    description: 'Id of the file to generate share link for',
+    description: 'Id of the file to generate shareId for',
   })
   @ApiResponse({
     status: 400,
@@ -151,12 +151,12 @@ export class FilesController {
     description: 'File does not exist',
   })
   @Post(':id/share')
-  async generateShareLink(
+  async generateShareId(
     @Req() req: Request,
     @Param('id') fileId: string,
     @Body() dto: GenerateLinkDto,
   ) {
-    return this.filesService.generateShareLink(req.user.id, fileId, dto);
+    return this.filesService.generateShareId(req.user.id, fileId, dto);
   }
 
   @ApiOperation({ summary: 'Get share links for a file' })
