@@ -18,6 +18,7 @@ import { UploadFileDto } from './dtos/upload-file.dto';
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
+import { UpdateShareLinkDto } from './dtos/update-share-link.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
@@ -394,6 +395,45 @@ export class FilesService {
     return {
       message: 'success',
     };
+  }
+
+  async updateShareLink(
+    userId: string,
+    fileId: string,
+    shareId: string,
+    dto: UpdateShareLinkDto,
+  ) {
+    let password: string | undefined = undefined;
+
+    if (dto.password) {
+      const hashed = await this.hasherService.hashPassword(dto.password);
+
+      if (!hashed.success) {
+        this.logger.error({
+          error: hashed.error,
+          message: 'Failed to hash link password',
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      password = hashed.data;
+    }
+
+    await this.databaseService.shareLinks.update({
+      where: {
+        id: shareId,
+        file_id: fileId,
+        file: {
+          user_id: userId,
+        },
+      },
+      data: {
+        password,
+        description: dto.description,
+        expires_at: dto.expiresAt,
+      },
+    });
   }
 
   async getShareLinkDetails(shareId: string): Promise<ShareLinkDetailsDto> {

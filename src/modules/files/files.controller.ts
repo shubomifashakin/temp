@@ -35,6 +35,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
+import { UpdateShareLinkDto } from './dtos/update-share-link.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
@@ -212,6 +213,27 @@ export class FilesController {
     @Param('shareId') shareId: string,
   ) {
     return this.filesService.revokeShareLink(req.user.id, fileId, shareId);
+  }
+
+  @ApiOperation({ summary: 'Update  share link details' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'File does not exist' })
+  @ApiParam({
+    name: 'id',
+    description: 'Id of the file to update share link for',
+  })
+  @ApiParam({
+    name: 'shareId',
+    description: 'Id of the share link to update',
+  })
+  @Patch(':id/share/:shareId')
+  async updateShareLink(
+    @Req() req: Request,
+    @Body() dto: UpdateShareLinkDto,
+    @Param('id') fileId: string,
+    @Param('shareId') shareId: string,
+  ) {
+    return this.filesService.updateShareLink(req.user.id, fileId, shareId, dto);
   }
 
   @ApiOperation({ summary: 'Get share link details' })
