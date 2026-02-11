@@ -38,6 +38,7 @@ import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
+import { GetFileShareLinksResponseDto } from './dtos/get-file-share-links-response.dto';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -177,8 +178,8 @@ export class FilesController {
   })
   @ApiResponse({
     status: 200,
+    type: GetFileShareLinksResponseDto,
     description: 'List of links that have been generated for this file',
-    //FIXME: ADD RESPONSE DTO
   })
   @Get(':id/share')
   async getFileShareLinks(
@@ -186,7 +187,7 @@ export class FilesController {
     @Param('id') fileId: string,
     @Query('cursor', new ParseUUIDPipe({ version: '4', optional: true }))
     cursor?: string,
-  ) {
+  ): Promise<GetFileShareLinksResponseDto> {
     return this.filesService.getFileShareLinks(req.user.id, fileId, cursor);
   }
 

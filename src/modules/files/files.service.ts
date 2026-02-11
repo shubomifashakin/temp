@@ -21,6 +21,7 @@ import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { GenerateShareIdResponseDto } from './dtos/generate-share-id.dto';
+import { GetFileShareLinksResponseDto } from './dtos/get-file-share-links-response.dto';
 
 import { MINUTES_10 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
@@ -312,7 +313,11 @@ export class FilesService {
     };
   }
 
-  async getFileShareLinks(userId: string, fileId: string, cursor?: string) {
+  async getFileShareLinks(
+    userId: string,
+    fileId: string,
+    cursor?: string,
+  ): Promise<GetFileShareLinksResponseDto> {
     const limit = 10;
 
     const files = await this.databaseService.shareLinks.findMany({
@@ -345,7 +350,13 @@ export class FilesService {
     });
 
     const hasNextPage = files.length > limit;
-    const data = files.slice(0, limit);
+    const data = files.slice(0, limit).map((file) => {
+      const { password, ...safeFile } = file;
+      return {
+        ...safeFile,
+        password_protected: password !== null,
+      };
+    });
     const nextCursor = hasNextPage ? data[data.length - 1].id : null;
 
     return {
