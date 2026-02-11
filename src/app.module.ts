@@ -17,10 +17,10 @@ import { S3Module } from './core/s3/s3.module';
 import { SqsModule } from './core/sqs/sqs.module';
 import { RedisModule } from './core/redis/redis.module';
 import { RedisService } from './core/redis/redis.service';
+import { HasherModule } from './core/hasher/hasher.module';
 import { DatabaseModule } from './core/database/database.module';
 
 import { validateConfig } from './common/utils';
-import { HasherModule } from './core/hasher/hasher.module';
 
 @Module({
   imports: [
