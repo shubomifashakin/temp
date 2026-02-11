@@ -10,8 +10,8 @@ import {
 
 import { v4 as uuid } from 'uuid';
 
-import { makeFileCacheKey } from './common/utils';
 import { ALLOWED_LIFETIMES } from './common/constants';
+import { makeFileCacheKey, makePresignedUrlCacheKey } from './common/utils';
 
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
@@ -361,6 +361,17 @@ export class FilesService {
       },
     });
 
+    const { success, error } = await this.redisService.delete(
+      makePresignedUrlCacheKey(shareId),
+    );
+
+    if (!success) {
+      this.logger.error({
+        error,
+        message: 'Failed to delete share link presigned url from cache',
+      });
+    }
+
     return {
       message: 'success',
     };
@@ -459,7 +470,7 @@ export class FilesService {
       }
     }
 
-    const urlCacheKey = `presigned-url:${shareId}`;
+    const urlCacheKey = makePresignedUrlCacheKey(shareId);
 
     const existingUrlForFile = await this.redisService.get<string>(urlCacheKey);
 
