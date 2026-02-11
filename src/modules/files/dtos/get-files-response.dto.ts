@@ -51,9 +51,9 @@ class File {
     example: '2025-01-01T00:00:00.000Z',
     description: 'the last time the file was accessed',
   })
-  @IsDate({ message: 'last_accesed_at must be a date' })
+  @IsDate({ message: 'last_accessed_at must be a date' })
   @IsOptional()
-  last_accesed_at: Date | null;
+  last_accessed_at: Date | null;
 
   @ApiProperty({
     example: FileStatus.safe,

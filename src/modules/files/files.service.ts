@@ -96,7 +96,7 @@ export class FilesService {
         view_count: true,
         expires_at: true,
         description: true,
-        last_accesed_at: true,
+        last_accessed_at: true,
       },
       ...(cursor && {
         cursor: {
@@ -153,7 +153,7 @@ export class FilesService {
         created_at: true,
         updated_at: true,
         expires_at: true,
-        last_accesed_at: true,
+        last_accessed_at: true,
       },
     });
 
@@ -236,7 +236,7 @@ export class FilesService {
         created_at: true,
         updated_at: true,
         expires_at: true,
-        last_accesed_at: true,
+        last_accessed_at: true,
       },
     });
 
@@ -508,7 +508,7 @@ export class FilesService {
           click_count: { increment: 1 },
           file: {
             update: {
-              last_accesed_at: new Date(),
+              last_accessed_at: new Date(),
               view_count: { increment: 1 },
             },
           },
@@ -556,7 +556,7 @@ export class FilesService {
         click_count: { increment: 1 },
         file: {
           update: {
-            last_accesed_at: new Date(),
+            last_accessed_at: new Date(),
             view_count: { increment: 1 },
           },
         },

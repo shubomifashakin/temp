@@ -67,7 +67,7 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   })
   @IsOptional()
   @IsDate()
-  last_accesed_at: Date | null;
+  last_accessed_at: Date | null;
 
   @ApiProperty({ description: 'The status of the file' })
   @IsEnum(FileStatus, { message: 'Invalid file status' })

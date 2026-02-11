@@ -60,20 +60,19 @@ model Files {
   view_count  Int    @default(0)
   s3_key      String
 
-  created_at      DateTime   @default(now())
-  updated_at      DateTime   @updatedAt
-  deleted_at      DateTime?
-  expires_at      DateTime
-  size            Int
-  last_accesed_at DateTime?
-  status          FileStatus @default(pending)
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+  deleted_at       DateTime?
+  expires_at       DateTime
+  size             Int
+  last_accessed_at DateTime?
+  status           FileStatus @default(pending)
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   links ShareLinks[]
 }
-
 
 model ShareLinks {
   id String @id @default(nanoid(13))
@@ -83,16 +82,16 @@ model ShareLinks {
   description String @db.VarChar(100)
 
   file_id String
-  file Files @relation(fields: [file_id], references: [id])
+  file    Files  @relation(fields: [file_id], references: [id])
 
   last_accessed_at DateTime?
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
   revoked_at DateTime?
   expires_at DateTime?
 
   password String?
 
-  @@unique(name: "id_file_id_unique",[id,file_id])
+  @@unique(name: "id_file_id_unique", [id, file_id])
 }
