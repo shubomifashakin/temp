@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
+  NotFoundException,
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
@@ -263,7 +264,7 @@ export class FilesService {
     }
 
     if (file.deleted_at) {
-      throw new BadRequestException('File has been deleted');
+      throw new NotFoundException('File has been deleted');
     }
 
     let password = dto.password;
