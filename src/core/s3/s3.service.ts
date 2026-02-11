@@ -1,7 +1,12 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
@@ -44,6 +49,28 @@ export class S3Service implements OnModuleDestroy {
       return { success: true, error: null, data: null };
     } catch (error) {
       return { success: false, error: makeError(error), data: null };
+    }
+  }
+
+  async generatePresignedGetUrl({
+    key,
+    ttl,
+    bucket,
+  }: {
+    key: string;
+    ttl: number;
+    bucket: string;
+  }): Promise<FnResult<string>> {
+    try {
+      const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+
+      const url = await getSignedUrl(this.s3Client, command, {
+        expiresIn: ttl,
+      });
+
+      return { data: url, error: null, success: true };
+    } catch (error) {
+      return { error: makeError(error), data: null, success: false };
     }
   }
 
