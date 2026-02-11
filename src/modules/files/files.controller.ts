@@ -80,8 +80,9 @@ export class FilesController {
     description: 'Get files metadata in chunks',
   })
   @ApiQuery({
-    description: 'Cursor to start from',
     name: 'cursor',
+    description: 'Pagination cursor',
+    required: false,
   })
   @ApiResponse({
     status: 200,
@@ -164,6 +165,11 @@ export class FilesController {
   }
 
   @ApiOperation({ summary: 'Get share links for a file' })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Pagination cursor',
+  })
   @ApiParam({
     name: 'id',
     description: 'Id of the file to get share links for',
