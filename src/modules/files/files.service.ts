@@ -463,12 +463,54 @@ export class FilesService {
       }
     }
 
+    const urlCacheKey = `presigned-url:${shareId}`;
+
+    const existingUrlForFile = await this.redisService.get<string>(urlCacheKey);
+
+    if (!existingUrlForFile.success) {
+      this.logger.error({
+        error: existingUrlForFile.error,
+        message: 'Failed to get cached url for file',
+      });
+    }
+
+    if (existingUrlForFile.success && existingUrlForFile.data) {
+      await this.databaseService.shareLinks.update({
+        where: { id: shareId },
+        data: {
+          last_accessed_at: new Date(),
+          click_count: { increment: 1 },
+          file: {
+            update: {
+              last_accesed_at: new Date(),
+              view_count: { increment: 1 },
+            },
+          },
+        },
+      });
+
+      return { fileUrl: existingUrlForFile.data };
+    }
+
+    const ttl = 3600 / 2;
     const { success, data, error } =
       await this.s3Service.generatePresignedGetUrl({
-        ttl: 3600 / 2,
+        ttl,
         key: fileFound.file.s3_key,
         bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
       });
+
+    const { success: cacheSuccess, error: cacheError } =
+      await this.redisService.set(urlCacheKey, data, {
+        expiration: { type: 'EX', value: ttl },
+      });
+
+    if (!cacheSuccess) {
+      this.logger.error({
+        error: cacheError,
+        message: 'Failed to cache url for file',
+      });
+    }
 
     if (!success) {
       this.logger.error({
