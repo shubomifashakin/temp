@@ -348,17 +348,13 @@ export class FilesService {
   }
 
   async revokeShareLink(userId: string, fileId: string, shareId: string) {
-    await this.databaseService.files.findUniqueOrThrow({
-      where: {
-        id: fileId,
-        user_id: userId,
-      },
-    });
-
     await this.databaseService.shareLinks.update({
       where: {
         id: shareId,
         file_id: fileId,
+        file: {
+          user_id: userId,
+        },
       },
       data: {
         revoked_at: new Date(),
