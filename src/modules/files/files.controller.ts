@@ -134,24 +134,46 @@ export class FilesController {
 
   //FIXME: ADD RESPONSE DTO
   @ApiOperation({ summary: 'Generate share link for a file' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiParam({
     name: 'id',
     description: 'Id of the file to generate share link for',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'File is not safe',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'File does not exist',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'File has been deleted',
   })
   @Post(':id/share')
   async generateShareLink(
     @Req() req: Request,
     @Param('id') fileId: string,
-    dto: GenerateLinkDto,
+    @Body() dto: GenerateLinkDto,
   ) {
     return this.filesService.generateShareLink(req.user.id, fileId, dto);
   }
 
-  //FIXME: ADD RESPONSE DTO
   @ApiOperation({ summary: 'Get share links for a file' })
   @ApiParam({
     name: 'id',
     description: 'Id of the file to get share links for',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of links that have been generated for this file',
+    //FIXME: ADD RESPONSE DTO
   })
   @Get(':id/share')
   async getFileShareLinks(
