@@ -18,14 +18,14 @@ import { UploadFileDto } from './dtos/upload-file.dto';
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
+import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
 
 import { MINUTES_10 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
 import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisService } from '../../core/redis/redis.service';
-import { DatabaseService } from '../../core/database/database.service';
 import { HasherService } from '../../core/hasher/hasher.service';
-import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { DatabaseService } from '../../core/database/database.service';
 
 @Injectable()
 export class FilesService {
