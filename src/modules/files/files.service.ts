@@ -182,10 +182,13 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    await this.databaseService.files.delete({
+    await this.databaseService.files.update({
       where: {
         id: fileId,
         user_id: userId,
+      },
+      data: {
+        deleted_at: new Date(),
       },
     });
 

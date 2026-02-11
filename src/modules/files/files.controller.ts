@@ -32,6 +32,7 @@ import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from './common/constants';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 
+import { UpdateFileDto } from './dtos/update-file.dto';
 import { GenerateLinkDto } from './dtos/generate-link.dto';
 import { GetSharedFile } from './dtos/get-shared-file.dto';
 import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
@@ -85,7 +86,8 @@ export class FilesController {
   @Get()
   getFiles(
     @Req() req: Request,
-    @Query('cursor', ParseUUIDPipe) cursor?: string,
+    @Query('cursor', new ParseUUIDPipe({ optional: true, version: '4' }))
+    cursor?: string,
   ) {
     return this.filesService.getFiles(req.user.id, cursor);
   }
@@ -127,7 +129,7 @@ export class FilesController {
   updateSingleFile(
     @Req() req: Request,
     @Param('id') fileId: string,
-    @Body() dto: UploadFileDto,
+    @Body() dto: UpdateFileDto,
   ) {
     return this.filesService.updateSingleFile(req.user.id, fileId, dto);
   }
