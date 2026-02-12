@@ -501,7 +501,7 @@ export class FilesService {
   }
 
   async getLinkFile(linkId: string, dto: GetLinkFileDto) {
-    const fileFound = await this.databaseService.link.findUniqueOrThrow({
+    const linkFound = await this.databaseService.link.findUniqueOrThrow({
       where: {
         id: linkId,
         revoked_at: null,
@@ -517,29 +517,29 @@ export class FilesService {
       },
     });
 
-    if (fileFound.expires_at && new Date() > fileFound.expires_at) {
+    if (linkFound.expires_at && new Date() > linkFound.expires_at) {
       throw new BadRequestException('This link has expired');
     }
 
-    if (fileFound.revoked_at) {
+    if (linkFound.revoked_at) {
       throw new BadRequestException('This link has been revoked');
     }
 
     if (
-      fileFound.file.deleted_at ||
-      (fileFound.file.expires_at && new Date() > fileFound.file.expires_at)
+      linkFound.file.deleted_at ||
+      (linkFound.file.expires_at && new Date() > linkFound.file.expires_at)
     ) {
       throw new BadRequestException('This file no longer exists');
     }
 
-    if (fileFound.password) {
+    if (linkFound.password) {
       if (!dto.password) {
         throw new UnauthorizedException('Please enter the password');
       }
 
       const { success, error, data } = await this.hasherService.verifyPassword(
         dto.password,
-        fileFound.password,
+        linkFound.password,
       );
 
       if (!success) {
@@ -583,7 +583,7 @@ export class FilesService {
     const { success, data, error } =
       await this.s3Service.generatePresignedGetUrl({
         ttl,
-        key: fileFound.file.s3_key,
+        key: linkFound.file.s3_key,
         bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
       });
 
