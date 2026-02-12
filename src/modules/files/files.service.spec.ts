@@ -503,7 +503,7 @@ describe('FilesService', () => {
     mockDatabaseService.link.update.mockResolvedValue(true);
 
     const testLinkId = 'test-link-id';
-    const res = await service.getLinkedFile(testLinkId, {
+    const res = await service.getLinkFile(testLinkId, {
       password: undefined,
     });
 
@@ -541,7 +541,7 @@ describe('FilesService', () => {
     mockDatabaseService.link.update.mockResolvedValue(true);
 
     const testLinkId = 'test-link-id';
-    const res = await service.getLinkedFile(testLinkId, {
+    const res = await service.getLinkFile(testLinkId, {
       password: undefined,
     });
 
@@ -570,7 +570,7 @@ describe('FilesService', () => {
 
     const testLinkId = 'test-link-id';
     await expect(
-      service.getLinkedFile(testLinkId, {
+      service.getLinkFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -593,7 +593,7 @@ describe('FilesService', () => {
 
     const testLinkId = 'test-link-id';
     await expect(
-      service.getLinkedFile(testLinkId, {
+      service.getLinkFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -615,7 +615,7 @@ describe('FilesService', () => {
 
     const testLinkId = 'test-link-id';
     await expect(
-      service.getLinkedFile(testLinkId, {
+      service.getLinkFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -637,7 +637,7 @@ describe('FilesService', () => {
 
     const testLinkId = 'test-link-id';
     await expect(
-      service.getLinkedFile(testLinkId, {
+      service.getLinkFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -665,7 +665,7 @@ describe('FilesService', () => {
 
     const testLinkId = 'test-link-id';
     await expect(
-      service.getLinkedFile(testLinkId, {
+      service.getLinkFile(testLinkId, {
         password: 'incorrect-password',
       }),
     ).rejects.toThrow(UnauthorizedException);

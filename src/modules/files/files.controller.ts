@@ -42,7 +42,7 @@ import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
 import { LinkDetailsDto } from './dtos/link-details.dto';
-import { GetLinkedFileDto } from './dtos/get-linked-file.dto';
+import { GetLinkFileDto } from './dtos/get-link-file.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
@@ -258,17 +258,17 @@ export class FilesController {
     summary: 'Get linked file',
     description: 'Redirects to the file URL',
   })
-  @ApiBody({ type: GetLinkedFileDto })
+  @ApiBody({ type: GetLinkFileDto })
   @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
   @ApiResponse({ status: 404, description: 'File link does not exist' })
   @Public()
   @Post('links/:linkId')
-  async getLinkedFile(
+  async getLinkFile(
     @Res() res: Response,
-    @Body() dto: GetLinkedFileDto,
+    @Body() dto: GetLinkFileDto,
     @Param('linkId') linkId: string,
   ) {
-    const url = await this.filesService.getLinkedFile(linkId, dto);
+    const url = await this.filesService.getLinkFile(linkId, dto);
 
     res.redirect(302, url.fileUrl);
   }

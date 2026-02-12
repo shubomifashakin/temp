@@ -2,4 +2,4 @@ import { PickType } from '@nestjs/swagger';
 
 import { CreateLinkDto } from './create-link.dto';
 
-export class GetLinkedFileDto extends PickType(CreateLinkDto, ['password']) {}
+export class GetLinkFileDto extends PickType(CreateLinkDto, ['password']) {}

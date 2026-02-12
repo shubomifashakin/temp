@@ -19,7 +19,7 @@ import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
 import { LinkDetailsDto } from './dtos/link-details.dto';
-import { GetLinkedFileDto } from './dtos/get-linked-file.dto';
+import { GetLinkFileDto } from './dtos/get-link-file.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
@@ -506,7 +506,7 @@ export class FilesService {
     };
   }
 
-  async getLinkedFile(linkId: string, dto: GetLinkedFileDto) {
+  async getLinkFile(linkId: string, dto: GetLinkFileDto) {
     const fileFound = await this.databaseService.link.findUniqueOrThrow({
       where: {
         id: linkId,

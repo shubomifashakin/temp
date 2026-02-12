@@ -193,7 +193,7 @@ describe('FilesController', () => {
     mockDatabaseService.link.update.mockResolvedValue(true);
 
     const testLinkId = 'test-link-id';
-    await controller.getLinkedFile(
+    await controller.getLinkFile(
       mockResponse,
       {
         password: undefined,
