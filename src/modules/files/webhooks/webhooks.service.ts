@@ -20,7 +20,7 @@ export class WebhooksService {
 
       await this.databaseService.files.updateMany({
         where: {
-          s3_key: validatedData.fileName,
+          s3_key: validatedData.key,
         },
         data: {
           status: validatedData.safe ? 'safe' : 'unsafe',

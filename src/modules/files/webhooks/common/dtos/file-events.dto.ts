@@ -40,9 +40,9 @@ export class FileValidatedEventPayload {
   @IsBoolean({ message: 'safe should be a boolean' })
   safe: boolean;
 
-  @ApiProperty({ description: 'The name that was assigned to the file' })
-  @IsString({ message: 'fileName should be a string' })
-  fileName: string;
+  @ApiProperty({ description: 'The s3 key of the file' })
+  @IsString({ message: 'key should be a string' })
+  key: string;
 }
 
 export class FileEventsDto {
