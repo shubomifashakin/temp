@@ -4,7 +4,7 @@ import { WebhooksService } from './webhooks.service';
 import { DatabaseService } from '../../../core/database/database.service';
 
 const mockDatabaseService = {
-  files: {
+  file: {
     updateMany: jest.fn(),
   },
 };
@@ -36,7 +36,7 @@ describe('WebhooksService', () => {
       type: 'file:validated',
     });
 
-    expect(mockDatabaseService.files.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
       where: {
         s3_key: 'test-key',
       },
@@ -60,7 +60,7 @@ describe('WebhooksService', () => {
       data: dto.data,
     });
 
-    expect(mockDatabaseService.files.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
       where: {
         s3_key: { in: ['test-key-1', 'test-key-2'] },
       },

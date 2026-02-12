@@ -18,7 +18,7 @@ export class WebhooksService {
     if (dto.type === 'file:validated') {
       const validatedData = dto.data as FileValidatedEventPayload;
 
-      await this.databaseService.files.updateMany({
+      await this.databaseService.file.updateMany({
         where: {
           s3_key: validatedData.key,
         },
@@ -33,7 +33,7 @@ export class WebhooksService {
     if (dto.type === 'file:deleted') {
       const deletedData = dto.data as FileDeletedEventPayload;
 
-      await this.databaseService.files.updateMany({
+      await this.databaseService.file.updateMany({
         where: {
           s3_key: { in: deletedData.keys },
         },

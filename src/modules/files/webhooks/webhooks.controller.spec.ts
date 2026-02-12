@@ -7,7 +7,7 @@ import { DatabaseService } from '../../../core/database/database.service';
 import { ConfigModule } from '@nestjs/config';
 
 const mockDatabaseService = {
-  files: {
+  file: {
     updateMany: jest.fn(),
   },
 };
@@ -41,7 +41,7 @@ describe('WebhooksController', () => {
       type: 'file:validated',
     });
 
-    expect(mockDatabaseService.files.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
       where: {
         s3_key: 'test-key',
       },
@@ -65,7 +65,7 @@ describe('WebhooksController', () => {
       data: dto.data,
     });
 
-    expect(mockDatabaseService.files.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
       where: {
         s3_key: { in: ['test-key-1', 'test-key-2'] },
       },
