@@ -61,6 +61,13 @@ export class FileEventsDto {
       { $ref: '#/components/schemas/FileDeletedEventPayload' },
       { $ref: '#/components/schemas/FileValidatedEventPayload' },
     ],
+    discriminator: {
+      propertyName: 'type',
+      mapping: {
+        'file:deleted': '#/components/schemas/FileDeletedEventPayload',
+        'file:validated': '#/components/schemas/FileValidatedEventPayload',
+      },
+    },
   })
   @IsNotEmpty({ message: 'data payload cannot be empty' })
   @Transform(({ value, obj }) => {

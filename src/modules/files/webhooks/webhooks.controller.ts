@@ -1,11 +1,22 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiHeader, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiExtraModels,
+} from '@nestjs/swagger';
 
 import { WebhooksService } from './webhooks.service';
 
-import { FileEventsDto } from './common/dtos/file-events.dto';
+import {
+  FileEventsDto,
+  FileDeletedEventPayload,
+  FileValidatedEventPayload,
+} from './common/dtos/file-events.dto';
 import { WebhooksGuard } from './common/guards/webhooks.guard';
 
+@ApiExtraModels(FileDeletedEventPayload, FileValidatedEventPayload)
 @ApiHeader({
   required: true,
   name: 'x-signature',
