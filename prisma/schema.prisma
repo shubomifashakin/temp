@@ -59,7 +59,6 @@ model RefreshToken {
 model File {
   id          String @id @default(uuid())
   description String @db.VarChar(100)
-  view_count  Int    @default(0)
   s3_key      String
 
   created_at       DateTime   @default(now())
@@ -67,7 +66,6 @@ model File {
   deleted_at       DateTime?
   expires_at       DateTime
   size             Int
-  last_accessed_at DateTime?
   status           FileStatus @default(pending)
 
   user_id String

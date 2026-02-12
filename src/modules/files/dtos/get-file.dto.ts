@@ -17,13 +17,6 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   id: string;
 
   @ApiProperty({
-    example: 10,
-    description: 'The amount of times the file has been viewed',
-  })
-  @IsNumber()
-  view_count: number;
-
-  @ApiProperty({
     example: 100000,
     description: 'The size of the file in bytes',
   })
@@ -59,15 +52,6 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   @IsOptional()
   @IsDate()
   deleted_at: Date | null;
-
-  @ApiProperty({
-    required: false,
-    example: new Date().toISOString(),
-    description: 'The date the file was last accessed',
-  })
-  @IsOptional()
-  @IsDate()
-  last_accessed_at: Date | null;
 
   @ApiProperty({ description: 'The status of the file' })
   @IsEnum(FileStatus, { message: 'Invalid file status' })
