@@ -576,6 +576,29 @@ describe('FilesService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
+  it('should not generate the presigned url for the file since link has been revoked', async () => {
+    const resolvedValue = {
+      expires_at: new Date(Date.now() + 100000),
+      deleted_at: null,
+      password: null,
+      revoked_at: new Date(),
+      file: {
+        s3_key: 'test-s3-key',
+        deleted_at: null,
+        expires_at: new Date(Date.now() + 100000),
+      },
+    };
+
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
+
+    const testLinkId = 'test-link-id';
+    await expect(
+      service.getLinkedFile(testLinkId, {
+        password: undefined,
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
   it('should not generate the presigned url for the file since file has been deleted', async () => {
     const resolvedValue = {
       expires_at: new Date(Date.now() + 100000),

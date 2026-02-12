@@ -527,6 +527,10 @@ export class FilesService {
       throw new BadRequestException('This link has expired');
     }
 
+    if (fileFound.revoked_at) {
+      throw new BadRequestException('This link has been revoked');
+    }
+
     if (
       fileFound.file.deleted_at ||
       (fileFound.file.expires_at && new Date() > fileFound.file.expires_at)
