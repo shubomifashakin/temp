@@ -175,8 +175,18 @@ export class FilesService {
   }
 
   async deleteSingleFile(userId: string, fileId: string) {
+    const s3Key = await this.databaseService.files.findUniqueOrThrow({
+      where: {
+        id: fileId,
+        user_id: userId,
+      },
+      select: {
+        s3_key: true,
+      },
+    });
+
     const queued = await this.sqsService.pushMessage({
-      message: { userId, fileId },
+      message: { s3Key: s3Key.s3_key },
       queueUrl: this.configService.getOrThrow('SQS_QUEUE_URL'),
     });
 

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 import { S3Module } from '../../core/s3/s3.module';
 import { SqsModule } from '../../core/sqs/sqs.module';
@@ -12,6 +13,13 @@ import { DatabaseModule } from '../../core/database/database.module';
 @Module({
   providers: [FilesService],
   controllers: [FilesController],
-  imports: [DatabaseModule, RedisModule, S3Module, SqsModule, HasherModule],
+  imports: [
+    DatabaseModule,
+    RedisModule,
+    S3Module,
+    SqsModule,
+    HasherModule,
+    WebhooksModule,
+  ],
 })
 export class FilesModule {}

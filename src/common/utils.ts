@@ -57,6 +57,10 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   REDIS_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  FILES_WEBHOOKS_SECRET: string;
 }
 
 export function validateConfig(config: Record<string, string>) {

@@ -86,7 +86,7 @@ model ShareLinks {
   description String @db.VarChar(100)
 
   file_id String
-  file    Files  @relation(fields: [file_id], references: [id])
+  file    Files  @relation(fields: [file_id], references: [id], onDelete: Cascade)
 
   last_accessed_at DateTime?
 
