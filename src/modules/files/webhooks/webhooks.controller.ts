@@ -6,7 +6,7 @@ import { FileEventsDto } from './common/dtos/file-events.dto';
 import { WebhooksGuard } from './common/guards/webhooks.guard';
 
 @UseGuards(WebhooksGuard)
-@Controller('files/webhooks')
+@Controller('webhooks/files')
 export class WebhooksController {
   constructor(private readonly webhooksService: WebhooksService) {}
 
