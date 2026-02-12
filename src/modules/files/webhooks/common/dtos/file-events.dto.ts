@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ApiProperty } from '@nestjs/swagger';
-
+import { Type, Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
@@ -7,7 +9,9 @@ import {
   IsString,
   IsNotEmpty,
   ValidateNested,
+  IsArray,
 } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 
 export const FileEvents = {
   deleted: 'file:deleted',
@@ -17,11 +21,13 @@ export const FileEvents = {
 export type FileEvents = (typeof FileEvents)[keyof typeof FileEvents];
 
 export class FileDeletedEventPayload {
-  @ApiProperty({ description: 'the s3 key of the file' })
-  @IsString({ message: 'key should be a string' })
+  @ApiProperty({ description: 'the s3 keys of the files', type: [String] })
+  @IsArray({ message: 'keys should be an array' })
+  @IsString({ each: true, message: 'each key should be a string' })
   keys: string[];
 
   @ApiProperty({ description: 'the date the file was deleted' })
+  @Type(() => Date)
   @IsDate({ message: 'deleted_at should be a valid date' })
   deleted_at: Date;
 }
@@ -41,12 +47,12 @@ export class FileValidatedEventPayload {
 
 export class FileEventsDto {
   @ApiProperty({
-    type: FileEvents,
+    enum: FileEvents,
     enumName: 'FileEvents',
     example: FileEvents.deleted,
     description: 'The type of event this is',
   })
-  @IsEnum(FileEvents, { message: 'invalid eventype' })
+  @IsEnum(FileEvents, { message: 'invalid event type' })
   type: FileEvents;
 
   @ApiProperty({
@@ -57,6 +63,25 @@ export class FileEventsDto {
     ],
   })
   @IsNotEmpty({ message: 'data payload cannot be empty' })
-  @ValidateNested({ message: 'data payload must be valid' })
+  @Transform(({ value, obj }) => {
+    if (obj.type === FileEvents.deleted) {
+      return plainToInstance(FileDeletedEventPayload, value);
+    }
+    if (obj.type === FileEvents.validated) {
+      return plainToInstance(FileValidatedEventPayload, value);
+    }
+    return value;
+  })
+  @ValidateNested()
+  @Type(() => Object, {
+    discriminator: {
+      property: 'type',
+      subTypes: [
+        { value: FileDeletedEventPayload, name: FileEvents.deleted },
+        { value: FileValidatedEventPayload, name: FileEvents.validated },
+      ],
+    },
+    keepDiscriminatorProperty: true,
+  })
   data: FileDeletedEventPayload | FileValidatedEventPayload;
 }
