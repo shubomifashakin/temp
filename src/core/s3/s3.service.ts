@@ -43,6 +43,7 @@ export class S3Service implements OnModuleDestroy {
           Tagging: tags,
           Bucket: bucket,
           Body: body.buffer,
+          ContentType: body.mimetype,
         }),
       );
 
