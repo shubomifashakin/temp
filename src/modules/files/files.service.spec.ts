@@ -194,6 +194,11 @@ describe('FilesService', () => {
   });
 
   it('should delete a single file', async () => {
+    const testS3Key = 'test-key';
+    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+      s3_key: testS3Key,
+    });
+
     mockSqsService.pushMessage.mockResolvedValue({
       success: true,
       error: null,
@@ -209,10 +214,18 @@ describe('FilesService', () => {
     const res = await service.deleteSingleFile('test-user-id', '1');
 
     expect(res).toEqual({ message: 'success' });
+    expect(mockSqsService.pushMessage).toHaveBeenCalledWith({
+      message: { s3Key: testS3Key },
+      queueUrl: expect.any(String),
+    });
     expect(mockRedisService.delete).toHaveBeenCalledWith(makeFileCacheKey('1'));
   });
 
   it('should not delete a single file, since it failed to push to sqs', async () => {
+    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+      s3_key: 'test-key',
+    });
+
     mockSqsService.pushMessage.mockResolvedValue({
       success: false,
       error: new Error('test error'),
@@ -221,6 +234,7 @@ describe('FilesService', () => {
     await expect(service.deleteSingleFile('test-user-id', '1')).rejects.toThrow(
       InternalServerErrorException,
     );
+    expect(mockDatabaseService.files.findUniqueOrThrow).toHaveBeenCalled();
   });
 
   it('should update a single file', async () => {
