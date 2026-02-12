@@ -7,7 +7,7 @@ import { DatabaseModule } from '../../../core/database/database.module';
 
 @Module({
   providers: [WebhooksService],
-  imports: [DatabaseModule],
   controllers: [WebhooksController],
+  imports: [DatabaseModule],
 })
 export class WebhooksModule {}
