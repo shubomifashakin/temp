@@ -383,6 +383,20 @@ export class FilesService {
   }
 
   async revokeLink(userId: string, fileId: string, linkId: string) {
+    const linkDetails = await this.databaseService.link.findUniqueOrThrow({
+      where: {
+        id: linkId,
+        file_id: fileId,
+        file: {
+          user_id: userId,
+        },
+      },
+    });
+
+    if (linkDetails.revoked_at) {
+      return { message: 'success' };
+    }
+
     await this.databaseService.link.update({
       where: {
         id: linkId,

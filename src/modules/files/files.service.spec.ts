@@ -400,6 +400,11 @@ describe('FilesService', () => {
     const testFileId = 'test-file-id';
     const testLinkId = 'test-link-id';
     const testUserId = 'test-user-id';
+
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue({
+      revoked_at: null,
+    });
+
     mockDatabaseService.link.update.mockResolvedValue(true);
 
     mockRedisService.delete.mockResolvedValue({
