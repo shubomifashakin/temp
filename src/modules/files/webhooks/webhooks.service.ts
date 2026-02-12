@@ -15,7 +15,7 @@ export class WebhooksService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async handleFileEvents(dto: FileEventsDto) {
-    if (dto.eventType === 'file:validated') {
+    if (dto.type === 'file:validated') {
       const validatedData = dto.data as FileValidatedEventPayload;
 
       await this.databaseService.files.updateMany({
@@ -30,7 +30,7 @@ export class WebhooksService {
       return { message: 'success' };
     }
 
-    if (dto.eventType === 'file:deleted') {
+    if (dto.type === 'file:deleted') {
       const deletedData = dto.data as FileDeletedEventPayload;
 
       await this.databaseService.files.updateMany({

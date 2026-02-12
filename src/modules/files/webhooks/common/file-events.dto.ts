@@ -47,7 +47,7 @@ export class FileEventsDto {
     description: 'The type of event this is',
   })
   @IsEnum(FileEvents, { message: 'invalid eventype' })
-  eventType: FileEvents;
+  type: FileEvents;
 
   @ApiProperty({
     description: 'The payload data for the event',
