@@ -182,8 +182,13 @@ export class FilesService {
       },
       select: {
         s3_key: true,
+        deleted_at: true,
       },
     });
+
+    if (s3Key.deleted_at) {
+      return { message: 'success' };
+    }
 
     const queued = await this.sqsService.pushMessage({
       message: { s3Key: s3Key.s3_key },
