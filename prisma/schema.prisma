@@ -96,4 +96,5 @@ model Link {
   password String?
 
   @@unique(name: "id_file_id_unique", [id, file_id])
+  @@index(name: "file_id_idx", fields: [file_id])
 }
