@@ -73,12 +73,12 @@ model Files {
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  links ShareLinks[]
+  links Link[]
 
   @@index(name: "files_user_id_idx", fields: [user_id])
 }
 
-model ShareLinks {
+model Link {
   id String @id @default(nanoid(13))
 
   click_count Int @default(0)

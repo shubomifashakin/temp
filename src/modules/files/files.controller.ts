@@ -40,12 +40,12 @@ import { Public } from '../../common/decorators/public.decorator';
 
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
-import { GetSharedFile } from './dtos/get-shared-file.dto';
-import { UpdateShareLinkDto } from './dtos/update-share-link.dto';
-import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { UpdateLinkDto } from './dtos/update-link.dto';
+import { LinkDetailsDto } from './dtos/link-details.dto';
+import { GetLinkedFileDto } from './dtos/get-linked-file.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
-import { CreateShareIdResponseDto } from './dtos/create-share-id.dto';
-import { GetFileShareLinksResponseDto } from './dtos/get-file-share-links-response.dto';
+import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
+import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -153,12 +153,12 @@ export class FilesController {
     return this.filesService.updateSingleFile(req.user.id, fileId, dto);
   }
 
-  @ApiOperation({ summary: 'Generate shareId for a file' })
-  @ApiResponse({ status: 200, type: CreateShareIdResponseDto })
+  @ApiOperation({ summary: 'Create link for a file' })
+  @ApiResponse({ status: 200, type: CreateLinkResponseDto })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiParam({
     name: 'id',
-    description: 'Id of the file to generate shareId for',
+    description: 'Id of the file to create a link for',
   })
   @ApiBody({ type: CreateLinkDto })
   @ApiResponse({
@@ -169,16 +169,16 @@ export class FilesController {
     status: 404,
     description: 'File does not exist',
   })
-  @Post(':id/share')
-  async createShareId(
+  @Post(':id/links')
+  async createLink(
     @Req() req: Request,
     @Param('id') fileId: string,
     @Body() dto: CreateLinkDto,
-  ): Promise<CreateShareIdResponseDto> {
-    return this.filesService.createShareId(req.user.id, fileId, dto);
+  ): Promise<CreateLinkResponseDto> {
+    return this.filesService.createLink(req.user.id, fileId, dto);
   }
 
-  @ApiOperation({ summary: 'Get share links for a file' })
+  @ApiOperation({ summary: 'Get all links for a file' })
   @ApiQuery({
     name: 'cursor',
     required: false,
@@ -186,89 +186,89 @@ export class FilesController {
   })
   @ApiParam({
     name: 'id',
-    description: 'Id of the file to get share links for',
+    description: 'Id of the file to get links for',
   })
   @ApiResponse({
     status: 200,
-    type: GetFileShareLinksResponseDto,
-    description: 'List of links that have been generated for this file',
+    type: GetFileLinksResponseDto,
+    description: 'List of links that have been created for this file',
   })
-  @Get(':id/share')
-  async getFileShareLinks(
+  @Get(':id/links')
+  async getFileLinks(
     @Req() req: Request,
     @Param('id') fileId: string,
     @Query('cursor', new ParseUUIDPipe({ version: '4', optional: true }))
     cursor?: string,
-  ): Promise<GetFileShareLinksResponseDto> {
-    return this.filesService.getFileShareLinks(req.user.id, fileId, cursor);
+  ): Promise<GetFileLinksResponseDto> {
+    return this.filesService.getFileLinks(req.user.id, fileId, cursor);
   }
 
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404, description: 'File does not exist' })
-  @ApiOperation({ summary: 'Revoke a share link' })
+  @ApiOperation({ summary: 'Revoke a file link' })
   @ApiParam({
     name: 'id',
-    description: 'Id of the file to revoke share link for',
+    description: 'Id of the file to revoke link for',
   })
   @ApiParam({
-    name: 'shareId',
-    description: 'Id of the share link to revoke',
+    name: 'linkId',
+    description: 'Id of the link to revoke',
   })
-  @Delete(':id/share/:shareId')
-  async revokeShareLink(
+  @Delete(':id/links/:linkId')
+  async revokeLink(
     @Req() req: Request,
     @Param('id') fileId: string,
-    @Param('shareId') shareId: string,
+    @Param('linkId') linkId: string,
   ) {
-    return this.filesService.revokeShareLink(req.user.id, fileId, shareId);
+    return this.filesService.revokeLink(req.user.id, fileId, linkId);
   }
 
-  @ApiOperation({ summary: 'Update  share link details' })
+  @ApiOperation({ summary: 'Update file link details' })
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404, description: 'File does not exist' })
   @ApiParam({
     name: 'id',
-    description: 'Id of the file to update share link for',
+    description: 'Id of the file to update link details for',
   })
   @ApiParam({
-    name: 'shareId',
-    description: 'Id of the share link to update',
+    name: 'linkId',
+    description: 'Id of the link to update',
   })
-  @ApiBody({ type: UpdateShareLinkDto })
-  @Patch(':id/share/:shareId')
-  async updateShareLink(
+  @ApiBody({ type: UpdateLinkDto })
+  @Patch(':id/links/:linkId')
+  async updateLink(
     @Req() req: Request,
-    @Body() dto: UpdateShareLinkDto,
+    @Body() dto: UpdateLinkDto,
     @Param('id') fileId: string,
-    @Param('shareId') shareId: string,
+    @Param('linkId') linkId: string,
   ) {
-    return this.filesService.updateShareLink(req.user.id, fileId, shareId, dto);
+    return this.filesService.updateLink(req.user.id, fileId, linkId, dto);
   }
 
-  @ApiOperation({ summary: 'Get share link details' })
-  @ApiResponse({ status: 200, type: ShareLinkDetailsDto })
-  @ApiResponse({ status: 404, description: 'Share link does not exist' })
+  @ApiOperation({ summary: 'Get file link details' })
+  @ApiResponse({ status: 200, type: LinkDetailsDto })
+  @ApiResponse({ status: 404, description: 'File link does not exist' })
   @Public()
-  @Get('share/:shareId')
-  async getShareLinkDetails(@Param('shareId') shareId: string) {
-    return this.filesService.getShareLinkDetails(shareId);
+  @Get('links/:linkId')
+  async getLinkDetails(@Param('linkId') linkId: string) {
+    return this.filesService.getLinkDetails(linkId);
   }
 
   @ApiOperation({
-    summary: 'Get shared file',
+    summary: 'Get linked file',
     description: 'Redirects to the file URL',
   })
-  @ApiBody({ type: GetSharedFile })
+  @ApiBody({ type: GetLinkedFileDto })
   @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
-  @ApiResponse({ status: 404, description: 'Share link does not exist' })
+  @ApiResponse({ status: 404, description: 'File link does not exist' })
   @Public()
-  @Post('share/:shareId')
-  async getSharedFile(
+  @Post('links/:linkId')
+  async getLinkedFile(
     @Res() res: Response,
-    @Body() dto: GetSharedFile,
-    @Param('shareId') shareId: string,
+    @Body() dto: GetLinkedFileDto,
+    @Param('linkId') linkId: string,
   ) {
-    const url = await this.filesService.getSharedFile(shareId, dto);
+    const url = await this.filesService.getLinkedFile(linkId, dto);
 
     res.redirect(302, url.fileUrl);
   }

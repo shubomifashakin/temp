@@ -32,7 +32,7 @@ const mockDatabaseService = {
     delete: jest.fn(),
     findMany: jest.fn(),
   },
-  shareLinks: {
+  link: {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -262,7 +262,7 @@ describe('FilesService', () => {
     );
   });
 
-  it('should generate share link for a file', async () => {
+  it('should generate link for a file', async () => {
     const testFileId = 'test-file-id';
     mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
@@ -273,23 +273,23 @@ describe('FilesService', () => {
       password: null,
     });
 
-    const testShareId = 'test-share-id';
-    mockDatabaseService.shareLinks.create.mockResolvedValue({
-      id: testShareId,
+    const testLinkId = 'test-link-id';
+    mockDatabaseService.link.create.mockResolvedValue({
+      id: testLinkId,
     });
 
     const testUserId = 'test-user-id';
 
-    const res = await service.createShareId(testUserId, testFileId, {
+    const res = await service.createLink(testUserId, testFileId, {
       description: 'Test file',
       expiresAt: new Date(),
       password: undefined,
     });
 
-    expect(res).toEqual({ id: testShareId });
+    expect(res).toEqual({ id: testLinkId });
   });
 
-  it('should generate share link for a file with a password', async () => {
+  it('should generate link for a file with a password', async () => {
     const testFileId = 'test-file-id';
     mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
@@ -300,9 +300,9 @@ describe('FilesService', () => {
       password: null,
     });
 
-    const testShareId = 'test-share-id';
-    mockDatabaseService.shareLinks.create.mockResolvedValue({
-      id: testShareId,
+    const testLinkId = 'test-link-id';
+    mockDatabaseService.link.create.mockResolvedValue({
+      id: testLinkId,
     });
 
     const testUserId = 'test-user-id';
@@ -313,19 +313,19 @@ describe('FilesService', () => {
       error: null,
     });
 
-    const res = await service.createShareId(testUserId, testFileId, {
+    const res = await service.createLink(testUserId, testFileId, {
       description: 'Test file',
       expiresAt: new Date(),
       password: 'test-password',
     });
 
-    expect(res).toEqual({ id: testShareId });
+    expect(res).toEqual({ id: testLinkId });
     expect(mockHasherService.hashPassword).toHaveBeenCalledWith(
       'test-password',
     );
   });
 
-  it('should not generate share link for file that is not safe', async () => {
+  it('should not generate link for file that is not safe', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
     mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
@@ -338,7 +338,7 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.createShareId(testUserId, testFileId, {
+      service.createLink(testUserId, testFileId, {
         description: 'Test file',
         expiresAt: new Date(),
         password: 'test-password',
@@ -346,7 +346,7 @@ describe('FilesService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
-  it('should not generate share link for file that is deleted', async () => {
+  it('should not generate link for file that is deleted', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
     mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
@@ -359,7 +359,7 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.createShareId(testUserId, testFileId, {
+      service.createLink(testUserId, testFileId, {
         description: 'Test file',
         expiresAt: new Date(),
         password: 'test-password',
@@ -367,7 +367,7 @@ describe('FilesService', () => {
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('should not generate share link for file that is expired', async () => {
+  it('should not generate link for file that is expired', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
     mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
@@ -380,7 +380,7 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.createShareId(testUserId, testFileId, {
+      service.createLink(testUserId, testFileId, {
         description: 'Test file',
         expiresAt: new Date(),
         password: 'test-password',
@@ -388,35 +388,31 @@ describe('FilesService', () => {
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('should get all share links that have been generated for a file', async () => {
-    mockDatabaseService.shareLinks.findMany.mockResolvedValue([]);
+  it('should get all links that have been generated for a file', async () => {
+    mockDatabaseService.link.findMany.mockResolvedValue([]);
 
-    const res = await service.getFileShareLinks('test-user-id', 'test-file-id');
+    const res = await service.getFileLinks('test-user-id', 'test-file-id');
 
     expect(res).toEqual({ data: [], hasNextPage: false, cursor: null });
   });
 
-  it('should revoke share link', async () => {
+  it('should revoke link', async () => {
     const testFileId = 'test-file-id';
-    const testShareId = 'test-share-id';
+    const testLinkId = 'test-link-id';
     const testUserId = 'test-user-id';
-    mockDatabaseService.shareLinks.update.mockResolvedValue(true);
+    mockDatabaseService.link.update.mockResolvedValue(true);
 
     mockRedisService.delete.mockResolvedValue({
       error: null,
       success: true,
     });
 
-    const res = await service.revokeShareLink(
-      testUserId,
-      testFileId,
-      testShareId,
-    );
+    const res = await service.revokeLink(testUserId, testFileId, testLinkId);
 
     expect(res).toEqual({ message: 'success' });
-    expect(mockDatabaseService.shareLinks.update).toHaveBeenCalledWith({
+    expect(mockDatabaseService.link.update).toHaveBeenCalledWith({
       where: {
-        id: testShareId,
+        id: testLinkId,
         file_id: testFileId,
         file: {
           user_id: testUserId,
@@ -429,7 +425,7 @@ describe('FilesService', () => {
     });
   });
 
-  it('should get share link details', async () => {
+  it('should get link details', async () => {
     const resolvedValue = {
       created_at: new Date(),
       expires_at: new Date(),
@@ -448,11 +444,9 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const res = await service.getShareLinkDetails('test-share-id');
+    const res = await service.getLinkDetails('test-link-id');
 
     expect(res).toEqual({
       created_at: resolvedValue.created_at,
@@ -481,9 +475,7 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
     mockRedisService.get.mockResolvedValue({
       success: true,
@@ -503,10 +495,10 @@ describe('FilesService', () => {
       error: null,
     });
 
-    mockDatabaseService.shareLinks.update.mockResolvedValue(true);
+    mockDatabaseService.link.update.mockResolvedValue(true);
 
-    const testShareId = 'test-shared-id';
-    const res = await service.getSharedFile(testShareId, {
+    const testLinkId = 'test-link-id';
+    const res = await service.getLinkedFile(testLinkId, {
       password: undefined,
     });
 
@@ -527,9 +519,7 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
     const testPresignedUrl = 'test-presigned-url';
     mockRedisService.get.mockResolvedValue({
@@ -543,10 +533,10 @@ describe('FilesService', () => {
       error: null,
     });
 
-    mockDatabaseService.shareLinks.update.mockResolvedValue(true);
+    mockDatabaseService.link.update.mockResolvedValue(true);
 
-    const testShareId = 'test-shared-id';
-    const res = await service.getSharedFile(testShareId, {
+    const testLinkId = 'test-link-id';
+    const res = await service.getLinkedFile(testLinkId, {
       password: undefined,
     });
 
@@ -554,7 +544,7 @@ describe('FilesService', () => {
       fileUrl: testPresignedUrl,
     });
     expect(mockRedisService.get).toHaveBeenCalledWith(
-      makePresignedUrlCacheKey(testShareId),
+      makePresignedUrlCacheKey(testLinkId),
     );
     expect(mockS3Service.generatePresignedGetUrl).not.toHaveBeenCalled();
   });
@@ -571,13 +561,11 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testShareId = 'test-shared-id';
+    const testLinkId = 'test-link-id';
     await expect(
-      service.getSharedFile(testShareId, {
+      service.getLinkedFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -595,13 +583,11 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testShareId = 'test-shared-id';
+    const testLinkId = 'test-link-id';
     await expect(
-      service.getSharedFile(testShareId, {
+      service.getLinkedFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -619,13 +605,11 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testShareId = 'test-shared-id';
+    const testLinkId = 'test-link-id';
     await expect(
-      service.getSharedFile(testShareId, {
+      service.getLinkedFile(testLinkId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -643,9 +627,7 @@ describe('FilesService', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
     mockHasherService.verifyPassword.mockResolvedValue({
       success: true,
@@ -653,9 +635,9 @@ describe('FilesService', () => {
       error: null,
     });
 
-    const testShareId = 'test-shared-id';
+    const testLinkId = 'test-link-id';
     await expect(
-      service.getSharedFile(testShareId, {
+      service.getLinkedFile(testLinkId, {
         password: 'incorrect-password',
       }),
     ).rejects.toThrow(UnauthorizedException);

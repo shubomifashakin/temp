@@ -26,7 +26,7 @@ const mockDatabaseService = {
     delete: jest.fn(),
     findMany: jest.fn(),
   },
-  shareLinks: {
+  link: {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -170,9 +170,7 @@ describe('FilesController', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
     mockRedisService.get.mockResolvedValue({
       success: true,
@@ -192,15 +190,15 @@ describe('FilesController', () => {
       error: null,
     });
 
-    mockDatabaseService.shareLinks.update.mockResolvedValue(true);
+    mockDatabaseService.link.update.mockResolvedValue(true);
 
-    const testShareId = 'test-shared-id';
-    await controller.getSharedFile(
+    const testLinkId = 'test-link-id';
+    await controller.getLinkedFile(
       mockResponse,
       {
         password: undefined,
       },
-      testShareId,
+      testLinkId,
     );
 
     // eslint-disable-next-line @typescript-eslint/unbound-method

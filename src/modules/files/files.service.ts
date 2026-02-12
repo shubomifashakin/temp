@@ -17,12 +17,12 @@ import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
-import { GetSharedFile } from './dtos/get-shared-file.dto';
-import { UpdateShareLinkDto } from './dtos/update-share-link.dto';
-import { ShareLinkDetailsDto } from './dtos/share-link-details.dto';
+import { UpdateLinkDto } from './dtos/update-link.dto';
+import { LinkDetailsDto } from './dtos/link-details.dto';
+import { GetLinkedFileDto } from './dtos/get-linked-file.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
-import { CreateShareIdResponseDto } from './dtos/create-share-id.dto';
-import { GetFileShareLinksResponseDto } from './dtos/get-file-share-links-response.dto';
+import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
+import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 
 import { MINUTES_10 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
@@ -267,11 +267,11 @@ export class FilesService {
     return file;
   }
 
-  async createShareId(
+  async createLink(
     userId: string,
     fileId: string,
     dto: CreateLinkDto,
-  ): Promise<CreateShareIdResponseDto> {
+  ): Promise<CreateLinkResponseDto> {
     const file = await this.databaseService.files.findUniqueOrThrow({
       where: {
         id: fileId,
@@ -310,7 +310,7 @@ export class FilesService {
       password = data;
     }
 
-    const link = await this.databaseService.shareLinks.create({
+    const link = await this.databaseService.link.create({
       data: {
         password,
         file_id: fileId,
@@ -324,14 +324,14 @@ export class FilesService {
     };
   }
 
-  async getFileShareLinks(
+  async getFileLinks(
     userId: string,
     fileId: string,
     cursor?: string,
-  ): Promise<GetFileShareLinksResponseDto> {
+  ): Promise<GetFileLinksResponseDto> {
     const limit = 10;
 
-    const files = await this.databaseService.shareLinks.findMany({
+    const files = await this.databaseService.link.findMany({
       where: {
         file_id: fileId,
         file: {
@@ -377,10 +377,10 @@ export class FilesService {
     };
   }
 
-  async revokeShareLink(userId: string, fileId: string, shareId: string) {
-    await this.databaseService.shareLinks.update({
+  async revokeLink(userId: string, fileId: string, linkId: string) {
+    await this.databaseService.link.update({
       where: {
-        id: shareId,
+        id: linkId,
         file_id: fileId,
         file: {
           user_id: userId,
@@ -392,13 +392,13 @@ export class FilesService {
     });
 
     const { success, error } = await this.redisService.delete(
-      makePresignedUrlCacheKey(shareId),
+      makePresignedUrlCacheKey(linkId),
     );
 
     if (!success) {
       this.logger.error({
         error,
-        message: 'Failed to delete share link presigned url from cache',
+        message: 'Failed to delete link presigned url from cache',
       });
     }
 
@@ -407,11 +407,11 @@ export class FilesService {
     };
   }
 
-  async updateShareLink(
+  async updateLink(
     userId: string,
     fileId: string,
-    shareId: string,
-    dto: UpdateShareLinkDto,
+    linkId: string,
+    dto: UpdateLinkDto,
   ) {
     let password: string | undefined = undefined;
 
@@ -430,9 +430,9 @@ export class FilesService {
       password = hashed.data;
     }
 
-    await this.databaseService.shareLinks.update({
+    await this.databaseService.link.update({
       where: {
-        id: shareId,
+        id: linkId,
         file_id: fileId,
         file: {
           user_id: userId,
@@ -446,10 +446,10 @@ export class FilesService {
     });
   }
 
-  async getShareLinkDetails(shareId: string): Promise<ShareLinkDetailsDto> {
-    const link = await this.databaseService.shareLinks.findUniqueOrThrow({
+  async getLinkDetails(linkId: string): Promise<LinkDetailsDto> {
+    const link = await this.databaseService.link.findUniqueOrThrow({
       where: {
-        id: shareId,
+        id: linkId,
         revoked_at: null,
       },
       select: {
@@ -487,10 +487,10 @@ export class FilesService {
     };
   }
 
-  async getSharedFile(shareId: string, dto: GetSharedFile) {
-    const fileFound = await this.databaseService.shareLinks.findUniqueOrThrow({
+  async getLinkedFile(linkId: string, dto: GetLinkedFileDto) {
+    const fileFound = await this.databaseService.link.findUniqueOrThrow({
       where: {
-        id: shareId,
+        id: linkId,
         revoked_at: null,
       },
       include: {
@@ -539,7 +539,7 @@ export class FilesService {
       }
     }
 
-    const urlCacheKey = makePresignedUrlCacheKey(shareId);
+    const urlCacheKey = makePresignedUrlCacheKey(linkId);
 
     const existingUrlForFile = await this.redisService.get<string>(urlCacheKey);
 
@@ -551,8 +551,8 @@ export class FilesService {
     }
 
     if (existingUrlForFile.success && existingUrlForFile.data) {
-      await this.databaseService.shareLinks.update({
-        where: { id: shareId },
+      await this.databaseService.link.update({
+        where: { id: linkId },
         data: {
           last_accessed_at: new Date(),
           click_count: { increment: 1 },
@@ -597,9 +597,9 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    await this.databaseService.shareLinks.update({
+    await this.databaseService.link.update({
       where: {
-        id: shareId,
+        id: linkId,
       },
       data: {
         last_accessed_at: new Date(),
