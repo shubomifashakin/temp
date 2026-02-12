@@ -4,7 +4,7 @@ import {
   FileEventsDto,
   FileDeletedEventPayload,
   FileValidatedEventPayload,
-} from './common/file-events.dto';
+} from './common/dtos/file-events.dto';
 
 import { DatabaseService } from '../../../core/database/database.service';
 
