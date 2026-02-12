@@ -27,7 +27,7 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  files          Files[]
+  files          File[]
   accounts       Accounts[]
   refresh_tokens RefreshToken[]
 }
@@ -56,7 +56,7 @@ model RefreshToken {
   @@index(name: "refresh_tokens_user_id_idx", fields: [user_id])
 }
 
-model Files {
+model File {
   id          String @id @default(uuid())
   description String @db.VarChar(100)
   view_count  Int    @default(0)
@@ -86,7 +86,7 @@ model Link {
   description String @db.VarChar(100)
 
   file_id String
-  file    Files  @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  file    File  @relation(fields: [file_id], references: [id], onDelete: Cascade)
 
   last_accessed_at DateTime?
 

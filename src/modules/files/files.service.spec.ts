@@ -25,7 +25,7 @@ import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
 
 const mockDatabaseService = {
-  files: {
+  file: {
     create: jest.fn(),
     findUniqueOrThrow: jest.fn(),
     update: jest.fn(),
@@ -112,7 +112,7 @@ describe('FilesService', () => {
 
     mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
 
-    mockDatabaseService.files.create.mockResolvedValue({
+    mockDatabaseService.file.create.mockResolvedValue({
       id: '1',
     });
 
@@ -134,7 +134,7 @@ describe('FilesService', () => {
       error: new Error('test error'),
     });
 
-    mockDatabaseService.files.create.mockResolvedValue({
+    mockDatabaseService.file.create.mockResolvedValue({
       id: '1',
     });
 
@@ -148,7 +148,7 @@ describe('FilesService', () => {
   });
 
   it('should get all files', async () => {
-    mockDatabaseService.files.findMany.mockResolvedValue([]);
+    mockDatabaseService.file.findMany.mockResolvedValue([]);
 
     const res = await service.getFiles('test-user-id');
 
@@ -167,7 +167,7 @@ describe('FilesService', () => {
       error: null,
     });
 
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: '1',
       size: 200,
     });
@@ -190,12 +190,12 @@ describe('FilesService', () => {
     const res = await service.getSingleFile('test-user-id', '1');
 
     expect(res).toEqual({ id: '1', size: 200 });
-    expect(mockDatabaseService.files.findUniqueOrThrow).not.toHaveBeenCalled();
+    expect(mockDatabaseService.file.findUniqueOrThrow).not.toHaveBeenCalled();
   });
 
   it('should delete a single file', async () => {
     const testS3Key = 'test-key';
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       s3_key: testS3Key,
     });
 
@@ -209,7 +209,7 @@ describe('FilesService', () => {
       error: null,
     });
 
-    mockDatabaseService.files.update.mockResolvedValue(true);
+    mockDatabaseService.file.update.mockResolvedValue(true);
 
     const res = await service.deleteSingleFile('test-user-id', '1');
 
@@ -222,7 +222,7 @@ describe('FilesService', () => {
   });
 
   it('should not delete a single file, since it failed to push to sqs', async () => {
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       s3_key: 'test-key',
     });
 
@@ -234,7 +234,7 @@ describe('FilesService', () => {
     await expect(service.deleteSingleFile('test-user-id', '1')).rejects.toThrow(
       InternalServerErrorException,
     );
-    expect(mockDatabaseService.files.findUniqueOrThrow).toHaveBeenCalled();
+    expect(mockDatabaseService.file.findUniqueOrThrow).toHaveBeenCalled();
   });
 
   it('should update a single file', async () => {
@@ -242,7 +242,7 @@ describe('FilesService', () => {
       id: '1',
       size: 200,
     };
-    mockDatabaseService.files.update.mockResolvedValue(resolvedValue);
+    mockDatabaseService.file.update.mockResolvedValue(resolvedValue);
 
     mockRedisService.set.mockResolvedValue({
       success: true,
@@ -264,7 +264,7 @@ describe('FilesService', () => {
 
   it('should generate link for a file', async () => {
     const testFileId = 'test-file-id';
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'safe',
@@ -291,7 +291,7 @@ describe('FilesService', () => {
 
   it('should generate link for a file with a password', async () => {
     const testFileId = 'test-file-id';
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'safe',
@@ -328,7 +328,7 @@ describe('FilesService', () => {
   it('should not generate link for file that is not safe', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'pending',
@@ -349,7 +349,7 @@ describe('FilesService', () => {
   it('should not generate link for file that is deleted', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'safe',
@@ -370,7 +370,7 @@ describe('FilesService', () => {
   it('should not generate link for file that is expired', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'safe',

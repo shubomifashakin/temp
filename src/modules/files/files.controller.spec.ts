@@ -19,7 +19,7 @@ import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
 
 const mockDatabaseService = {
-  files: {
+  file: {
     create: jest.fn(),
     findUniqueOrThrow: jest.fn(),
     update: jest.fn(),
@@ -115,7 +115,7 @@ describe('FilesController', () => {
   it('should upload the file', async () => {
     mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
 
-    mockDatabaseService.files.create.mockResolvedValue({
+    mockDatabaseService.file.create.mockResolvedValue({
       id: '1',
     });
 
@@ -129,7 +129,7 @@ describe('FilesController', () => {
   });
 
   it('should get all files', async () => {
-    mockDatabaseService.files.findMany.mockResolvedValue([]);
+    mockDatabaseService.file.findMany.mockResolvedValue([]);
 
     const res = await controller.getFiles(mockRequest);
 
@@ -148,7 +148,7 @@ describe('FilesController', () => {
       error: null,
     });
 
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: '1',
       size: 200,
     });

@@ -67,7 +67,7 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    const response = await this.databaseService.files.create({
+    const response = await this.databaseService.file.create({
       data: {
         s3_key: key,
         user_id: userId,
@@ -86,7 +86,7 @@ export class FilesService {
   ): Promise<GetFilesResponseDto> {
     const limit = 10;
 
-    const files = await this.databaseService.files.findMany({
+    const files = await this.databaseService.file.findMany({
       where: {
         user_id: userId,
       },
@@ -138,7 +138,7 @@ export class FilesService {
       return cached.data;
     }
 
-    const file = await this.databaseService.files.findUniqueOrThrow({
+    const file = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
         user_id: userId,
@@ -175,7 +175,7 @@ export class FilesService {
   }
 
   async deleteSingleFile(userId: string, fileId: string) {
-    const s3Key = await this.databaseService.files.findUniqueOrThrow({
+    const s3Key = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
         user_id: userId,
@@ -204,7 +204,7 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    await this.databaseService.files.update({
+    await this.databaseService.file.update({
       where: {
         id: fileId,
         user_id: userId,
@@ -233,7 +233,7 @@ export class FilesService {
     fileId: string,
     dto: UpdateFileDto,
   ): Promise<GetFileDto> {
-    const file = await this.databaseService.files.update({
+    const file = await this.databaseService.file.update({
       where: {
         id: fileId,
         user_id: userId,
@@ -277,7 +277,7 @@ export class FilesService {
     fileId: string,
     dto: CreateLinkDto,
   ): Promise<CreateLinkResponseDto> {
-    const file = await this.databaseService.files.findUniqueOrThrow({
+    const file = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
         user_id: userId,
