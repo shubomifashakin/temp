@@ -27,7 +27,7 @@ export class SubscriptionsService {
     const { success, data, error } =
       await this.polarService.getAvailableProducts({
         page,
-        limit: limit + 1,
+        limit,
         visibility: ['public'],
         sorting: ['price_amount'],
         organizationId: this.configService.getOrThrow('POLAR_ORGANIZATION_ID'),
@@ -42,9 +42,9 @@ export class SubscriptionsService {
       throw new InternalServerErrorException();
     }
 
-    const hasNextPage = data.result.items.length > limit;
+    const hasNextPage = data.result.pagination.maxPage > page;
     const next = hasNextPage ? page + 1 : null;
-    const plans = data.result.items.slice(0, limit);
+    const plans = data.result.items;
 
     const transformed = plans.map((c) => {
       const { id, name, prices, description } = c;
