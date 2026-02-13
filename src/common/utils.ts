@@ -61,6 +61,10 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   FILES_WEBHOOKS_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  POLAR_WEBHOOK_SECRET: string;
 }
 
 export function validateConfig(config: Record<string, string>) {
