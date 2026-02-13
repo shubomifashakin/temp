@@ -32,7 +32,7 @@ describe('WebhooksService', () => {
 
   it('should handle file:validated event', async () => {
     await service.handleFileEvents({
-      data: { key: 'test-key', safe: true },
+      data: { key: 'test-key', infected: false },
       type: 'file:validated',
     });
 

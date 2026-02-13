@@ -35,10 +35,10 @@ export class FileDeletedEventPayload {
 export class FileValidatedEventPayload {
   @ApiProperty({
     example: true,
-    description: 'status of the validation, if it was safe or not',
+    description: 'status of the validation, if it was infected or not',
   })
-  @IsBoolean({ message: 'safe should be a boolean' })
-  safe: boolean;
+  @IsBoolean({ message: 'infected should be a boolean' })
+  infected: boolean;
 
   @ApiProperty({ description: 'The s3 key of the file' })
   @IsString({ message: 'key should be a string' })

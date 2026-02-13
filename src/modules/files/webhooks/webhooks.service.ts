@@ -23,7 +23,7 @@ export class WebhooksService {
           s3_key: validatedData.key,
         },
         data: {
-          status: validatedData.safe ? 'safe' : 'unsafe',
+          status: validatedData.infected ? 'unsafe' : 'safe',
         },
       });
 

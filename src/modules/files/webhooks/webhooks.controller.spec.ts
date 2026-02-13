@@ -37,7 +37,7 @@ describe('WebhooksController', () => {
 
   it('should handle file:validated event', async () => {
     await controller.handleEvent({
-      data: { key: 'test-key', safe: true },
+      data: { key: 'test-key', infected: true },
       type: 'file:validated',
     });
 
@@ -46,7 +46,7 @@ describe('WebhooksController', () => {
         s3_key: 'test-key',
       },
       data: {
-        status: 'safe',
+        status: 'unsafe',
       },
     });
   });
