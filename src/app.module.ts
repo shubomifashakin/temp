@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { FilesModule } from './modules/files/files.module';
 import { HealthModule } from './modules/health/health.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 
 import { S3Module } from './core/s3/s3.module';
 import { SqsModule } from './core/sqs/sqs.module';
@@ -176,6 +177,7 @@ import { validateConfig } from './common/utils';
     HealthModule,
     UsersModule,
     FilesModule,
+    SubscriptionsModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

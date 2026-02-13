@@ -9,7 +9,7 @@ export class WebhooksController {
   constructor(private readonly webhooksService: WebhooksService) {}
 
   @Post('polar')
-  handleEvent(@Body() dto: any, @Req() req: Request) {
-    this.webhooksService.handleEvent(dto, req.headers);
+  async handleEvent(@Body() dto: any, @Req() req: Request) {
+    return this.webhooksService.handleEvent(dto, req.headers);
   }
 }
