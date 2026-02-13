@@ -69,6 +69,10 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   POLAR_PRODUCT_PRO: string;
+
+  @IsString()
+  @IsNotEmpty()
+  POLAR_ACCESS_TOKEN: string;
 }
 
 export function validateConfig(config: Record<string, string>) {
