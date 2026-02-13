@@ -19,8 +19,6 @@ import {
 
 import { availablePolarPlans } from '../common/constants';
 
-import { Decimal } from '@prisma/client/runtime/index-browser';
-
 import { Order } from '@polar-sh/sdk/models/components/order';
 import { SubscriptionStatus } from '@polar-sh/sdk/models/components/subscriptionstatus';
 import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval';
@@ -202,7 +200,7 @@ export class WebhooksService {
         product_id: data.productId,
         plan_name: data.product?.name,
         plan: this.getPlanTier(data.productId),
-        amount: new Decimal(data.amount),
+        amount: data.amount,
         currency: data.currency,
         interval_count: data.recurringIntervalCount,
         interval: this.getInterval(data.recurringInterval),
@@ -270,9 +268,7 @@ export class WebhooksService {
           : null,
         cancel_at_period_end: data.subscription.cancelAtPeriodEnd || false,
 
-        amount: data.subscription.amount
-          ? new Decimal(data.subscription.amount)
-          : undefined,
+        amount: data.subscription.amount ? data.subscription.amount : undefined,
         currency: data.currency || undefined,
 
         product_id: data.subscription.productId,
