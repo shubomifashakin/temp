@@ -77,6 +77,12 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   POLAR_ORGANIZATION_ID: string;
+
+  @IsUrl()
+  CHECKOUT_SUCCESS_URL: string;
+
+  @IsUrl()
+  CHECKOUT_RETURN_URL: string;
 }
 
 export function validateConfig(config: Record<string, string>) {

@@ -64,9 +64,13 @@ export class PolarService {
   async createCheckout({
     productId,
     user,
+    successUrl,
+    returnUrl,
   }: {
-    user: { name: string; id: string; email: string };
     productId: string;
+    successUrl: string;
+    returnUrl: string;
+    user: { name: string; id: string; email: string };
   }): Promise<FnResult<{ url: string }>> {
     try {
       const res = await this.polar.checkouts.create({
@@ -79,6 +83,8 @@ export class PolarService {
         customerMetadata: {
           userId: user.id,
         },
+        successUrl,
+        returnUrl,
       });
 
       return { success: true, data: { url: res.url }, error: null };
