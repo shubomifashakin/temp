@@ -4,6 +4,7 @@ import {
   ApiBody,
   ApiCookieAuth,
   ApiOperation,
+  ApiQuery,
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
 import {
@@ -33,6 +34,12 @@ export class SubscriptionsController {
   //FIXME: DOCUMENT THIS
   @ApiOperation({ summary: 'Get Polar subscription plans' })
   @Get('plans/polar')
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'pagination cursor',
+    type: 'number',
+  })
   async getPolarPlans(
     @Query('cursor', new ParseIntPipe({ optional: true })) cursor?: number,
   ) {
