@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { Polar } from '@polar-sh/sdk';
+import { PageIterator } from '@polar-sh/sdk/types/operations.js';
+import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty.js';
+import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility.js';
+import { ProductsListResponse } from '@polar-sh/sdk/models/operations/productslist.js';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
@@ -18,6 +22,40 @@ export class PolarService {
           ? 'production'
           : 'sandbox',
     });
+  }
+
+  async getAvailableProducts({
+    organizationId,
+    limit,
+    sorting,
+    visibility,
+  }: {
+    organizationId: string;
+    limit?: number;
+    sorting: ProductSortProperty[];
+    visibility: ProductVisibility[];
+  }): Promise<
+    FnResult<
+      PageIterator<
+        ProductsListResponse,
+        {
+          page: number;
+        }
+      >
+    >
+  > {
+    try {
+      const products = await this.polar.products.list({
+        organizationId,
+        limit,
+        sorting,
+        visibility,
+      });
+
+      return { success: true, data: products, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
   }
 
   async createCheckout({

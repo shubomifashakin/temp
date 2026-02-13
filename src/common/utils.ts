@@ -73,6 +73,10 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   POLAR_ACCESS_TOKEN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  POLAR_ORGANIZATION_ID: string;
 }
 
 export function validateConfig(config: Record<string, string>) {
