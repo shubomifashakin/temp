@@ -3,7 +3,7 @@ import { IsDate, IsString, IsNumber, IsBoolean, IsEnum } from 'class-validator';
 
 import { FileStatus } from '../../../../generated/prisma/enums';
 
-export class ShareLinkDetailsDto {
+export class LinkDetailsDto {
   @ApiProperty({
     type: 'string',
     format: 'date-time',

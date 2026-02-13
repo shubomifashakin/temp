@@ -6,26 +6,41 @@ import {
   FileValidatedEventPayload,
 } from './common/dtos/file-events.dto';
 
+import { makeFileCacheKey } from '../common/utils';
+
+import { RedisService } from '../../../core/redis/redis.service';
 import { DatabaseService } from '../../../core/database/database.service';
 
 @Injectable()
 export class WebhooksService {
   logger = new Logger(WebhooksService.name);
 
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly databaseService: DatabaseService,
+  ) {}
 
   async handleFileEvents(dto: FileEventsDto) {
     if (dto.type === 'file:validated') {
       const validatedData = dto.data as FileValidatedEventPayload;
 
-      await this.databaseService.files.updateMany({
+      const data = await this.databaseService.file.update({
         where: {
           s3_key: validatedData.key,
         },
         data: {
-          status: validatedData.safe ? 'safe' : 'unsafe',
+          status: validatedData.infected ? 'unsafe' : 'safe',
         },
       });
+
+      const cached = await this.redisService.delete(makeFileCacheKey(data.id));
+
+      if (!cached.success) {
+        this.logger.error({
+          message: 'Failed to delete file from cache',
+          error: cached.error,
+        });
+      }
 
       return { message: 'success' };
     }
@@ -33,7 +48,7 @@ export class WebhooksService {
     if (dto.type === 'file:deleted') {
       const deletedData = dto.data as FileDeletedEventPayload;
 
-      await this.databaseService.files.updateMany({
+      await this.databaseService.file.updateMany({
         where: {
           s3_key: { in: deletedData.keys },
         },

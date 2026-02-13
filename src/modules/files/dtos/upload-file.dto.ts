@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 
-import { Files } from '../../../../generated/prisma/client';
+import { File } from '../../../../generated/prisma/client';
 
 import { LIFETIMES, type Lifetime } from '../common/constants';
 
-export class UploadFileDto implements Pick<Files, 'description'> {
+export class UploadFileDto implements Pick<File, 'description'> {
   @ApiProperty({
     minLength: 5,
     maxLength: 100,

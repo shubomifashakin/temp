@@ -19,14 +19,14 @@ import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
 
 const mockDatabaseService = {
-  files: {
+  file: {
     create: jest.fn(),
     findUniqueOrThrow: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     findMany: jest.fn(),
   },
-  shareLinks: {
+  link: {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -115,7 +115,7 @@ describe('FilesController', () => {
   it('should upload the file', async () => {
     mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
 
-    mockDatabaseService.files.create.mockResolvedValue({
+    mockDatabaseService.file.create.mockResolvedValue({
       id: '1',
     });
 
@@ -129,7 +129,7 @@ describe('FilesController', () => {
   });
 
   it('should get all files', async () => {
-    mockDatabaseService.files.findMany.mockResolvedValue([]);
+    mockDatabaseService.file.findMany.mockResolvedValue([]);
 
     const res = await controller.getFiles(mockRequest);
 
@@ -148,7 +148,7 @@ describe('FilesController', () => {
       error: null,
     });
 
-    mockDatabaseService.files.findUniqueOrThrow.mockResolvedValue({
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: '1',
       size: 200,
     });
@@ -170,9 +170,7 @@ describe('FilesController', () => {
       },
     };
 
-    mockDatabaseService.shareLinks.findUniqueOrThrow.mockResolvedValue(
-      resolvedValue,
-    );
+    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
     mockRedisService.get.mockResolvedValue({
       success: true,
@@ -192,15 +190,15 @@ describe('FilesController', () => {
       error: null,
     });
 
-    mockDatabaseService.shareLinks.update.mockResolvedValue(true);
+    mockDatabaseService.link.update.mockResolvedValue(true);
 
-    const testShareId = 'test-shared-id';
-    await controller.getSharedFile(
+    const testLinkId = 'test-link-id';
+    await controller.getLinkFile(
       mockResponse,
       {
         password: undefined,
       },
-      testShareId,
+      testLinkId,
     );
 
     // eslint-disable-next-line @typescript-eslint/unbound-method

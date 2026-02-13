@@ -20,10 +20,14 @@ export class CreateLinkDto {
   @MaxLength(100, { message: 'Description is too long' })
   description: string;
 
-  @ApiProperty({ description: 'The password for the file', required: false })
+  @ApiProperty({
+    description: 'The password for the file',
+    required: false,
+    minLength: 6,
+  })
   @IsString({ message: 'Invalid Password' })
   @IsOptional()
-  @IsStrongPassword({ minLength: 6 })
+  @IsStrongPassword({ minLength: 6, minSymbols: 0 })
   password?: string;
 
   @IsOptional()

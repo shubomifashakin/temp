@@ -1,15 +1,21 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { WebhooksService } from './webhooks.service';
 import { WebhooksController } from './webhooks.controller';
 
+import { RedisService } from '../../../core/redis/redis.service';
 import { DatabaseService } from '../../../core/database/database.service';
-import { ConfigModule } from '@nestjs/config';
 
 const mockDatabaseService = {
-  files: {
+  file: {
     updateMany: jest.fn(),
+    update: jest.fn(),
   },
+};
+
+const mockRedisService = {
+  delete: jest.fn(),
 };
 
 describe('WebhooksController', () => {
@@ -25,6 +31,10 @@ describe('WebhooksController', () => {
           provide: DatabaseService,
           useValue: mockDatabaseService,
         },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
+        },
       ],
     }).compile();
 
@@ -36,17 +46,28 @@ describe('WebhooksController', () => {
   });
 
   it('should handle file:validated event', async () => {
+    mockRedisService.delete.mockResolvedValue({
+      success: true,
+      error: null,
+    });
+
+    mockDatabaseService.file.update.mockResolvedValue({
+      id: 'test-id',
+      s3_key: 'test-key',
+      status: 'safe',
+    });
+
     await controller.handleEvent({
-      data: { key: 'test-key', safe: true },
+      data: { key: 'test-key', infected: true },
       type: 'file:validated',
     });
 
-    expect(mockDatabaseService.files.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.update).toHaveBeenCalledWith({
       where: {
         s3_key: 'test-key',
       },
       data: {
-        status: 'safe',
+        status: 'unsafe',
       },
     });
   });
@@ -65,7 +86,7 @@ describe('WebhooksController', () => {
       data: dto.data,
     });
 
-    expect(mockDatabaseService.files.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
       where: {
         s3_key: { in: ['test-key-1', 'test-key-2'] },
       },

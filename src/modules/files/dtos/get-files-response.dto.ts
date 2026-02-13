@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import {
-  IsString,
-  IsNumber,
-  IsDate,
-  IsOptional,
-  IsEnum,
-} from 'class-validator';
+import { IsString, IsNumber, IsDate, IsEnum } from 'class-validator';
 
 import { FileStatus } from '../../../../generated/prisma/enums';
 
@@ -26,13 +20,6 @@ class File {
   description: string;
 
   @ApiProperty({
-    description: 'Number of times the file has been viewed',
-    example: 1,
-  })
-  @IsNumber({}, { message: 'View count must be a number' })
-  view_count: number;
-
-  @ApiProperty({
     description: 'Date and time when the file expires',
     example: '2025-01-01T00:00:00.000Z',
   })
@@ -45,15 +32,6 @@ class File {
   })
   @IsNumber({}, { message: 'size must be a number' })
   size: number;
-
-  @ApiProperty({
-    nullable: true,
-    example: '2025-01-01T00:00:00.000Z',
-    description: 'the last time the file was accessed',
-  })
-  @IsDate({ message: 'last_accessed_at must be a date' })
-  @IsOptional()
-  last_accessed_at: Date | null;
 
   @ApiProperty({
     example: FileStatus.safe,

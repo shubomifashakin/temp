@@ -3,6 +3,6 @@ import { PickType } from '@nestjs/mapped-types';
 
 import { CreateLinkDto } from './create-link.dto';
 
-export class UpdateShareLinkDto extends PartialType(
+export class UpdateLinkDto extends PartialType(
   PickType(CreateLinkDto, ['description', 'expiresAt', 'password']),
 ) {}
