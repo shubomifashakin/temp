@@ -86,8 +86,8 @@ export class SubscriptionsService {
         name: user.name,
         email: user.email,
       },
-      successUrl: this.configService.getOrThrow('CHECKOUT_SUCCESS_URL'),
-      returnUrl: this.configService.getOrThrow('CHECKOUT_RETURN_URL'),
+      successUrl,
+      returnUrl,
     });
 
     if (!success || !data?.url) {
