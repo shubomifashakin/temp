@@ -28,10 +28,12 @@ export class PolarService {
     organizationId,
     limit,
     sorting,
+    page,
     visibility,
   }: {
     organizationId: string;
     limit?: number;
+    page?: number;
     sorting: ProductSortProperty[];
     visibility: ProductVisibility[];
   }): Promise<
@@ -49,6 +51,7 @@ export class PolarService {
         organizationId,
         limit,
         sorting,
+        page,
         visibility,
       });
 
