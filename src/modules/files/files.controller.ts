@@ -20,10 +20,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
-  ApiOperation,
   ApiParam,
   ApiQuery,
   ApiResponse,
+  ApiOperation,
+  ApiConsumes,
 } from '@nestjs/swagger';
 
 import { memoryStorage } from 'multer';
@@ -54,6 +55,35 @@ export class FilesController {
 
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'File upload data with metadata',
+    type: 'multipart/form-data',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'The file to upload',
+        },
+        description: {
+          type: 'string',
+          minLength: 5,
+          maxLength: 100,
+          description: 'The description of the file that was uploaded',
+          example: 'My yearbook photo',
+        },
+        lifetime: {
+          type: 'string',
+          enum: ['short', 'medium', 'long'],
+          description: 'How long the file should be stored',
+          example: 'long',
+        },
+      },
+      required: ['file', 'description', 'lifetime'],
+    },
+  })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
