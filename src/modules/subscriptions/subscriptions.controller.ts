@@ -33,7 +33,9 @@ export class SubscriptionsController {
   //FIXME: DOCUMENT THIS
   @ApiOperation({ summary: 'Get Polar subscription plans' })
   @Get('plans/polar')
-  async getPolarPlans(@Query('cursor', ParseIntPipe) cursor?: number) {
+  async getPolarPlans(
+    @Query('cursor', new ParseIntPipe({ optional: true })) cursor?: number,
+  ) {
     return this.subscriptionsService.getPolarPlans(cursor);
   }
 
