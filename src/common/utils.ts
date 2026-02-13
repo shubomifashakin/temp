@@ -65,6 +65,10 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   POLAR_WEBHOOK_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  POLAR_PRODUCT_PRO: string;
 }
 
 export function validateConfig(config: Record<string, string>) {
