@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { Polar } from '@polar-sh/sdk';
 import { PageIterator } from '@polar-sh/sdk/types/operations';
 import { Product } from '@polar-sh/sdk/models/components/product';
-import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty';
-import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility';
+import { PolarError } from '@polar-sh/sdk/models/errors/polarerror';
 import { ProductsListResponse } from '@polar-sh/sdk/models/operations/productslist';
+import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility';
+import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
-import { PolarError } from '@polar-sh/sdk/models/errors/polarerror.js';
 
 @Injectable()
 export class PolarService {
@@ -117,6 +117,27 @@ export class PolarService {
       return { success: true, data: { url: res.url }, error: null };
     } catch (error) {
       return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  async cancelSubscription({
+    id,
+    cancel,
+  }: {
+    id: string;
+    cancel: boolean;
+  }): Promise<FnResult<null>> {
+    try {
+      await this.polar.subscriptions.update({
+        id,
+        subscriptionUpdate: {
+          cancelAtPeriodEnd: cancel,
+        },
+      });
+
+      return { success: true, data: null, error: null };
+    } catch (error) {
+      return { success: false, error: makeError(error), data: null };
     }
   }
 }
