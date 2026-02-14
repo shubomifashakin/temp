@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { polarProductIdToPlan } from './common/constants';
+import { polarProductIdToPlan } from './common/utils';
 import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
 
@@ -60,19 +60,24 @@ export class SubscriptionsService {
       const amount = allFixedPrices[0].priceAmount;
       const currency = allFixedPrices[0].priceCurrency;
 
-      const {
-        features,
-        plan: planName,
-        interval: billingInterval,
-      } = polarProductIdToPlan(id, recurringInterval!);
+      const productInfo = polarProductIdToPlan(id, recurringInterval!);
+
+      if (!productInfo.success) {
+        this.logger.error({
+          error: productInfo.error,
+          message: 'Failed to get plan for product',
+        });
+
+        throw new InternalServerErrorException();
+      }
 
       return {
         id,
         amount,
         currency,
-        name: planName,
-        benefits: features,
-        interval: billingInterval,
+        name: productInfo.data.plan,
+        benefits: productInfo.data.benefits,
+        interval: productInfo.data.interval,
       };
     });
 
