@@ -137,7 +137,10 @@ export class SubscriptionsService {
       },
     });
 
-    if (user.subscriptions[0].status === 'ACTIVE') {
+    if (
+      user.subscriptions.length &&
+      user.subscriptions[0].status === 'ACTIVE'
+    ) {
       throw new BadRequestException('User already has an active subscription');
     }
 
