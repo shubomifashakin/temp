@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { Polar } from '@polar-sh/sdk';
-import { PageIterator } from '@polar-sh/sdk/types/operations.js';
-import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty.js';
-import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility.js';
-import { ProductsListResponse } from '@polar-sh/sdk/models/operations/productslist.js';
+import { PageIterator } from '@polar-sh/sdk/types/operations';
+import { Product } from '@polar-sh/sdk/models/components/product';
+import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty';
+import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility';
+import { ProductsListResponse } from '@polar-sh/sdk/models/operations/productslist';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
+import { PolarError } from '@polar-sh/sdk/models/errors/polarerror.js';
 
 @Injectable()
 export class PolarService {
@@ -57,6 +59,28 @@ export class PolarService {
 
       return { success: true, data: products, error: null };
     } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  async getProduct({
+    productId,
+  }: {
+    productId: string;
+  }): Promise<FnResult<Product | null>> {
+    try {
+      const product = await this.polar.products.get({ id: productId });
+
+      return { success: true, data: product, error: null };
+    } catch (error) {
+      if (error instanceof PolarError) {
+        if (error.statusCode === 404) {
+          return { success: true, data: null, error: null };
+        }
+
+        return { success: false, data: null, error: makeError(error) };
+      }
+
       return { success: false, data: null, error: makeError(error) };
     }
   }

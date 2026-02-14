@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
+  NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
 
@@ -77,6 +78,27 @@ export class SubscriptionsService {
       });
 
       throw new InternalServerErrorException();
+    }
+
+    const productExists = await this.polarService.getProduct({
+      productId: dto.productId,
+    });
+
+    if (!productExists.success) {
+      this.logger.error({
+        message: 'Failed to check if product exists',
+        error: productExists.error,
+      });
+
+      throw new InternalServerErrorException();
+    }
+
+    if (productExists.success && !productExists.data) {
+      this.logger.warn({
+        message: `Product with id: ${dto.productId} does not exist`,
+      });
+
+      throw new NotFoundException('Product does not exist');
     }
 
     const { success, data, error } = await this.polarService.createCheckout({
