@@ -43,7 +43,7 @@ export class SubscriptionsController {
     return this.subscriptionsService.cancelSubscription(req.user.id);
   }
 
-  @ApiOperation({ summary: 'Get Polar subscription plans' })
+  @ApiOperation({ summary: 'Get available polar subscription plans' })
   @ApiResponse({
     status: 200,
     type: PolarPlanResponseDto,
