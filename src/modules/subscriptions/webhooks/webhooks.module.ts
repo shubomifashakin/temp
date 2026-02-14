@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
+
 import { WebhooksController } from './webhooks.controller';
-import { WebhooksService } from './webhooks.service';
+import { PolarWebhooksService } from './polar-webhooks.service';
 
 import { DatabaseModule } from '../../../core/database/database.module';
 
 @Module({
   controllers: [WebhooksController],
-  providers: [WebhooksService],
+  providers: [PolarWebhooksService],
   imports: [DatabaseModule],
 })
 export class WebhooksModule {}

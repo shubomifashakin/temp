@@ -115,10 +115,9 @@ model Subscription {
   provider_customer_id     String
 
   product_id String 
-  plan_name  String? 
   plan       Plan    
 
-  amount   Decimal @db.Decimal(10, 2)
+  amount   Int
   currency String  
 
   interval       BillingInterval @default(MONTH)
@@ -133,6 +132,8 @@ model Subscription {
   trial_ends_at DateTime?
   cancelled_at  DateTime?
   ended_at      DateTime?
+
+  last_event_at DateTime
 
   cancel_at_period_end Boolean @default(false)
 
@@ -154,12 +155,7 @@ enum SubscriptionProvider {
 
 enum SubscriptionStatus {
   ACTIVE
-  CANCELED
-  TRIALING
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  PAUSED
-  ENDED
+  INACTIVE
 }
 
 enum Plan {

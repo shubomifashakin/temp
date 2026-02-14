@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WebhooksService } from './webhooks.service';
+import { PolarWebhooksService } from './polar-webhooks.service';
 
-describe('WebhooksService', () => {
-  let service: WebhooksService;
+describe('PolarWebhooksService', () => {
+  let service: PolarWebhooksService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WebhooksService],
+      providers: [PolarWebhooksService],
     }).compile();
 
-    service = module.get<WebhooksService>(WebhooksService);
+    service = module.get<PolarWebhooksService>(PolarWebhooksService);
   });
 
   it('should be defined', () => {
