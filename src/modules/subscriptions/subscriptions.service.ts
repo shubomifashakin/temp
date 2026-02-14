@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { polarProductIdToPlan } from './common/utils';
@@ -87,7 +88,18 @@ export class SubscriptionsService {
   async createPolarCheckout(userId: string, dto: CreatePolarCheckoutDto) {
     const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id: userId },
+      include: {
+        subscriptions: {
+          select: {
+            status: true,
+          },
+        },
+      },
     });
+
+    if (user.subscriptions[0].status === 'ACTIVE') {
+      throw new BadRequestException('User already has an active subscription');
+    }
 
     const returnUrl = this.configService.get<string>('CHECKOUT_RETURN_URL');
     const successUrl = this.configService.get<string>('CHECKOUT_SUCCESS_URL');
