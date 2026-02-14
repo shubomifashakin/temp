@@ -15,6 +15,7 @@ import {
   Body,
   Post,
   Query,
+  Delete,
   UseGuards,
   Controller,
   ParseIntPipe,
@@ -32,6 +33,15 @@ import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
+
+  @ApiOperation({
+    summary: 'Cancel a users active subscription once the period is over',
+  })
+  @ApiResponse({ description: 'subscription cancelled', status: 201 })
+  @Delete()
+  async cancelSubscription(@Req() req: Request) {
+    return this.subscriptionsService.cancelSubscription(req.user.id);
+  }
 
   @ApiOperation({ summary: 'Get Polar subscription plans' })
   @ApiResponse({

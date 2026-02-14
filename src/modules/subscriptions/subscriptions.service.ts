@@ -24,6 +24,42 @@ export class SubscriptionsService {
     private readonly databaseService: DatabaseService,
   ) {}
 
+  async cancelSubscription(userId: string) {
+    const subscription = await this.databaseService.subscription.findUnique({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        status: true,
+        provider: true,
+        provider_subscription_id: true,
+      },
+    });
+
+    if (!subscription) {
+      return { message: 'success' };
+    }
+
+    if (subscription.provider === 'POLAR') {
+      //FIXME: CONFIRM IF THIS TRIGGERS THE CANCELLED EVENT
+      const { success, error } = await this.polarService.cancelSubscription({
+        cancel: true,
+        id: subscription.provider_subscription_id,
+      });
+
+      if (!success) {
+        this.logger.error({
+          error,
+          message: 'Failed to cancel customers polar subscription',
+        });
+
+        throw new InternalServerErrorException();
+      }
+    }
+
+    return { message: 'success' };
+  }
+
   async getPolarPlans(cursor?: number): Promise<PolarPlanResponseDto> {
     const limit = 10;
     const page = cursor || 1;
