@@ -6,6 +6,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
+import { polarProductIdToPlan } from './common/constants';
+import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
 
 import { PolarService } from '../../core/polar/polar.service';
@@ -21,7 +23,7 @@ export class SubscriptionsService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async getPolarPlans(cursor?: number) {
+  async getPolarPlans(cursor?: number): Promise<PolarPlanResponseDto> {
     const limit = 10;
     const page = cursor || 1;
 
@@ -29,6 +31,7 @@ export class SubscriptionsService {
       await this.polarService.getAvailableProducts({
         page,
         limit,
+        isRecurring: true,
         visibility: ['public'],
         sorting: ['price_amount'],
         organizationId: this.configService.getOrThrow('POLAR_ORGANIZATION_ID'),
@@ -47,18 +50,33 @@ export class SubscriptionsService {
     const next = hasNextPage ? page + 1 : null;
     const plans = data.result.items;
 
-    const transformed = plans.map((c) => {
-      const { id, name, prices, description } = c;
+    const transformed = plans.map((plan) => {
+      const { id, prices, recurringInterval } = plan;
+
+      const allFixedPrices = prices.filter(
+        (price) => price.amountType === 'fixed',
+      );
+
+      const amount = allFixedPrices[0].priceAmount;
+      const currency = allFixedPrices[0].priceCurrency;
+
+      const {
+        features,
+        plan: planName,
+        interval: billingInterval,
+      } = polarProductIdToPlan(id, recurringInterval!);
 
       return {
         id,
-        name,
-        prices,
-        description,
+        amount,
+        currency,
+        name: planName,
+        benefits: features,
+        interval: billingInterval,
       };
     });
 
-    return { hasNextPage, next, data: transformed };
+    return { hasNextPage, cursor: next, data: transformed };
   }
 
   async createPolarCheckout(userId: string, dto: CreatePolarCheckoutDto) {

@@ -2,9 +2,10 @@ import { type Request, type Response } from 'express';
 
 import {
   ApiBody,
-  ApiCookieAuth,
-  ApiOperation,
   ApiQuery,
+  ApiResponse,
+  ApiOperation,
+  ApiCookieAuth,
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
 import {
@@ -24,6 +25,7 @@ import { SubscriptionsService } from './subscriptions.service';
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
@@ -31,15 +33,19 @@ import { AuthGuard } from '../../common/guards/auth.guard';
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
-  //FIXME: DOCUMENT THIS
   @ApiOperation({ summary: 'Get Polar subscription plans' })
-  @Get('plans/polar')
+  @ApiResponse({
+    status: 200,
+    type: PolarPlanResponseDto,
+    description: 'The available plans',
+  })
   @ApiQuery({
     name: 'cursor',
     required: false,
     description: 'pagination cursor',
     type: 'number',
   })
+  @Get('plans/polar')
   async getPolarPlans(
     @Query('cursor', new ParseIntPipe({ optional: true })) cursor?: number,
   ) {
