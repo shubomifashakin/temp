@@ -40,6 +40,10 @@ export class SubscriptionsService {
       return { message: 'success' };
     }
 
+    if (subscription.status !== 'ACTIVE') {
+      return { message: 'success' };
+    }
+
     if (subscription.provider === 'POLAR') {
       //FIXME: CONFIRM IF THIS TRIGGERS THE CANCELLED EVENT
       const { success, error } = await this.polarService.cancelSubscription({
