@@ -32,12 +32,14 @@ export class PolarService {
     sorting,
     page,
     visibility,
+    isRecurring,
   }: {
     organizationId: string;
     limit?: number;
     page?: number;
     sorting: ProductSortProperty[];
     visibility: ProductVisibility[];
+    isRecurring: boolean;
   }): Promise<
     FnResult<
       PageIterator<
@@ -55,6 +57,7 @@ export class PolarService {
         sorting,
         page,
         visibility,
+        isRecurring,
       });
 
       return { success: true, data: products, error: null };
