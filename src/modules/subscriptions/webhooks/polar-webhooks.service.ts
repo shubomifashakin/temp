@@ -80,7 +80,7 @@ export class PolarWebhooksService {
     try {
       const lastEvent = await this.databaseService.subscription.findUnique({
         where: {
-          id: subscriptionId,
+          provider_subscription_id: subscriptionId,
         },
         select: {
           last_event_at: true,
@@ -474,7 +474,7 @@ export class PolarWebhooksService {
         product_id: data.subscription.productId,
         interval_count: data.subscription.recurringIntervalCount,
         cancel_at_period_end: data.subscription.cancelAtPeriodEnd || false,
-        amount: data.subscription.amount ? data.subscription.amount : undefined,
+        amount: data.subscription.amount || data.totalAmount,
         current_period_start: data.subscription.currentPeriodStart
           ? new Date(data.subscription.currentPeriodStart)
           : new Date(),
