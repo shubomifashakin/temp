@@ -29,7 +29,9 @@ export function polarProductIdToPlan(
   if (!selectedPlan) {
     return {
       success: false,
-      error: new Error(`Plan for productId:${productId} does not exist`),
+      error: new Error(
+        `Plan does not exist for Polar product with id:${productId}`,
+      ),
       data: null,
     };
   }

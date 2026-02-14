@@ -58,7 +58,7 @@ export class SubscriptionsController {
   @Get('plans/polar')
   async getPolarPlans(
     @Query('cursor', new ParseIntPipe({ optional: true })) cursor?: number,
-  ) {
+  ): Promise<PolarPlanResponseDto> {
     return this.subscriptionsService.getPolarPlans(cursor);
   }
 
