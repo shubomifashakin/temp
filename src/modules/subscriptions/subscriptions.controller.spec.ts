@@ -22,7 +22,7 @@ import { Request, Response } from 'express';
 
 const mockDatabaseService = {
   subscription: {
-    findUnique: jest.fn(),
+    findFirst: jest.fn(),
   },
   user: {
     findUniqueOrThrow: jest.fn(),
@@ -95,10 +95,12 @@ describe('SubscriptionsController', () => {
   it('should cancel the subscription', async () => {
     const subId = 'test-sub-id';
 
-    mockDatabaseService.subscription.findUnique.mockResolvedValue({
+    mockDatabaseService.subscription.findFirst.mockResolvedValue({
       status: SubscriptionStatus.ACTIVE,
       provider: SubscriptionProvider.POLAR,
       provider_subscription_id: subId,
+      cancelled_at: null,
+      cancel_at_period_end: false,
     });
 
     mockPolarService.cancelSubscription.mockResolvedValue({
@@ -149,8 +151,9 @@ describe('SubscriptionsController', () => {
       name: 'Test User',
       emai: 'test@email.com',
       id: userId,
-      subscriptions: [{ status: SubscriptionStatus.INACTIVE }],
     });
+
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(null);
 
     mockPolarService.getProduct.mockResolvedValue({
       success: true,

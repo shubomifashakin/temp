@@ -21,7 +21,7 @@ import {
 
 const mockDatabaseService = {
   subscription: {
-    findUnique: jest.fn(),
+    findFirst: jest.fn(),
   },
   user: {
     findUniqueOrThrow: jest.fn(),
@@ -78,10 +78,12 @@ describe('SubscriptionsService', () => {
     const testUserId = 'test-user-id';
     const subId = 'test-sub-id';
 
-    mockDatabaseService.subscription.findUnique.mockResolvedValue({
+    mockDatabaseService.subscription.findFirst.mockResolvedValue({
       status: SubscriptionStatus.ACTIVE,
       provider: SubscriptionProvider.POLAR,
       provider_subscription_id: subId,
+      cancelled_at: null,
+      cancel_at_period_end: false,
     });
 
     mockPolarService.cancelSubscription.mockResolvedValue({
@@ -97,7 +99,7 @@ describe('SubscriptionsService', () => {
   it('should not cancel an non-existent subscription', async () => {
     const testUserId = 'test-user-id';
 
-    mockDatabaseService.subscription.findUnique.mockResolvedValue(null);
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(null);
 
     const response = await service.cancelSubscription(testUserId);
 
@@ -109,7 +111,7 @@ describe('SubscriptionsService', () => {
     const testUserId = 'test-user-id';
     const subId = 'test-sub-id';
 
-    mockDatabaseService.subscription.findUnique.mockResolvedValue({
+    mockDatabaseService.subscription.findFirst.mockResolvedValue({
       status: SubscriptionStatus.INACTIVE,
       provider: SubscriptionProvider.POLAR,
       provider_subscription_id: subId,
@@ -125,7 +127,7 @@ describe('SubscriptionsService', () => {
     const testUserId = 'test-user-id';
     const subId = 'test-sub-id';
 
-    mockDatabaseService.subscription.findUnique.mockResolvedValue({
+    mockDatabaseService.subscription.findFirst.mockResolvedValue({
       status: SubscriptionStatus.ACTIVE,
       provider: SubscriptionProvider.POLAR,
       provider_subscription_id: subId,
@@ -149,8 +151,9 @@ describe('SubscriptionsService', () => {
       name: 'Test User',
       emai: 'test@email.com',
       id: userId,
-      subscriptions: [{ status: SubscriptionStatus.INACTIVE }],
     });
+
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(null);
 
     mockPolarService.getProduct.mockResolvedValue({
       success: true,
@@ -181,8 +184,9 @@ describe('SubscriptionsService', () => {
       name: 'Test User',
       emai: 'test@email.com',
       id: userId,
-      subscriptions: [{ status: SubscriptionStatus.INACTIVE }],
     });
+
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(null);
 
     mockPolarService.getProduct.mockResolvedValue({
       success: true,
@@ -205,8 +209,9 @@ describe('SubscriptionsService', () => {
       name: 'Test User',
       emai: 'test@email.com',
       id: userId,
-      subscriptions: { status: SubscriptionStatus.ACTIVE },
     });
+
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(true);
 
     await expect(
       service.createPolarCheckout(userId, {
