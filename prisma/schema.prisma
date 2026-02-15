@@ -34,7 +34,7 @@ model User {
   files          File[]
   accounts       Accounts[]
   refresh_tokens RefreshToken[]
-  subscriptions  Subscription[]
+  subscriptions  Subscription?
 }
 
 model Accounts {
