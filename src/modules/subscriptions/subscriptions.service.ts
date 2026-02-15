@@ -32,6 +32,8 @@ export class SubscriptionsService {
       select: {
         status: true,
         provider: true,
+        cancelled_at: true,
+        cancel_at_period_end: true,
         provider_subscription_id: true,
       },
     });
@@ -40,7 +42,7 @@ export class SubscriptionsService {
       return { message: 'success' };
     }
 
-    if (subscription.status !== 'ACTIVE') {
+    if (subscription.status !== 'ACTIVE' || subscription.cancel_at_period_end) {
       return { message: 'success' };
     }
 
