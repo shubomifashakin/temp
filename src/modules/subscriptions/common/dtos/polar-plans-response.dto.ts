@@ -17,9 +17,15 @@ export class PolarPlan {
   @IsString({ message: 'id should be a string' })
   id: string;
 
-  @ApiProperty({ description: 'The amount the user would be charged' })
+  @ApiProperty({
+    description: 'The amount the user would be charged in dollars',
+  })
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Amount should be a number' })
-  amount: number;
+  amountInDollars: number;
+
+  @ApiProperty({ description: 'The amount the user would be charged in cents' })
+  @IsNumber({}, { message: 'Amount should be a number' })
+  amountInCents: number;
 
   @ApiProperty({
     example: 'usd',

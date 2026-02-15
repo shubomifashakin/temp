@@ -91,38 +91,47 @@ export class SubscriptionsService {
 
     const hasNextPage = data.result.pagination.maxPage > page;
     const next = hasNextPage ? page + 1 : null;
-    const plans = data.result.items;
+    const products = data.result.items;
 
-    //FIXME: PROPERLY HANDLE THIS
-    //FIXME: CONVERT THE PRICES TO A READBALE FORMAT FOR EASY DISPLAY ON FRONTEND
-    const transformed = plans.map((plan) => {
-      const { id, prices, recurringInterval } = plan;
-
-      const allFixedPrices = prices.filter(
-        (price) => price.amountType === 'fixed',
-      );
-
-      const amountInCents = allFixedPrices[0].priceAmount;
-      const currency = allFixedPrices[0].priceCurrency;
-
-      const productInfo = polarProductIdToPlan(id, recurringInterval!);
-
-      if (!productInfo.success) {
+    for (const product of products) {
+      if (!product.isRecurring || !product.recurringInterval) {
         this.logger.error({
-          error: productInfo.error,
-          message: 'Failed to get plan for product',
+          message: 'Products fetched are not subscription based products',
         });
 
         throw new InternalServerErrorException();
       }
 
+      const productInfo = polarProductIdToPlan(
+        product.id,
+        product.recurringInterval,
+      );
+
+      if (!productInfo.success) {
+        this.logger.error({
+          error: productInfo.error,
+          message: `Failed to map product:${product.id} to plan`,
+        });
+      }
+    }
+
+    const transformed = products.map((plan) => {
+      const { id, prices, recurringInterval } = plan;
+
+      const allFixedPrices = prices.filter((p) => p.amountType === 'fixed');
+      const amountInCents = allFixedPrices[0].priceAmount;
+      const currency = allFixedPrices[0].priceCurrency;
+
+      const productInfo = polarProductIdToPlan(id, recurringInterval!);
+
       return {
         id,
         currency,
-        name: productInfo.data.plan,
-        benefits: productInfo.data.benefits,
-        interval: productInfo.data.interval,
-        amount: centsToDollars(amountInCents),
+        name: productInfo.data!.plan,
+        benefits: productInfo.data!.benefits,
+        interval: productInfo.data!.interval,
+        amountInCents,
+        amountInDollars: centsToDollars(amountInCents),
       };
     });
 
