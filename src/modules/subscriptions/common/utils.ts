@@ -1,4 +1,4 @@
-import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval.js';
+import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval';
 
 import { benefits, mappedPolarIntervals } from './constants';
 
