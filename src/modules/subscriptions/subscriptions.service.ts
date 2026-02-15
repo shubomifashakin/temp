@@ -7,7 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { polarProductIdToPlan } from './common/utils';
+import { centsToDollars, polarProductIdToPlan } from './common/utils';
 import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
 
@@ -102,7 +102,7 @@ export class SubscriptionsService {
         (price) => price.amountType === 'fixed',
       );
 
-      const amount = allFixedPrices[0].priceAmount;
+      const amountInCents = allFixedPrices[0].priceAmount;
       const currency = allFixedPrices[0].priceCurrency;
 
       const productInfo = polarProductIdToPlan(id, recurringInterval!);
@@ -118,11 +118,11 @@ export class SubscriptionsService {
 
       return {
         id,
-        amount,
         currency,
         name: productInfo.data.plan,
         benefits: productInfo.data.benefits,
         interval: productInfo.data.interval,
+        amount: centsToDollars(amountInCents),
       };
     });
 
