@@ -68,7 +68,7 @@ export class SubscriptionsController {
   @Post('checkout/polar')
   async createPolarCheckout(
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
     @Body() dto: CreatePolarCheckoutDto,
   ) {
     const result = await this.subscriptionsService.createPolarCheckout(
