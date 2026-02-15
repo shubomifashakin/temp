@@ -24,9 +24,9 @@ import {
 import { SubscriptionsService } from './subscriptions.service';
 
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
+import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
-import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
