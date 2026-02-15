@@ -1,38 +1,32 @@
 import { Request } from 'express';
-import { ConfigService } from '@nestjs/config';
 import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
-import { validateEvent } from '@polar-sh/sdk/webhooks';
-import { Order } from '@polar-sh/sdk/models/components/order.js';
-import { Subscription } from '@polar-sh/sdk/models/components/subscription.js';
+import { PolarService } from '../../../../core/polar/polar.service';
 
 @Injectable()
 export class PolarGuard implements CanActivate {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly polarService: PolarService) {}
 
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
-    const polarSecret = this.configService.get<string>('POLAR_WEBHOOK_SECRET');
 
-    if (!polarSecret) {
-      throw new InternalServerErrorException();
+    const { success, data } = this.polarService.validateWebhookEvent(request);
+
+    if (!success) {
+      throw new UnauthorizedException();
     }
 
-    const { type, data, timestamp } = validateEvent(
-      JSON.stringify(request.body),
-      request.headers as Record<string, string>,
-      polarSecret,
-    );
+    const { timestamp, type, data: eventData } = data;
 
     request.polarEvent = {
       type,
-      data: data as Order | Subscription,
       timestamp,
+      data: eventData,
     };
 
     return true;

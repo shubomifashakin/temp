@@ -1,13 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
+import {
+  Logger,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import { Polar } from '@polar-sh/sdk';
+import { validateEvent } from '@polar-sh/sdk/webhooks';
 import { PageIterator } from '@polar-sh/sdk/types/operations';
+import { Order } from '@polar-sh/sdk/models/components/order';
 import { Product } from '@polar-sh/sdk/models/components/product';
 import { PolarError } from '@polar-sh/sdk/models/errors/polarerror';
+import { Subscription } from '@polar-sh/sdk/models/components/subscription';
 import { ProductsListResponse } from '@polar-sh/sdk/models/operations/productslist';
 import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility';
 import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty';
+import { EventType } from '@polar-sh/sdk/models/operations/webhookslistwebhookdeliveries.js';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
@@ -15,6 +24,7 @@ import { FnResult } from '../../types/common.types';
 @Injectable()
 export class PolarService {
   private readonly polar: Polar;
+  private readonly logger = new Logger(PolarService.name);
 
   constructor(private readonly configService: ConfigService) {
     this.polar = new Polar({
@@ -136,6 +146,41 @@ export class PolarService {
       });
 
       return { success: true, data: null, error: null };
+    } catch (error) {
+      return { success: false, error: makeError(error), data: null };
+    }
+  }
+
+  validateWebhookEvent(request: Request): FnResult<{
+    timestamp: Date;
+    type: EventType;
+    data: Order | Subscription;
+  }> {
+    try {
+      const polarSecret = this.configService.get<string>(
+        'POLAR_WEBHOOK_SECRET',
+      );
+
+      if (!polarSecret) {
+        this.logger.error({
+          error: new Error('Polar webhooke secret is not set'),
+          message: 'Polar webhook secret is absent',
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      const { type, data, timestamp } = validateEvent(
+        JSON.stringify(request.body),
+        request.headers as Record<string, string>,
+        polarSecret,
+      );
+
+      return {
+        success: true,
+        error: null,
+        data: { timestamp, type, data: data as Order | Subscription },
+      };
     } catch (error) {
       return { success: false, error: makeError(error), data: null };
     }
