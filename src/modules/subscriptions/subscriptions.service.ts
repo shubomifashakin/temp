@@ -93,6 +93,8 @@ export class SubscriptionsService {
     const next = hasNextPage ? page + 1 : null;
     const plans = data.result.items;
 
+    //FIXME: PROPERLY HANDLE THIS
+    //FIXME: CONVERT THE PRICES TO A READBALE FORMAT FOR EASY DISPLAY ON FRONTEND
     const transformed = plans.map((plan) => {
       const { id, prices, recurringInterval } = plan;
 
