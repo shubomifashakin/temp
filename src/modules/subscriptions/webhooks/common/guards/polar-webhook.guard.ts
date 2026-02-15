@@ -6,10 +6,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { PolarService } from '../../../../core/polar/polar.service';
+import { PolarService } from '../../../../../core/polar/polar.service';
 
 @Injectable()
-export class PolarGuard implements CanActivate {
+export class PolarWebhookGuard implements CanActivate {
   constructor(private readonly polarService: PolarService) {}
 
   canActivate(context: ExecutionContext) {

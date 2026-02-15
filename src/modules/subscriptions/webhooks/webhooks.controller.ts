@@ -12,7 +12,7 @@ import {
 
 import { PolarWebhooksService } from './polar-webhooks.service';
 
-import { PolarGuard } from '../common/guards/polar.guard';
+import { PolarWebhookGuard } from './common/guards/polar-webhook.guard';
 
 @Controller('webhooks/subscriptions')
 export class WebhooksController {
@@ -20,7 +20,7 @@ export class WebhooksController {
 
   constructor(private readonly polarWebhooksService: PolarWebhooksService) {}
 
-  @UseGuards(PolarGuard)
+  @UseGuards(PolarWebhookGuard)
   @ApiOperation({ summary: 'handles webhook events from polar' })
   @ApiResponse({ status: 201, description: 'event handled successfully' })
   @Post('polar')
