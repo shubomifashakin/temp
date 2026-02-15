@@ -239,35 +239,20 @@ export class PolarWebhooksService {
           ? new Date(data.currentPeriodEnd)
           : null,
         cancel_at_period_end: data.cancelAtPeriodEnd || false,
-        ended_at: new Date(),
+        ended_at: data.endedAt || new Date(),
         last_event_at: timestamp,
       },
       update: {
         status: 'INACTIVE',
         provider: 'POLAR',
         product_id: data.productId,
-        ended_at: new Date(),
+        ended_at: data.endedAt,
         last_event_at: timestamp,
       },
     });
   }
 
   private async handleSubscriptionActive(data: Subscription, timestamp: Date) {
-    const {
-      error,
-      success,
-      data: details,
-    } = polarProductIdToPlan(data.productId, data.recurringInterval);
-
-    if (!success) {
-      this.logger.error({
-        message: 'Failed to map product id to a valid plan',
-        error,
-      });
-
-      throw new InternalServerErrorException();
-    }
-
     const eventIsOld = await this.isOldEvent(data.id, timestamp);
 
     if (!eventIsOld.success) {
@@ -285,6 +270,21 @@ export class PolarWebhooksService {
       });
 
       return;
+    }
+
+    const {
+      error,
+      success,
+      data: details,
+    } = polarProductIdToPlan(data.productId, data.recurringInterval);
+
+    if (!success) {
+      this.logger.error({
+        message: 'Failed to map product id to a valid plan',
+        error,
+      });
+
+      throw new InternalServerErrorException();
     }
 
     await this.databaseService.subscription.upsert({
