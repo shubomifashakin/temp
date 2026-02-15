@@ -36,6 +36,8 @@ export class SubscriptionsController {
 
   @ApiOperation({
     summary: 'Cancel a users active subscription once the period is over',
+    description:
+      'Cancel a users active subscription once the period is over, it is idempotent',
   })
   @ApiResponse({ description: 'subscription cancelled', status: 201 })
   @Delete()
