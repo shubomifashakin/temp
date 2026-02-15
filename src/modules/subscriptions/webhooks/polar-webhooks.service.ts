@@ -1,5 +1,3 @@
-import { IncomingHttpHeaders } from 'http';
-
 import { ConfigService } from '@nestjs/config';
 import {
   Logger,
@@ -7,9 +5,9 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { validateEvent } from '@polar-sh/sdk/webhooks';
 import { Order } from '@polar-sh/sdk/models/components/order';
 import { Subscription } from '@polar-sh/sdk/models/components/subscription';
+import { EventType } from '@polar-sh/sdk/models/operations/webhookslistwebhookdeliveries';
 
 import { polarProductIdToPlan } from '../common/utils';
 import { DatabaseService } from '../../../core/database/database.service';
@@ -26,48 +24,48 @@ export class PolarWebhooksService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async handleEvent(dto: any, headers: IncomingHttpHeaders) {
+  async handleEvent(
+    type: EventType,
+    data: Subscription | Order,
+    timestamp: Date,
+  ) {
     const polarSecret = this.configService.get<string>('POLAR_WEBHOOK_SECRET');
 
     if (!polarSecret) {
       throw new InternalServerErrorException();
     }
 
-    //FIXME: IMPLEMENT ERROR FILTER FOR WebhookVerificationError
-    const { type, data, timestamp } = validateEvent(
-      JSON.stringify(dto),
-      headers as Record<string, string>,
-      polarSecret,
-    );
-
-    this.logger.verbose({
+    this.logger.log({
       message: 'Polar event received',
       data,
     });
 
     switch (type) {
       case 'subscription.revoked':
-        await this.handleSubscriptionRevoked(data, timestamp);
+        await this.handleSubscriptionRevoked(data as Subscription, timestamp);
         break;
 
       case 'subscription.active':
-        await this.handleSubscriptionActive(data, timestamp);
+        await this.handleSubscriptionActive(data as Subscription, timestamp);
         break;
 
       case 'subscription.canceled':
-        await this.handleSubscriptionCancelled(data, timestamp);
+        await this.handleSubscriptionCancelled(data as Subscription, timestamp);
         break;
 
       case 'subscription.uncanceled':
-        await this.handleSubscriptionUncanceled(data, timestamp);
+        await this.handleSubscriptionUncanceled(
+          data as Subscription,
+          timestamp,
+        );
         break;
 
       case 'order.created':
-        await this.handleOrderCreated(data, timestamp);
+        await this.handleOrderCreated(data as Order, timestamp);
         break;
 
       default:
-        this.logger.warn(`Unhandled webhook type: ${type}`);
+        this.logger.warn(`Unhandled webhook type: ${type as string}`);
     }
 
     return { message: 'success' };
@@ -148,7 +146,7 @@ export class PolarWebhooksService {
         provider_subscription_id: data.id,
       },
       create: {
-        user_id: data.metadata.user_id as string,
+        user_id: data.metadata.userId as string,
         provider: 'POLAR',
         plan: details.plan,
         amount: data.amount,
@@ -224,7 +222,7 @@ export class PolarWebhooksService {
         provider_subscription_id: data.id,
       },
       create: {
-        user_id: data.metadata.user_id as string,
+        user_id: data.metadata.userId as string,
         provider: 'POLAR',
         plan: details.plan,
         status: 'INACTIVE',
@@ -303,7 +301,7 @@ export class PolarWebhooksService {
         interval: details.interval,
         provider_subscription_id: data.id,
         provider_customer_id: data.customerId,
-        user_id: data.metadata.user_id as string,
+        user_id: data.metadata.userId as string,
         started_at: data.startedAt || new Date(),
         interval_count: data.recurringIntervalCount,
         current_period_start: data.currentPeriodStart,
@@ -382,7 +380,7 @@ export class PolarWebhooksService {
         product_id: data.productId,
         provider_subscription_id: data.id,
         provider_customer_id: data.customerId,
-        user_id: data.metadata.user_id as string,
+        user_id: data.metadata.userId as string,
         interval_count: data.recurringIntervalCount,
         started_at: data.startedAt || new Date(),
         current_period_start: data.currentPeriodStart,
