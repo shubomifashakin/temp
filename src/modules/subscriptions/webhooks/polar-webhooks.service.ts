@@ -17,7 +17,7 @@ import { FnResult } from '../../../types/common.types';
 
 @Injectable()
 export class PolarWebhooksService {
-  logger = new Logger(PolarWebhooksService.name);
+  private readonly logger = new Logger(PolarWebhooksService.name);
 
   constructor(
     private readonly configService: ConfigService,
