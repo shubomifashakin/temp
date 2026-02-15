@@ -38,11 +38,11 @@ export class SubscriptionsService {
       },
     });
 
-    if (!subscription) {
-      return { message: 'success' };
-    }
-
-    if (subscription.status !== 'ACTIVE' || subscription.cancel_at_period_end) {
+    if (
+      !subscription ||
+      subscription.status !== 'ACTIVE' ||
+      subscription.cancel_at_period_end
+    ) {
       return { message: 'success' };
     }
 
