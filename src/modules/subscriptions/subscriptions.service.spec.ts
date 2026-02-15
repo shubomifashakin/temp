@@ -205,7 +205,7 @@ describe('SubscriptionsService', () => {
       name: 'Test User',
       emai: 'test@email.com',
       id: userId,
-      subscriptions: [{ status: SubscriptionStatus.ACTIVE }],
+      subscriptions: { status: SubscriptionStatus.ACTIVE },
     });
 
     await expect(
@@ -223,7 +223,14 @@ describe('SubscriptionsService', () => {
     const result = {
       result: {
         pagination: { maxPagee: 1 },
-        items: [{ id: 'test-value', recurringInterval: 'day', prices }],
+        items: [
+          {
+            id: 'test-value',
+            recurringInterval: 'day',
+            prices,
+            isRecurring: true,
+          },
+        ],
       },
     };
 
@@ -235,5 +242,6 @@ describe('SubscriptionsService', () => {
 
     const res = await service.getPolarPlans();
     expect(res.data).toHaveLength(1);
+    expect(res.data[0].amountInDollars).toBe(0.2);
   });
 });
