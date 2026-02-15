@@ -7,6 +7,7 @@ import {
   ApiOperation,
   ApiCookieAuth,
   ApiTemporaryRedirectResponse,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import {
   Get,
@@ -67,6 +68,9 @@ export class SubscriptionsController {
   @ApiOperation({ summary: 'Create Polar checkout' })
   @ApiBody({ type: CreatePolarCheckoutDto })
   @ApiTemporaryRedirectResponse({ description: 'Redirect to Polar checkout' })
+  @ApiBadRequestResponse({
+    description: 'User already has an active subscription',
+  })
   @Post('checkout/polar')
   async createPolarCheckout(
     @Req() req: Request,
