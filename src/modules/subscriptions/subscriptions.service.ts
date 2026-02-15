@@ -25,9 +25,10 @@ export class SubscriptionsService {
   ) {}
 
   async cancelSubscription(userId: string) {
-    const subscription = await this.databaseService.subscription.findUnique({
+    const subscription = await this.databaseService.subscription.findFirst({
       where: {
         user_id: userId,
+        status: 'ACTIVE',
       },
       select: {
         status: true,
@@ -35,6 +36,9 @@ export class SubscriptionsService {
         cancelled_at: true,
         cancel_at_period_end: true,
         provider_subscription_id: true,
+      },
+      orderBy: {
+        last_event_at: 'desc',
       },
     });
 
@@ -47,7 +51,6 @@ export class SubscriptionsService {
     }
 
     if (subscription.provider === 'POLAR') {
-      //FIXME: CONFIRM IF THIS TRIGGERS THE CANCELLED EVENT
       const { success, error } = await this.polarService.cancelSubscription({
         cancel: true,
         id: subscription.provider_subscription_id,
@@ -141,16 +144,20 @@ export class SubscriptionsService {
   async createPolarCheckout(userId: string, dto: CreatePolarCheckoutDto) {
     const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id: userId },
-      include: {
-        subscriptions: {
-          select: {
-            status: true,
-          },
-        },
-      },
     });
 
-    if (user.subscriptions && user.subscriptions.status === 'ACTIVE') {
+    const hasActiveSubscription =
+      await this.databaseService.subscription.findFirst({
+        where: {
+          status: 'ACTIVE',
+          user_id: userId,
+        },
+        orderBy: {
+          last_event_at: 'desc',
+        },
+      });
+
+    if (hasActiveSubscription) {
       throw new BadRequestException('User already has an active subscription');
     }
 

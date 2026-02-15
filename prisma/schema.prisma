@@ -34,7 +34,7 @@ model User {
   files          File[]
   accounts       Accounts[]
   refresh_tokens RefreshToken[]
-  subscriptions  Subscription?
+  subscriptions  Subscription[]
 }
 
 model Accounts {
@@ -107,7 +107,7 @@ model Link {
 model Subscription {
   id String @id @default(uuid())
 
-  user_id String @unique
+  user_id String 
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   provider                 SubscriptionProvider
@@ -142,6 +142,8 @@ model Subscription {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+
+  @@unique(name: "subscriptions_provider_id_user_id_unique",fields:[provider_subscription_id,user_id])
   @@index(name: "subscriptions_user_id_idx", fields: [user_id])
   @@index(name: "subscriptions_provider_subscription_id_idx", fields: [provider_subscription_id])
   @@index(name: "subscriptions_provider_provider_customer_id_idx", fields: [provider, provider_customer_id])
