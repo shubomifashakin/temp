@@ -16,7 +16,7 @@ export function UploadFile() {
         },
         fileFilter: (_, file, cb) => {
           if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-            return cb(null, false);
+            return cb(new Error('Unsupported file type'), false);
           }
 
           return cb(null, true);
