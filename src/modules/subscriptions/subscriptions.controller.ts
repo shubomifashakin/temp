@@ -8,6 +8,7 @@ import {
   ApiCookieAuth,
   ApiTemporaryRedirectResponse,
   ApiBadRequestResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import {
   Get,
@@ -37,10 +38,10 @@ export class SubscriptionsController {
 
   @ApiOperation({
     summary: 'Cancel a users active subscription once the period is over',
-    description:
-      'Cancel a users active subscription once the period is over, it is idempotent',
+    description: `Cancel a users active subscription once the period is over, it is idempotent. 
+      The users subscription would remain active until its expiry`,
   })
-  @ApiResponse({ description: 'subscription cancelled', status: 201 })
+  @ApiResponse({ description: 'Subscription cancelled', status: 201 })
   @Delete()
   async cancelSubscription(@Req() req: Request) {
     return this.subscriptionsService.cancelSubscription(req.user.id);
@@ -67,9 +68,12 @@ export class SubscriptionsController {
 
   @ApiOperation({ summary: 'Create Polar checkout' })
   @ApiBody({ type: CreatePolarCheckoutDto })
-  @ApiTemporaryRedirectResponse({ description: 'Redirect to Polar checkout' })
+  @ApiTemporaryRedirectResponse({ description: 'Redirects to Polar checkout' })
   @ApiBadRequestResponse({
     description: 'User already has an active subscription',
+  })
+  @ApiNotFoundResponse({
+    description: 'The product that was being checkouted does not exist.',
   })
   @Post('checkout/polar')
   async createPolarCheckout(

@@ -16,7 +16,7 @@ import { PolarWebhookGuard } from './common/guards/polar-webhook.guard';
 
 @Controller('webhooks/subscriptions')
 export class WebhooksController {
-  logger = new Logger(WebhooksController.name);
+  private readonly logger = new Logger(WebhooksController.name);
 
   constructor(private readonly polarWebhooksService: PolarWebhooksService) {}
 

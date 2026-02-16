@@ -16,7 +16,7 @@ import { DatabaseService } from '../../core/database/database.service';
 
 @Injectable()
 export class SubscriptionsService {
-  logger = new Logger(SubscriptionsService.name);
+  private readonly logger = new Logger(SubscriptionsService.name);
 
   constructor(
     private readonly polarService: PolarService,
