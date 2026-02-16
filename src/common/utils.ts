@@ -57,32 +57,6 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   REDIS_URL: string;
-
-  @IsString()
-  @IsNotEmpty()
-  FILES_WEBHOOKS_SECRET: string;
-
-  @IsString()
-  @IsNotEmpty()
-  POLAR_WEBHOOK_SECRET: string;
-
-  @IsString()
-  @IsNotEmpty()
-  POLAR_PRODUCT_PRO: string;
-
-  @IsString()
-  @IsNotEmpty()
-  POLAR_ACCESS_TOKEN: string;
-
-  @IsString()
-  @IsNotEmpty()
-  POLAR_ORGANIZATION_ID: string;
-
-  @IsUrl()
-  CHECKOUT_SUCCESS_URL: string;
-
-  @IsUrl()
-  CHECKOUT_RETURN_URL: string;
 }
 
 export function validateConfig(config: Record<string, string>) {

@@ -116,7 +116,6 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
   async onModuleDestroy() {
     try {
       await this.client.quit();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {
       this.client.destroy();
     }

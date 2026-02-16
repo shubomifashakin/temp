@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { CachedUserInfo } from './dtos/user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
+import { CachedUserInfo } from './entities/user.dto';
+import { UpdateUserDto } from './entities/update-user.dto';
 
 import { RedisService } from '../../core/redis/redis.service';
 import { DatabaseService } from '../../core/database/database.service';

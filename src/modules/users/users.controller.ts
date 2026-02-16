@@ -16,8 +16,8 @@ import {
 
 import { UsersService } from './users.service';
 
-import { CachedUserInfo } from './dtos/user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
+import { CachedUserInfo } from './entities/user.dto';
+import { UpdateUserDto } from './entities/update-user.dto';
 
 import { TOKEN } from '../../common/constants';
 import { AuthGuard } from '../../common/guards/auth.guard';
