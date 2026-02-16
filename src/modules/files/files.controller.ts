@@ -10,12 +10,14 @@ import {
   Patch,
   Query,
   Delete,
+  Logger,
   HttpCode,
   UseGuards,
   Controller,
   UploadedFile,
   ParseUUIDPipe,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -50,6 +52,7 @@ import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 @UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
+  private readonly logger = new Logger(FilesController.name);
   constructor(private readonly filesService: FilesService) {}
 
   @UseGuards(SubscriptionGuard)
@@ -93,15 +96,23 @@ export class FilesController {
     @Body() body: UploadFileDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!PLAN_INFO[req.user.plan!].ALLOWED_LIFETIMES.includes(body.lifetime)) {
+    if (!req.user.plan) {
+      this.logger.error({
+        message: 'User plan is undefined',
+        error: new Error('User plan was not attached to request'),
+      });
+      throw new InternalServerErrorException();
+    }
+
+    if (!PLAN_INFO[req.user.plan].ALLOWED_LIFETIMES.includes(body.lifetime)) {
       throw new BadRequestException(
         `${req.user.plan} users cannot upload files with ${body.lifetime} lifetime`,
       );
     }
 
-    if (file.size > PLAN_INFO[req.user.plan!].MAX_FILE_SIZE_BYTES) {
+    if (file.size > PLAN_INFO[req.user.plan].MAX_FILE_SIZE_BYTES) {
       throw new BadRequestException(
-        `${req.user.plan} users cannot upload files larger than ${PLAN_INFO[req.user.plan!].MAX_FILE_SIZE_MB}MB`,
+        `${req.user.plan} users cannot upload files larger than ${PLAN_INFO[req.user.plan].MAX_FILE_SIZE_MB}MB`,
       );
     }
 
