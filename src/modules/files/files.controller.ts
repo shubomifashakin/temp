@@ -18,6 +18,7 @@ import {
   ParseUUIDPipe,
   BadRequestException,
   InternalServerErrorException,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -37,6 +38,7 @@ import { UploadFileDto } from './dtos/upload-file.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
+import { SubscriptionPlanInterceptor } from '../../common/interceptors/subscription.interceptor';
 
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
@@ -47,7 +49,6 @@ import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 import { UploadFile } from './common/decorators/upload-file.decorator';
-import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -55,7 +56,7 @@ export class FilesController {
   private readonly logger = new Logger(FilesController.name);
   constructor(private readonly filesService: FilesService) {}
 
-  @UseGuards(SubscriptionGuard)
+  @UseInterceptors(SubscriptionPlanInterceptor)
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
   @ApiBadRequestResponse({ description: 'Bad request' })
