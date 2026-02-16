@@ -13,36 +13,161 @@ enum Provider {
   google
 }
 
+enum FileStatus {
+  safe
+  unsafe
+  pending
+}
+
+enum SubscriptionProviders {
+  polar
+}
+
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  name String
-  picture String?
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String
+  picture    String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  accounts Accounts[]
+  files          File[]
+  accounts       Accounts[]
   refresh_tokens RefreshToken[]
+  subscriptions  Subscription[]
 }
 
 model Accounts {
-  id String @id @default(uuid())
-  user_id String
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider Provider
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  provider    Provider
   provider_id String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   @@index(name: "accounts_user_id_idx", fields: [user_id])
 }
 
 model RefreshToken {
-  id String @id @default(uuid())
-  user_id String
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  token_id String @unique
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token_id   String   @unique
   expires_at DateTime
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@index(name: "refresh_tokens_user_id_idx", fields: [user_id])
+}
+
+model File {
+  id          String @id @default(uuid())
+  description String @db.VarChar(100)
+  s3_key      String @unique
+
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+  expires_at DateTime
+  size       Int
+  status     FileStatus @default(pending)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  links Link[]
+
+  @@index(name: "files_user_id_idx", fields: [user_id])
+}
+
+model Link {
+  id String @id @default(nanoid(13))
+
+  click_count Int @default(0)
+
+  description String @db.VarChar(100)
+
+  file_id String
+  file    File   @relation(fields: [file_id], references: [id], onDelete: Cascade)
+
+  last_accessed_at DateTime?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  revoked_at DateTime?
+  expires_at DateTime?
+
+  password String?
+
+  @@unique(name: "id_file_id_unique", [id, file_id])
+  @@index(name: "file_id_idx", fields: [file_id])
+}
+
+model Subscription {
+  id String @id @default(uuid())
+
+  user_id String 
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  provider                 SubscriptionProvider
+  provider_subscription_id String               @unique 
+  provider_customer_id     String
+
+  product_id String 
+  plan       Plan    
+
+  amount   Int
+  currency String  
+
+  interval       BillingInterval @default(MONTH)
+  interval_count Int             @default(1)
+
+  status SubscriptionStatus @default(ACTIVE)
+
+  started_at           DateTime
+  current_period_start DateTime
+  current_period_end   DateTime?
+
+  trial_ends_at DateTime?
+  cancelled_at  DateTime?
+  ended_at      DateTime?
+
+  last_event_at DateTime
+
+  cancel_at_period_end Boolean @default(false)
+
+  metadata Json?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+
+  @@unique(name: "subscriptions_provider_id_user_id_unique",fields:[provider_subscription_id,user_id])
+  @@index(name: "subscriptions_user_id_idx", fields: [user_id])
+  @@index(name: "subscriptions_provider_subscription_id_idx", fields: [provider_subscription_id])
+  @@index(name: "subscriptions_provider_provider_customer_id_idx", fields: [provider, provider_customer_id])
+  @@index(name: "subscriptions_status_idx", fields: [status])
+  @@map("subscriptions")
+}
+
+enum SubscriptionProvider {
+  POLAR
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum BillingInterval {
+  DAY
+  WEEK
+  MONTH
+  YEAR
 }
