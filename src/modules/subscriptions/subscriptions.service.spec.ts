@@ -170,7 +170,7 @@ describe('SubscriptionsService', () => {
     });
 
     const res = await service.createPolarCheckout(userId, {
-      productId: testProductId,
+      product_id: testProductId,
     });
 
     expect(res.url).toEqual(checkoutUrl);
@@ -196,7 +196,7 @@ describe('SubscriptionsService', () => {
 
     await expect(
       service.createPolarCheckout(userId, {
-        productId: testProductId,
+        product_id: testProductId,
       }),
     ).rejects.toThrow(NotFoundException);
   });
@@ -215,7 +215,7 @@ describe('SubscriptionsService', () => {
 
     await expect(
       service.createPolarCheckout(userId, {
-        productId: testProductId,
+        product_id: testProductId,
       }),
     ).rejects.toThrow(BadRequestException);
   });
@@ -247,6 +247,6 @@ describe('SubscriptionsService', () => {
 
     const res = await service.getPolarPlans();
     expect(res.data).toHaveLength(1);
-    expect(res.data[0].amountInDollars).toBe(0.2);
+    expect(res.data[0].amount_in_dollars).toBe(0.2);
   });
 });

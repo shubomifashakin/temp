@@ -21,13 +21,20 @@ export class CreateLinkDto {
   description: string;
 
   @ApiProperty({
-    description: 'The password for the file',
+    description:
+      'The password for the file. It must contain at least 6 characters, including at least one uppercase letter, one lowercase letter, and one number.',
     required: false,
     minLength: 6,
   })
   @IsString({ message: 'Invalid Password' })
   @IsOptional()
-  @IsStrongPassword({ minLength: 6, minSymbols: 0 })
+  @IsStrongPassword({
+    minLength: 6,
+    minSymbols: 0,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+  })
   password?: string;
 
   @IsOptional()

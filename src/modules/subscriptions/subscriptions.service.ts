@@ -133,8 +133,8 @@ export class SubscriptionsService {
         name: productInfo.data!.plan,
         benefits: productInfo.data!.benefits,
         interval: productInfo.data!.interval,
-        amountInCents,
-        amountInDollars: centsToDollars(amountInCents),
+        amount_in_cents: amountInCents,
+        amount_in_dollars: centsToDollars(amountInCents),
       };
     });
 
@@ -176,7 +176,7 @@ export class SubscriptionsService {
     }
 
     const productExists = await this.polarService.getProduct({
-      productId: dto.productId,
+      productId: dto.product_id,
     });
 
     if (!productExists.success) {
@@ -190,14 +190,14 @@ export class SubscriptionsService {
 
     if (productExists.success && !productExists.data) {
       this.logger.warn({
-        message: `Product with id: ${dto.productId} does not exist`,
+        message: `Product with id: ${dto.product_id} does not exist`,
       });
 
       throw new NotFoundException('Product does not exist');
     }
 
     const { success, data, error } = await this.polarService.createCheckout({
-      productId: dto.productId,
+      productId: dto.product_id,
       user: {
         id: user.id,
         name: user.name,
