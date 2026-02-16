@@ -23,6 +23,8 @@ import { HasherModule } from '../../core/hasher/hasher.module';
 import { HasherService } from '../../core/hasher/hasher.service';
 import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
+import { PrometheusModule } from '../../core/prometheus/prometheus.module';
+import { PrometheusService } from '../../core/prometheus/prometheus.service';
 
 const mockDatabaseService = {
   file: {
@@ -69,12 +71,22 @@ const mockHasherService = {
   verifyPassword: jest.fn(),
 };
 
+const mockIncrement = jest.fn();
+const mockPrometheusService = {
+  createCounter: jest.fn().mockReturnValue({
+    inc: mockIncrement,
+  }),
+};
+
 describe('FilesService', () => {
   let service: FilesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FilesService],
+      providers: [
+        FilesService,
+        { provide: PrometheusService, useValue: mockPrometheusService },
+      ],
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
         JwtModule,
@@ -83,6 +95,7 @@ describe('FilesService', () => {
         RedisModule,
         HasherModule,
         DatabaseModule,
+        PrometheusModule,
       ],
     })
       .overrideProvider(DatabaseService)
@@ -107,7 +120,7 @@ describe('FilesService', () => {
   });
 
   it('should upload a file', async () => {
-    const file = {} as Express.Multer.File;
+    const file = { size: 200 } as Express.Multer.File;
     const testUserId = 'test-user-id';
 
     mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
@@ -123,6 +136,10 @@ describe('FilesService', () => {
     );
 
     expect(res).toEqual({ id: '1' });
+    expect(mockIncrement).toHaveBeenCalledWith(
+      { lifetime: 'short', size: '200' },
+      1,
+    );
   });
 
   it('should fail to upload a file', async () => {
@@ -287,6 +304,7 @@ describe('FilesService', () => {
     });
 
     expect(res).toEqual({ id: testLinkId });
+    expect(mockIncrement).toHaveBeenCalled();
   });
 
   it('should generate link for a file with a password', async () => {
