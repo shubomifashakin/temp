@@ -233,6 +233,7 @@ describe('FilesService', () => {
     expect(res).toEqual({ message: 'success' });
     expect(mockSqsService.pushMessage).toHaveBeenCalledWith({
       message: { s3Key: testS3Key },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       queueUrl: expect.any(String),
     });
     expect(mockRedisService.delete).toHaveBeenCalledWith(makeFileCacheKey('1'));
