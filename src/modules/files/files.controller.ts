@@ -15,9 +15,7 @@ import {
   Controller,
   UploadedFile,
   ParseUUIDPipe,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiParam,
@@ -27,14 +25,10 @@ import {
   ApiConsumes,
 } from '@nestjs/swagger';
 
-import { memoryStorage } from 'multer';
-
 import { FilesService } from './files.service';
 
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
-
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from './common/constants';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
@@ -44,15 +38,18 @@ import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
 import { LinkDetailsDto } from './dtos/link-details.dto';
 import { GetLinkFileDto } from './dtos/get-link-file.dto';
+import { FileUploadGuard } from './common/guards/file-upload.guard';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
+import { UploadFile } from './common/decorators/upload-file.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
+  @UseGuards(FileUploadGuard)
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
   @ApiConsumes('multipart/form-data')
@@ -84,26 +81,7 @@ export class FilesController {
       required: ['file', 'description', 'lifetime'],
     },
   })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: memoryStorage(),
-      limits: {
-        fields: 2,
-        fileSize: MAX_FILE_SIZE_BYTES,
-      },
-      fileFilter: (_, file, cb) => {
-        if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-          return cb(null, false);
-        }
-
-        if (typeof file.size === 'number' && file.size > MAX_FILE_SIZE_BYTES) {
-          return cb(null, false);
-        }
-
-        return cb(null, true);
-      },
-    }),
-  )
+  @UploadFile()
   @Post()
   @HttpCode(201)
   async uploadFile(

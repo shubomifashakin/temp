@@ -1,4 +1,6 @@
-export const MAX_FILE_SIZE_BYTES = 80 * 1024 * 1024;
+import { Plan } from '../../../../generated/prisma/enums';
+
+export const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
 export const ALLOWED_MIME_TYPES = [
   //images
@@ -42,4 +44,21 @@ export const ALLOWED_LIFETIMES: Record<Lifetime, number> = {
   [LIFETIMES.SHORT]: 7 * 24 * 60 * 60 * 1000,
   [LIFETIMES.MEDIUM]: 14 * 24 * 60 * 60 * 1000,
   [LIFETIMES.LONG]: 31 * 24 * 60 * 60 * 1000,
+};
+
+export const PLAN_INFO = {
+  [Plan.PRO]: {
+    MAX_FILE_SIZE_BYTES: MAX_FILE_SIZE_BYTES,
+    MAX_FILE_SIZE_MB: MAX_FILE_SIZE_BYTES / (1024 * 1024),
+    ALLOWED_LIFETIMES: [
+      LIFETIMES.LONG,
+      LIFETIMES.SHORT,
+      LIFETIMES.MEDIUM,
+    ] as Lifetime[],
+  },
+  [Plan.FREE]: {
+    MAX_FILE_SIZE_MB: 50,
+    MAX_FILE_SIZE_BYTES: 50 * 1024 * 1024,
+    ALLOWED_LIFETIMES: [LIFETIMES.SHORT] as Lifetime[],
+  },
 };
