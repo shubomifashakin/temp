@@ -21,7 +21,7 @@ services:
   redis:
     container_name: temp_redis
     image: redis:8.4
-    mem_limit: 512m
+    mem_limit: 256m
     volumes:
       - redis_data_temp:/data
       - ./redis.conf:/etc/redis/redis.conf
