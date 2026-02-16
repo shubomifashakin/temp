@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { FilesModule } from './modules/files/files.module';
 import { HealthModule } from './modules/health/health.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 
 import { S3Module } from './core/s3/s3.module';
@@ -174,6 +175,7 @@ import { validateConfig } from './common/utils';
     HasherModule,
     S3Module,
     AuthModule,
+    MetricsModule,
     HealthModule,
     UsersModule,
     FilesModule,
