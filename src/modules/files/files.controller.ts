@@ -10,14 +10,16 @@ import {
   Patch,
   Query,
   Delete,
+  Logger,
   HttpCode,
   UseGuards,
   Controller,
   UploadedFile,
   ParseUUIDPipe,
+  BadRequestException,
+  InternalServerErrorException,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiParam,
@@ -25,19 +27,18 @@ import {
   ApiResponse,
   ApiOperation,
   ApiConsumes,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
-
-import { memoryStorage } from 'multer';
 
 import { FilesService } from './files.service';
 
+import { PLAN_INFO } from './common/constants';
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
 
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from './common/constants';
-
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
+import { SubscriptionPlanInterceptor } from '../../common/interceptors/subscription.interceptor';
 
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
@@ -47,14 +48,18 @@ import { GetLinkFileDto } from './dtos/get-link-file.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
+import { UploadFile } from './common/decorators/upload-file.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
+  private readonly logger = new Logger(FilesController.name);
   constructor(private readonly filesService: FilesService) {}
 
+  @UseInterceptors(SubscriptionPlanInterceptor)
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'File upload data with metadata',
@@ -84,26 +89,7 @@ export class FilesController {
       required: ['file', 'description', 'lifetime'],
     },
   })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: memoryStorage(),
-      limits: {
-        fields: 2,
-        fileSize: MAX_FILE_SIZE_BYTES,
-      },
-      fileFilter: (_, file, cb) => {
-        if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-          return cb(null, false);
-        }
-
-        if (typeof file.size === 'number' && file.size > MAX_FILE_SIZE_BYTES) {
-          return cb(null, false);
-        }
-
-        return cb(null, true);
-      },
-    }),
-  )
+  @UploadFile()
   @Post()
   @HttpCode(201)
   async uploadFile(
@@ -111,6 +97,26 @@ export class FilesController {
     @Body() body: UploadFileDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!req.user.plan) {
+      this.logger.error({
+        message: 'User plan is undefined',
+        error: new Error('User plan was not attached to request'),
+      });
+      throw new InternalServerErrorException();
+    }
+
+    if (!PLAN_INFO[req.user.plan].ALLOWED_LIFETIMES.includes(body.lifetime)) {
+      throw new BadRequestException(
+        `${req.user.plan} users cannot upload files with ${body.lifetime} lifetime`,
+      );
+    }
+
+    if (file.size > PLAN_INFO[req.user.plan].MAX_FILE_SIZE_BYTES) {
+      throw new BadRequestException(
+        `${req.user.plan} users cannot upload files larger than ${PLAN_INFO[req.user.plan].MAX_FILE_SIZE_MB}MB`,
+      );
+    }
+
     return this.filesService.uploadFile(file, body, req.user.id);
   }
 

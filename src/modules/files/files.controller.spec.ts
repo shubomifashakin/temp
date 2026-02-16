@@ -17,6 +17,7 @@ import { HasherModule } from '../../core/hasher/hasher.module';
 import { HasherService } from '../../core/hasher/hasher.service';
 import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
+import { BadRequestException } from '@nestjs/common';
 
 const mockDatabaseService = {
   file: {
@@ -67,6 +68,7 @@ const testUserId = 'test-user-id';
 const mockRequest = {
   user: {
     id: testUserId,
+    plan: 'FREE',
   },
 } as jest.Mocked<Request>;
 
@@ -122,10 +124,26 @@ describe('FilesController', () => {
     const res = await controller.uploadFile(
       mockRequest,
       { description: 'test description', lifetime: 'short' },
-      {} as Express.Multer.File,
+      { size: 1024 } as Express.Multer.File,
     );
 
     expect(res).toEqual({ id: '1' });
+  });
+
+  it('should not allow free user to upload large file', async () => {
+    mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
+
+    mockDatabaseService.file.create.mockResolvedValue({
+      id: '1',
+    });
+
+    await expect(
+      controller.uploadFile(
+        mockRequest,
+        { description: 'test description', lifetime: 'short' },
+        { size: 1024 * 10000 * 1000 } as Express.Multer.File,
+      ),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('should get all files', async () => {
