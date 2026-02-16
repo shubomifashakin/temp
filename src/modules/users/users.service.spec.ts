@@ -13,6 +13,9 @@ const mockDatabaseService = {
     delete: jest.fn(),
     update: jest.fn(),
   },
+  subscription: {
+    findFirst: jest.fn(),
+  },
 };
 
 const mockRedisService = {
@@ -56,11 +59,24 @@ describe('UsersService', () => {
 
     mockRedisService.get.mockResolvedValue({ success: true, data: null });
 
+    const date = new Date();
+    const subscription = {
+      plan: 'PRO',
+      current_period_end: date,
+      current_period_start: date,
+      cancel_at_period_end: true,
+    };
+
     mockDatabaseService.user.findUniqueOrThrow.mockResolvedValue(foundUser);
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(subscription);
+
+    mockRedisService.set.mockResolvedValue({
+      success: true,
+    });
 
     const res = await service.getMyInfo(testUserId);
 
-    expect(res).toEqual(foundUser);
+    expect(res).toEqual({ ...foundUser, subscription });
   });
 
   it('should get the users info from redis', async () => {
@@ -96,7 +112,7 @@ describe('UsersService', () => {
 
     mockDatabaseService.user.update.mockResolvedValue(updatedUser);
 
-    mockRedisService.set.mockResolvedValue({ success: true });
+    mockRedisService.delete.mockResolvedValue({ success: true });
 
     const res = await service.updateMyInfo(testUserId, {
       name: updatedName,
@@ -117,7 +133,8 @@ describe('UsersService', () => {
         created_at: true,
       },
     });
-    expect(res).toEqual(updatedUser);
+
+    expect(res).toEqual({ message: 'success' });
   });
 
   it('should delete the users account', async () => {

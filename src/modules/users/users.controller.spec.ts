@@ -1,5 +1,6 @@
 import { type Request, type Response } from 'express';
 
+import { Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -19,6 +20,9 @@ const mockDatabaseService = {
     delete: jest.fn(),
     update: jest.fn(),
   },
+  subscription: {
+    findFirst: jest.fn(),
+  },
 };
 
 const mockRedisService = {
@@ -26,6 +30,15 @@ const mockRedisService = {
   set: jest.fn(),
   delete: jest.fn(),
 };
+
+const mockLogger = {
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  fatal: jest.fn(),
+  verbose: jest.fn(),
+} as unknown as jest.Mocked<Logger>;
 
 const mockJwtService = {
   verifyAsync: jest.fn(),
@@ -66,6 +79,8 @@ describe('UsersController', () => {
       .compile();
 
     controller = module.get<UsersController>(UsersController);
+
+    module.useLogger(mockLogger);
     jest.clearAllMocks();
   });
 
@@ -84,11 +99,24 @@ describe('UsersController', () => {
 
     mockRedisService.get.mockResolvedValue({ success: true, data: null });
 
+    const date = new Date();
+    const subscription = {
+      plan: 'PRO',
+      current_period_end: date,
+      current_period_start: date,
+      cancel_at_period_end: true,
+    };
+
     mockDatabaseService.user.findUniqueOrThrow.mockResolvedValue(foundUser);
+    mockDatabaseService.subscription.findFirst.mockResolvedValue(subscription);
+
+    mockRedisService.set.mockResolvedValue({
+      success: true,
+    });
 
     const res = await controller.getMyInfo(mockRequest);
 
-    expect(res).toEqual(foundUser);
+    expect(res).toEqual({ ...foundUser, subscription });
   });
 
   it('should get the users info from redis', async () => {
@@ -121,7 +149,7 @@ describe('UsersController', () => {
 
     mockDatabaseService.user.update.mockResolvedValue(updatedUser);
 
-    mockRedisService.set.mockResolvedValue({ success: true });
+    mockRedisService.delete.mockResolvedValue({ success: true });
 
     const res = await controller.updateMyInfo(mockRequest, {
       name: updatedName,
@@ -142,7 +170,7 @@ describe('UsersController', () => {
         created_at: true,
       },
     });
-    expect(res).toEqual(updatedUser);
+    expect(res).toEqual({ message: 'success' });
   });
 
   it('should delete the users account', async () => {

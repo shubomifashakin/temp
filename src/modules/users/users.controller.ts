@@ -1,17 +1,22 @@
 import { type Response, type Request } from 'express';
 
 import { ConfigService } from '@nestjs/config';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiResponse,
+  ApiOperation,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
 import {
   Body,
-  Controller,
-  Delete,
   Get,
-  HttpCode,
-  Patch,
   Req,
   Res,
+  Patch,
+  Delete,
+  HttpCode,
   UseGuards,
+  Controller,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -23,6 +28,7 @@ import { TOKEN } from '../../common/constants';
 import { AuthGuard } from '../../common/guards/auth.guard';
 
 @UseGuards(AuthGuard)
+@ApiCookieAuth('access_token')
 @Controller('users')
 export class UsersController {
   constructor(
@@ -34,13 +40,13 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Success', type: CachedUserInfo })
   @ApiResponse({ status: 404, description: 'User does not exist' })
   @Get('me')
-  async getMyInfo(@Req() req: Request) {
+  async getMyInfo(@Req() req: Request): Promise<CachedUserInfo> {
     return this.UsersService.getMyInfo(req.user.id);
   }
 
   @HttpCode(200)
   @ApiOperation({ summary: 'Update logged in users info' })
-  @ApiResponse({ status: 200, description: 'Success', type: CachedUserInfo })
+  @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'User does not exist' })
   @ApiBody({ type: UpdateUserDto })
   @Patch('me')
