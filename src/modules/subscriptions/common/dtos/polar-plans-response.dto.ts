@@ -21,11 +21,11 @@ export class PolarPlan {
     description: 'The amount the user would be charged in dollars',
   })
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Amount should be a number' })
-  amountInDollars: number;
+  amount_in_dollars: number;
 
   @ApiProperty({ description: 'The amount the user would be charged in cents' })
   @IsNumber({}, { message: 'Amount should be a number' })
-  amountInCents: number;
+  amount_in_cents: number;
 
   @ApiProperty({
     example: 'usd',

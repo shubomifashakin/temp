@@ -1,7 +1,11 @@
 import { memoryStorage } from 'multer';
 
 import { FileInterceptor } from '@nestjs/platform-express';
-import { applyDecorators, UseInterceptors } from '@nestjs/common';
+import {
+  applyDecorators,
+  UseInterceptors,
+  BadRequestException,
+} from '@nestjs/common';
 
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '../constants';
 
@@ -16,7 +20,7 @@ export function UploadFile() {
         },
         fileFilter: (_, file, cb) => {
           if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-            return cb(null, false);
+            return cb(new BadRequestException('Invalid file type'), false);
           }
 
           return cb(null, true);

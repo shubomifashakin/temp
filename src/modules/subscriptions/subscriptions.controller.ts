@@ -73,7 +73,7 @@ export class SubscriptionsController {
     description: 'User already has an active subscription',
   })
   @ApiNotFoundResponse({
-    description: 'The product that was being checkouted does not exist.',
+    description: 'The product that was being checked out does not exist.',
   })
   @Post('checkout/polar')
   async createPolarCheckout(

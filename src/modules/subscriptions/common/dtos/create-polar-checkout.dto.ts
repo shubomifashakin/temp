@@ -7,5 +7,5 @@ export class CreatePolarCheckoutDto {
     description: 'The product ID to create a checkout for',
   })
   @IsString({ message: 'Product ID must be a string' })
-  productId: string;
+  product_id: string;
 }

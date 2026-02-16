@@ -140,7 +140,7 @@ describe('SubscriptionsController', () => {
 
     const res = await controller.getPolarPlans();
     expect(res.data).toHaveLength(1);
-    expect(res.data[0].amountInDollars).toBe(0.2);
+    expect(res.data[0].amount_in_dollars).toBe(0.2);
   });
 
   it('should create the checkout url', async () => {
@@ -170,7 +170,7 @@ describe('SubscriptionsController', () => {
     });
 
     await controller.createPolarCheckout(mockRequest, mockResponse, {
-      productId: testProductId,
+      product_id: testProductId,
     });
 
     expect(mockResponse.redirect).toHaveBeenCalled();

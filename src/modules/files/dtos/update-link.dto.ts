@@ -1,5 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
-import { PickType } from '@nestjs/mapped-types';
+import { PartialType, PickType } from '@nestjs/swagger';
 
 import { CreateLinkDto } from './create-link.dto';
 
