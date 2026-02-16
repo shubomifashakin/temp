@@ -19,13 +19,6 @@ export function UploadFile() {
             return cb(null, false);
           }
 
-          if (
-            typeof file.size === 'number' &&
-            file.size > MAX_FILE_SIZE_BYTES
-          ) {
-            return cb(null, false);
-          }
-
           return cb(null, true);
         },
       }),
