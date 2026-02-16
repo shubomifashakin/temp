@@ -7,9 +7,36 @@ import {
   IsOptional,
   MaxLength,
   MinLength,
+  IsEnum,
+  IsBoolean,
 } from 'class-validator';
 
 import { UserCreateInput } from '../../../../generated/prisma/models';
+import { Plan } from '../../../../generated/prisma/enums';
+
+class UserSubscription {
+  @ApiProperty({ description: 'The users current plan', enum: Plan })
+  @IsEnum(Plan, { message: 'Invalid plan' })
+  plan: Plan;
+
+  @ApiProperty({
+    type: Date,
+    nullable: true,
+    description: 'When the subscription ends',
+  })
+  @IsDate()
+  current_period_end: Date | null;
+
+  @ApiProperty({ description: 'When the subscription started', type: Date })
+  @IsDate()
+  current_period_start: Date;
+
+  @ApiProperty({
+    description: 'If the subscription is going to be renewed or not',
+  })
+  @IsBoolean()
+  cancel_at_period_end: boolean;
+}
 
 export class CachedUserInfo implements Pick<
   UserCreateInput,
@@ -56,4 +83,11 @@ export class CachedUserInfo implements Pick<
   })
   @IsDate({ message: 'Invalid date' })
   updated_at: Date;
+
+  @ApiProperty({
+    nullable: true,
+    type: UserSubscription,
+    description: 'The users subscription info',
+  })
+  subscription: UserSubscription | null;
 }

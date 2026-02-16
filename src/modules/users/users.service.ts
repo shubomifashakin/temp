@@ -44,16 +44,42 @@ export class UsersService {
         updated_at: true,
         created_at: true,
       },
-    })) satisfies CachedUserInfo;
+    })) satisfies Omit<CachedUserInfo, 'subscription'>;
 
-    return user;
+    const subscription = await this.databaseService.subscription.findFirst({
+      where: {
+        user_id: userId,
+        status: 'ACTIVE',
+      },
+      select: {
+        plan: true,
+        current_period_end: true,
+        current_period_start: true,
+        cancel_at_period_end: true,
+      },
+      orderBy: {
+        last_event_at: 'desc',
+      },
+    });
+
+    const info = { ...user, subscription } satisfies CachedUserInfo;
+
+    const cached = await this.redisService.set(makeUserKey(userId), info, {
+      expiration: { type: 'EX', value: MINUTES_10 },
+    });
+
+    if (!cached.success) {
+      this.logger.error({
+        error: cached.error,
+        message: 'Failed to cache user info',
+      });
+    }
+
+    return info;
   }
 
-  async updateMyInfo(
-    userId: string,
-    dto: UpdateUserDto,
-  ): Promise<CachedUserInfo> {
-    const updated = await this.databaseService.user.update({
+  async updateMyInfo(userId: string, dto: UpdateUserDto) {
+    await this.databaseService.user.update({
       where: {
         id: userId,
       },
@@ -69,22 +95,18 @@ export class UsersService {
       },
     });
 
-    const { success, error } = await this.redisService.set(
+    const { success, error } = await this.redisService.delete(
       makeUserKey(userId),
-      updated,
-      {
-        expiration: { type: 'EX', value: MINUTES_10 },
-      },
     );
 
     if (!success) {
       this.logger.error({
-        message: 'Failed to store updated user info in cache',
         error,
+        message: 'Failed to delete user info from',
       });
     }
 
-    return updated;
+    return { message: 'success' };
   }
 
   async deleteMyInfo(userId: string) {
