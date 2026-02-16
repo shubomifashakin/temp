@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: temp_postgres
-    image: postgres:latest
+    image: postgres:18.1
     volumes:
       - postgres_data_temp:/var/lib/postgresql
     environment:
@@ -20,7 +20,7 @@ services:
 
   redis:
     container_name: temp_redis
-    image: redis:latest
+    image: redis:8.4
     mem_limit: 512m
     volumes:
       - redis_data_temp:/data
