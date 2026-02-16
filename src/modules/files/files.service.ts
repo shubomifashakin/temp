@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 
 import { v4 as uuid } from 'uuid';
+import { Counter } from 'prom-client';
 
 import { ALLOWED_LIFETIMES } from './common/constants';
 import { makeFileCacheKey, makePresignedUrlCacheKey } from './common/utils';
@@ -30,10 +31,14 @@ import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisService } from '../../core/redis/redis.service';
 import { HasherService } from '../../core/hasher/hasher.service';
 import { DatabaseService } from '../../core/database/database.service';
+import { PrometheusService } from '../../core/prometheus/prometheus.service';
 
 @Injectable()
 export class FilesService {
-  logger = new Logger(FilesService.name);
+  private readonly logger = new Logger(FilesService.name);
+
+  private readonly filesUploaderCounter: Counter;
+  private readonly linksCreatedCounter: Counter;
 
   constructor(
     private readonly s3Service: S3Service,
@@ -42,7 +47,19 @@ export class FilesService {
     private readonly configService: ConfigService,
     private readonly hasherService: HasherService,
     private readonly databaseService: DatabaseService,
-  ) {}
+    private readonly prometheusService: PrometheusService,
+  ) {
+    this.filesUploaderCounter = this.prometheusService.createCounter(
+      'files_uploaded_total',
+      'Total number of files uploaded',
+      ['lifetime', 'size'],
+    );
+
+    this.linksCreatedCounter = this.prometheusService.createCounter(
+      'links_created_total',
+      'Total number of links created',
+    );
+  }
 
   async uploadFile(
     file: Express.Multer.File,
@@ -76,6 +93,11 @@ export class FilesService {
         expires_at: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
       },
     });
+
+    this.filesUploaderCounter.inc(
+      { lifetime: dto.lifetime, size: file.size.toString() },
+      1,
+    );
 
     return { id: response.id };
   }
@@ -317,6 +339,8 @@ export class FilesService {
         description: dto.description,
       },
     });
+
+    this.linksCreatedCounter.inc(1);
 
     return {
       id: link.id,

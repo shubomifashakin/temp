@@ -9,6 +9,7 @@ import { SqsModule } from '../../core/sqs/sqs.module';
 import { RedisModule } from '../../core/redis/redis.module';
 import { HasherModule } from '../../core/hasher/hasher.module';
 import { DatabaseModule } from '../../core/database/database.module';
+import { PrometheusModule } from '../../core/prometheus/prometheus.module';
 
 @Module({
   providers: [FilesService],
@@ -20,6 +21,7 @@ import { DatabaseModule } from '../../core/database/database.module';
     SqsModule,
     HasherModule,
     WebhooksModule,
+    PrometheusModule,
   ],
 })
 export class FilesModule {}

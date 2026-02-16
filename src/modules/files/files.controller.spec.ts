@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { FilesService } from './files.service';
@@ -17,7 +18,8 @@ import { HasherModule } from '../../core/hasher/hasher.module';
 import { HasherService } from '../../core/hasher/hasher.service';
 import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
-import { BadRequestException } from '@nestjs/common';
+import { PrometheusModule } from '../../core/prometheus/prometheus.module';
+import { PrometheusService } from '../../core/prometheus/prometheus.service';
 
 const mockDatabaseService = {
   file: {
@@ -64,6 +66,13 @@ const mockHasherService = {
   verifyPassword: jest.fn(),
 };
 
+const mockIncrement = jest.fn();
+const mockPrometheusService = {
+  createCounter: jest.fn().mockReturnValue({
+    inc: mockIncrement,
+  }),
+};
+
 const testUserId = 'test-user-id';
 const mockRequest = {
   user: {
@@ -81,7 +90,10 @@ describe('FilesController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FilesService],
+      providers: [
+        FilesService,
+        { useValue: mockPrometheusService, provide: PrometheusService },
+      ],
       controllers: [FilesController],
       imports: [
         DatabaseModule,
@@ -90,6 +102,7 @@ describe('FilesController', () => {
         SqsModule,
         HasherModule,
         ConfigModule.forRoot({ isGlobal: true }),
+        PrometheusModule,
         JwtModule,
       ],
     })

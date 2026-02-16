@@ -83,6 +83,10 @@ class EnvConfig {
 
   @IsUrl()
   CHECKOUT_RETURN_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  METRICS_BEARER_TOKEN: string;
 }
 
 export function validateConfig(config: Record<string, string>) {
