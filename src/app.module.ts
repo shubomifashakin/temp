@@ -2,7 +2,7 @@ import { Request } from 'express';
 
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
@@ -18,11 +18,14 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { S3Module } from './core/s3/s3.module';
 import { SqsModule } from './core/sqs/sqs.module';
 import { RedisModule } from './core/redis/redis.module';
+import { PolarModule } from './core/polar/polar.module';
 import { RedisService } from './core/redis/redis.service';
 import { HasherModule } from './core/hasher/hasher.module';
 import { DatabaseModule } from './core/database/database.module';
+import { PrometheusModule } from './core/prometheus/prometheus.module';
 
 import { validateConfig } from './common/utils';
+import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 
 @Module({
   imports: [
@@ -173,8 +176,11 @@ import { validateConfig } from './common/utils';
     DatabaseModule,
     SqsModule,
     HasherModule,
+    SqsModule,
+    PolarModule,
     S3Module,
     AuthModule,
+    PrometheusModule,
     MetricsModule,
     HealthModule,
     UsersModule,
@@ -182,6 +188,9 @@ import { validateConfig } from './common/utils';
     SubscriptionsModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
+  ],
 })
 export class AppModule {}
