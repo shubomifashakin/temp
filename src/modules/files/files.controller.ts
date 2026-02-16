@@ -15,6 +15,7 @@ import {
   Controller,
   UploadedFile,
   ParseUUIDPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -23,10 +24,12 @@ import {
   ApiResponse,
   ApiOperation,
   ApiConsumes,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
 
 import { FilesService } from './files.service';
 
+import { PLAN_INFO } from './common/constants';
 import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
 
@@ -38,20 +41,21 @@ import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
 import { LinkDetailsDto } from './dtos/link-details.dto';
 import { GetLinkFileDto } from './dtos/get-link-file.dto';
-import { FileUploadGuard } from './common/guards/file-upload.guard';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 import { UploadFile } from './common/decorators/upload-file.decorator';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 
 @UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
-  @UseGuards(FileUploadGuard)
+  @UseGuards(SubscriptionGuard)
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'File upload data with metadata',
@@ -89,6 +93,18 @@ export class FilesController {
     @Body() body: UploadFileDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    if (!PLAN_INFO[req.user.plan!].ALLOWED_LIFETIMES.includes(body.lifetime)) {
+      throw new BadRequestException(
+        `${req.user.plan} users cannot upload files with ${body.lifetime} lifetime`,
+      );
+    }
+
+    if (file.size > PLAN_INFO[req.user.plan!].MAX_FILE_SIZE_BYTES) {
+      throw new BadRequestException(
+        `${req.user.plan} users cannot upload files larger than ${PLAN_INFO[req.user.plan!].MAX_FILE_SIZE_MB}MB`,
+      );
+    }
+
     return this.filesService.uploadFile(file, body, req.user.id);
   }
 
