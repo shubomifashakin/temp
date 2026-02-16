@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import {
+  Logger,
   Injectable,
   CanActivate,
   ExecutionContext,
@@ -10,14 +11,21 @@ import { PolarService } from '../../../../../core/polar/polar.service';
 
 @Injectable()
 export class PolarWebhookGuard implements CanActivate {
+  private readonly logger = new Logger(PolarWebhookGuard.name);
+
   constructor(private readonly polarService: PolarService) {}
 
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
 
-    const { success, data } = this.polarService.validateWebhookEvent(request);
+    const { success, data, error } =
+      this.polarService.validateWebhookEvent(request);
 
     if (!success) {
+      this.logger.debug({
+        reason: error,
+        message: 'Polar event failed to be validated',
+      });
       throw new UnauthorizedException();
     }
 
