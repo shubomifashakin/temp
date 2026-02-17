@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
+import { LinksController } from './links/links.controller';
+import { LinksService } from './links/links.service';
 import { WebhooksModule } from './webhooks/webhooks.module';
 
 import { S3Module } from '../../core/s3/s3.module';
@@ -12,8 +14,8 @@ import { DatabaseModule } from '../../core/database/database.module';
 import { PrometheusModule } from '../../core/prometheus/prometheus.module';
 
 @Module({
-  providers: [FilesService],
-  controllers: [FilesController],
+  providers: [FilesService, LinksService],
+  controllers: [FilesController, LinksController],
   imports: [
     DatabaseModule,
     RedisModule,

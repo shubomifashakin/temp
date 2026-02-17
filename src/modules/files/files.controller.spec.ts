@@ -81,10 +81,6 @@ const mockRequest = {
   },
 } as jest.Mocked<Request>;
 
-const mockResponse = {
-  redirect: jest.fn(),
-} as unknown as jest.Mocked<Response>;
-
 describe('FilesController', () => {
   let controller: FilesController;
 
@@ -187,52 +183,5 @@ describe('FilesController', () => {
     const res = await controller.getSingleFile(mockRequest, '1');
 
     expect(res).toEqual({ id: '1', size: 200 });
-  });
-
-  it('should generate the presigned url for the file', async () => {
-    const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
-      password: null,
-      file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
-      },
-    };
-
-    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
-
-    mockRedisService.get.mockResolvedValue({
-      success: true,
-      error: null,
-      data: null,
-    });
-
-    const testPresignedUrl = 'test-presigned-url';
-    mockS3Service.generatePresignedGetUrl.mockResolvedValue({
-      success: true,
-      error: null,
-      data: testPresignedUrl,
-    });
-
-    mockRedisService.set.mockResolvedValue({
-      success: true,
-      error: null,
-    });
-
-    mockDatabaseService.link.update.mockResolvedValue(true);
-
-    const testLinkId = 'test-link-id';
-    await controller.getLinkFile(
-      mockResponse,
-      {
-        password: undefined,
-      },
-      testLinkId,
-    );
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(mockResponse.redirect).toHaveBeenCalledWith(302, testPresignedUrl);
   });
 });
