@@ -240,6 +240,7 @@ describe('FilesController (e2e)', () => {
         .attach('file', Buffer.from('test file content'), 'test.png')
         .field('lifetime', 'short')
         .field('description', 'This is a test file')
+        .field('name', 'Test File')
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(201);
@@ -272,6 +273,7 @@ describe('FilesController (e2e)', () => {
         .attach('file', Buffer.from('test file content'), 'test.png')
         .field('lifetime', 'short')
         .field('description', 'This is a test file')
+        .field('name', 'Test File')
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
@@ -331,6 +333,7 @@ describe('FilesController (e2e)', () => {
           expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
           user_id: userId.id,
+          name: `Test File ${i}`,
         })),
       });
 
@@ -401,6 +404,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'pending',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -485,6 +489,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'pending',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -564,6 +569,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'pending',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -616,6 +622,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'pending',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -698,6 +705,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'safe',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -739,6 +747,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'pending',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -781,6 +790,7 @@ describe('FilesController (e2e)', () => {
           user_id: userId.id,
           status: 'safe',
           deleted_at: new Date(),
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -822,6 +832,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           user_id: userId.id,
           status: 'safe',
+          name: 'Test File',
         },
         select: {
           id: true,
@@ -899,6 +910,7 @@ describe('FilesController (e2e)', () => {
           expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
           user_id: userId.id,
+          name: 'Test File',
           status: 'safe',
         },
         select: {
@@ -998,6 +1010,7 @@ describe('FilesController (e2e)', () => {
           size: 100,
           description: 'Test file',
           expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          name: 'Test file',
         },
       });
 
@@ -1077,6 +1090,7 @@ describe('FilesController (e2e)', () => {
           s3_key: 'test-key',
           size: 100,
           description: 'Test file',
+          name: 'Test file',
           expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });

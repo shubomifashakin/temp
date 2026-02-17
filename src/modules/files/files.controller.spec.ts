@@ -9,49 +9,11 @@ import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
 
 import { S3Module } from '../../core/s3/s3.module';
-import { S3Service } from '../../core/s3/s3.service';
 import { SqsModule } from '../../core/sqs/sqs.module';
-import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisModule } from '../../core/redis/redis.module';
-import { RedisService } from '../../core/redis/redis.service';
 import { HasherModule } from '../../core/hasher/hasher.module';
-import { HasherService } from '../../core/hasher/hasher.service';
 import { DatabaseModule } from '../../core/database/database.module';
-import { DatabaseService } from '../../core/database/database.service';
 import { PrometheusModule } from '../../core/prometheus/prometheus.module';
-import { PrometheusService } from '../../core/prometheus/prometheus.service';
-
-const mockDatabaseService = {
-  file: {
-    create: jest.fn(),
-    findUniqueOrThrow: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    findMany: jest.fn(),
-  },
-  link: {
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    findMany: jest.fn(),
-    findUniqueOrThrow: jest.fn(),
-  },
-};
-
-const mockRedisService = {
-  get: jest.fn(),
-  set: jest.fn(),
-  delete: jest.fn(),
-};
-
-const mockS3Service = {
-  uploadToS3: jest.fn(),
-  generatePresignedGetUrl: jest.fn(),
-};
-
-const mockSqsService = {
-  pushMessage: jest.fn(),
-};
 
 const mockLogger = {
   error: jest.fn(),
@@ -61,16 +23,16 @@ const mockLogger = {
   verbose: jest.fn(),
 };
 
-const mockHasherService = {
-  hashPassword: jest.fn(),
-  verifyPassword: jest.fn(),
-};
-
-const mockIncrement = jest.fn();
-const mockPrometheusService = {
-  createCounter: jest.fn().mockReturnValue({
-    inc: mockIncrement,
-  }),
+const mockFilesService = {
+  uploadFile: jest.fn(),
+  getFiles: jest.fn(),
+  getSingleFile: jest.fn(),
+  deleteSingleFile: jest.fn(),
+  updateSingleFile: jest.fn(),
+  createLink: jest.fn(),
+  getFileLinks: jest.fn(),
+  revokeLink: jest.fn(),
+  updateLink: jest.fn(),
 };
 
 const testUserId = 'test-user-id';
@@ -86,10 +48,7 @@ describe('FilesController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        FilesService,
-        { useValue: mockPrometheusService, provide: PrometheusService },
-      ],
+      providers: [{ useValue: mockFilesService, provide: FilesService }],
       controllers: [FilesController],
       imports: [
         DatabaseModule,
@@ -101,18 +60,7 @@ describe('FilesController', () => {
         PrometheusModule,
         JwtModule,
       ],
-    })
-      .overrideProvider(DatabaseService)
-      .useValue(mockDatabaseService)
-      .overrideProvider(RedisService)
-      .useValue(mockRedisService)
-      .overrideProvider(S3Service)
-      .useValue(mockS3Service)
-      .overrideProvider(SqsService)
-      .useValue(mockSqsService)
-      .overrideProvider(HasherService)
-      .useValue(mockHasherService)
-      .compile();
+    }).compile();
 
     controller = module.get<FilesController>(FilesController);
     module.useLogger(mockLogger);
@@ -124,15 +72,11 @@ describe('FilesController', () => {
   });
 
   it('should upload the file', async () => {
-    mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
-
-    mockDatabaseService.file.create.mockResolvedValue({
-      id: '1',
-    });
+    mockFilesService.uploadFile.mockResolvedValue({ id: '1' });
 
     const res = await controller.uploadFile(
       mockRequest,
-      { description: 'test description', lifetime: 'short' },
+      { description: 'test description', lifetime: 'short', name: 'test name' },
       { size: 1024 } as Express.Multer.File,
     );
 
@@ -140,23 +84,25 @@ describe('FilesController', () => {
   });
 
   it('should not allow free user to upload large file', async () => {
-    mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
-
-    mockDatabaseService.file.create.mockResolvedValue({
-      id: '1',
-    });
-
     await expect(
       controller.uploadFile(
         mockRequest,
-        { description: 'test description', lifetime: 'short' },
+        {
+          description: 'test description',
+          lifetime: 'short',
+          name: 'test name',
+        },
         { size: 1024 * 10000 * 1000 } as Express.Multer.File,
       ),
     ).rejects.toThrow(BadRequestException);
   });
 
   it('should get all files', async () => {
-    mockDatabaseService.file.findMany.mockResolvedValue([]);
+    mockFilesService.getFiles.mockResolvedValue({
+      data: [],
+      hasNextPage: false,
+      cursor: null,
+    });
 
     const res = await controller.getFiles(mockRequest);
 
@@ -164,21 +110,7 @@ describe('FilesController', () => {
   });
 
   it('should get single file', async () => {
-    mockRedisService.get.mockResolvedValue({
-      success: true,
-      data: null,
-      error: null,
-    });
-
-    mockRedisService.set.mockResolvedValue({
-      success: true,
-      error: null,
-    });
-
-    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
-      id: '1',
-      size: 200,
-    });
+    mockFilesService.getSingleFile.mockResolvedValue({ id: '1', size: 200 });
 
     const res = await controller.getSingleFile(mockRequest, '1');
 

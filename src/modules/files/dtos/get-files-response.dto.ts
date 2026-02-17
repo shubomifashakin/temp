@@ -39,6 +39,13 @@ class File {
   })
   @IsEnum(FileStatus, { message: 'status must be a valid file status' })
   status: FileStatus;
+
+  @ApiProperty({
+    description: 'the name of the file',
+    example: 'My file name',
+  })
+  @IsString({ message: 'name must be a string' })
+  name: string;
 }
 
 export class GetFilesResponseDto {
