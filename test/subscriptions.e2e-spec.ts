@@ -21,6 +21,7 @@ import { ValidationError } from 'class-validator';
 import { DatabaseService } from '../src/core/database/database.service';
 import { PolarService } from '../src/core/polar/polar.service';
 
+//FIXME:
 process.env.POLAR_PRODUCT_PRO = 'test-product-id';
 
 const mockLogger = {
