@@ -26,6 +26,7 @@ import {
   ApiOperation,
   ApiConsumes,
   ApiBadRequestResponse,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 
 import { FilesService } from './files.service';
@@ -45,6 +46,7 @@ import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 import { UploadFile } from './common/decorators/upload-file.decorator';
 
+@ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {

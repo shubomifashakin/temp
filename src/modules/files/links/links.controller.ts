@@ -10,9 +10,9 @@ import { GetLinkFileDto } from '../dtos/get-link-file.dto';
 export class LinksController {
   constructor(private readonly linksService: LinksService) {}
 
-  @ApiOperation({ summary: 'Get file link details' })
+  @ApiOperation({ summary: 'Get link details' })
   @ApiResponse({ status: 200, type: LinkDetailsDto })
-  @ApiResponse({ status: 404, description: 'File link does not exist' })
+  @ApiResponse({ status: 404, description: 'Link does not exist' })
   @Get(':linkId')
   async getLinkDetails(@Param('linkId') linkId: string) {
     console.log('reached');
@@ -25,7 +25,7 @@ export class LinksController {
   })
   @ApiBody({ type: GetLinkFileDto })
   @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
-  @ApiResponse({ status: 404, description: 'File link does not exist' })
+  @ApiResponse({ status: 404, description: 'Link does not exist' })
   @Post(':linkId')
   async getLinkFile(
     @Res() res: Response,
