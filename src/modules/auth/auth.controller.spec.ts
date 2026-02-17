@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Request, Response } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';

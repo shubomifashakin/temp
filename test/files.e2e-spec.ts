@@ -310,7 +310,7 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('cursor');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(response.body?.cursor).toBe(null);
       expect(response.body).toHaveProperty('hasNextPage');
     });

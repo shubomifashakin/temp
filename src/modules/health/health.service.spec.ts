@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Logger } from '@nestjs/common';
 
 import { Test, TestingModule } from '@nestjs/testing';
