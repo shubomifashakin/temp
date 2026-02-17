@@ -15,7 +15,7 @@ export function UploadFile() {
       FileInterceptor('file', {
         storage: memoryStorage(),
         limits: {
-          fields: 2,
+          fields: 3,
           fileSize: MAX_FILE_SIZE_BYTES,
         },
         fileFilter: (_, file, cb) => {

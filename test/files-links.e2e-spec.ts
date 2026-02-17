@@ -146,6 +146,7 @@ describe('FilesLinksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
+          name: 'Test file',
           user_id: user.id,
           s3_key: 'test-key',
           size: 100,
@@ -201,6 +202,7 @@ describe('FilesLinksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
+          name: 'Test file',
           user_id: user.id,
           s3_key: 'test-key',
           size: 100,
@@ -237,6 +239,7 @@ describe('FilesLinksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
+          name: 'Test file',
           user_id: user.id,
           s3_key: 'test-key',
           size: 100,

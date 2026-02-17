@@ -147,6 +147,7 @@ describe('FilesWebhooksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           user_id: user.id,
+          name: 'Test file',
           s3_key: 'test-key',
           size: 100,
           description: 'Test file',
@@ -192,6 +193,7 @@ describe('FilesWebhooksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
+          name: 'Test file',
           user_id: user.id,
           s3_key: 'test-key',
           size: 100,
@@ -228,6 +230,7 @@ describe('FilesWebhooksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
+          name: 'Test file',
           user_id: user.id,
           s3_key: 'test-key',
           size: 100,
@@ -274,6 +277,7 @@ describe('FilesWebhooksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
+          name: 'Test file',
           user_id: user.id,
           s3_key: 'test-key',
           size: 100,

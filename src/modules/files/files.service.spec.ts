@@ -32,6 +32,7 @@ const mockDatabaseService = {
     update: jest.fn(),
     delete: jest.fn(),
     findMany: jest.fn(),
+    findUnique: jest.fn(),
   },
   link: {
     create: jest.fn(),
@@ -122,6 +123,8 @@ describe('FilesService', () => {
     const file = { size: 200 } as Express.Multer.File;
     const testUserId = 'test-user-id';
 
+    mockDatabaseService.file.findUnique.mockResolvedValue(null);
+
     mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
 
     mockDatabaseService.file.create.mockResolvedValue({
@@ -130,7 +133,7 @@ describe('FilesService', () => {
 
     const res = await service.uploadFile(
       file,
-      { description: 'Test file', lifetime: 'short' },
+      { description: 'Test file', lifetime: 'short', name: 'Test file' },
       testUserId,
     );
 
@@ -141,9 +144,11 @@ describe('FilesService', () => {
     );
   });
 
-  it('should fail to upload a file', async () => {
+  it('should fail to upload a file because s3 failed', async () => {
     const file = {} as Express.Multer.File;
     const testUserId = 'test-user-id';
+
+    mockDatabaseService.file.findUnique.mockResolvedValue(null);
 
     mockS3Service.uploadToS3.mockResolvedValue({
       success: false,
@@ -157,10 +162,25 @@ describe('FilesService', () => {
     await expect(
       service.uploadFile(
         file,
-        { description: 'Test file', lifetime: 'short' },
+        { description: 'Test file', lifetime: 'short', name: 'Test file' },
         testUserId,
       ),
     ).rejects.toThrow(InternalServerErrorException);
+  });
+
+  it('should fail to upload file because a file with that name already exists for user', async () => {
+    const file = {} as Express.Multer.File;
+    const testUserId = 'test-user-id';
+
+    mockDatabaseService.file.findUnique.mockResolvedValue(true);
+
+    await expect(
+      service.uploadFile(
+        file,
+        { description: 'Test file', lifetime: 'short', name: 'Test file' },
+        testUserId,
+      ),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('should get all files', async () => {

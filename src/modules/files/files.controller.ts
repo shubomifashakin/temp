@@ -73,8 +73,16 @@ export class FilesController {
           type: 'string',
           minLength: 5,
           maxLength: 100,
-          description: 'The description of the file that was uploaded',
+          description: 'The description of file that was uploaded',
           example: 'My yearbook photo',
+        },
+        name: {
+          type: 'string',
+          minLength: 5,
+          maxLength: 50,
+          description: 'The name of the file',
+          example: 'Yearbook',
+          pattern: '^[a-zA-Z0-9\\s\\-_]+$',
         },
         lifetime: {
           type: 'string',
@@ -83,7 +91,7 @@ export class FilesController {
           example: 'long',
         },
       },
-      required: ['file', 'description', 'lifetime'],
+      required: ['file', 'description', 'lifetime', 'name'],
     },
   })
   @UploadFile()

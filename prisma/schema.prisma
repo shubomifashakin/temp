@@ -65,6 +65,7 @@ model File {
   id          String @id @default(uuid())
   description String @db.VarChar(100)
   s3_key      String @unique
+  name        String @db.VarChar(50)
 
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
@@ -78,6 +79,7 @@ model File {
 
   links Link[]
 
+@@unique(name: "files_name_unique", [name, user_id])
   @@index(name: "files_user_id_idx", fields: [user_id])
 }
 

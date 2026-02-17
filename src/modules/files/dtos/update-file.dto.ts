@@ -1,5 +1,7 @@
-import { PickType } from '@nestjs/swagger';
+import { PickType, PartialType } from '@nestjs/swagger';
 
 import { UploadFileDto } from './upload-file.dto';
 
-export class UpdateFileDto extends PickType(UploadFileDto, ['description']) {}
+export class UpdateFileDto extends PartialType(
+  PickType(UploadFileDto, ['description', 'name']),
+) {}

@@ -65,6 +65,19 @@ export class FilesService {
   ) {
     const key = uuid();
 
+    const fileWithNameeExist = await this.databaseService.file.findUnique({
+      where: {
+        files_name_unique: {
+          user_id: userId,
+          name: dto.name,
+        },
+      },
+    });
+
+    if (fileWithNameeExist) {
+      throw new BadRequestException('You already have a file with this name');
+    }
+
     const { success, error } = await this.s3Service.uploadToS3({
       key: key,
       body: file,
@@ -84,6 +97,7 @@ export class FilesService {
     const response = await this.databaseService.file.create({
       data: {
         s3_key: key,
+        name: dto.name,
         user_id: userId,
         size: file.size,
         description: dto.description,
@@ -115,6 +129,7 @@ export class FilesService {
         status: true,
         expires_at: true,
         description: true,
+        name: true,
       },
       ...(cursor && {
         cursor: {
@@ -170,6 +185,7 @@ export class FilesService {
         created_at: true,
         updated_at: true,
         expires_at: true,
+        name: true,
       },
     });
 
@@ -255,10 +271,12 @@ export class FilesService {
       },
       data: {
         description: dto.description,
+        name: dto.name,
       },
       select: {
         id: true,
         size: true,
+        name: true,
         status: true,
         user_id: true,
         deleted_at: true,

@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  MaxLength,
+  MinLength,
+  Matches,
+} from 'class-validator';
 
 import { File } from '../../../../generated/prisma/client';
 
@@ -9,7 +15,7 @@ export class UploadFileDto implements Pick<File, 'description'> {
   @ApiProperty({
     minLength: 5,
     maxLength: 100,
-    example: 'My yearbook photo',
+    example: 'My highschool yearbook photo',
     description: 'The description of the file that was uploaded',
   })
   @IsString()
@@ -24,4 +30,20 @@ export class UploadFileDto implements Pick<File, 'description'> {
   })
   @IsEnum(LIFETIMES, { message: 'Invalid lifetime' })
   lifetime: Lifetime;
+
+  @ApiProperty({
+    description: 'The name of the file',
+    maxLength: 50,
+    minLength: 5,
+    example: 'Yearbook',
+    pattern: '^[a-zA-Z0-9\\s\\-_]+$',
+  })
+  @IsString()
+  @MinLength(5, { message: 'File name is too short' })
+  @MaxLength(50, { message: 'File name is too long' })
+  @Matches(/^[a-zA-Z0-9\s\-_]+$/, {
+    message:
+      'File name can only contain letters, numbers, spaces, hyphens, and underscores',
+  })
+  name: string;
 }
