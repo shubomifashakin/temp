@@ -176,6 +176,7 @@ export class FilesController {
     description: 'Id of the file to be updated',
     name: 'id',
   })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @Patch(':id')
   updateSingleFile(
     @Req() req: Request,
@@ -258,6 +259,7 @@ export class FilesController {
   @ApiOperation({ summary: 'Update file link details' })
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404, description: 'File does not exist' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiParam({
     name: 'id',
     description: 'Id of the file to update link details for',
