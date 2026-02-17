@@ -16,10 +16,14 @@ import { Subscription } from '@polar-sh/sdk/models/components/subscription';
 import { ProductsListResponse } from '@polar-sh/sdk/models/operations/productslist';
 import { ProductVisibility } from '@polar-sh/sdk/models/components/productvisibility';
 import { ProductSortProperty } from '@polar-sh/sdk/models/components/productsortproperty';
-import { EventType } from '@polar-sh/sdk/models/operations/webhookslistwebhookdeliveries.js';
+import { EventType } from '@polar-sh/sdk/models/operations/webhookslistwebhookdeliveries';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
+import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval';
+
+import { BillingInterval, Plan } from '../../../generated/prisma/enums';
+import { benefits, mappedPolarIntervals } from '../../common/constants';
 
 @Injectable()
 export class PolarService {
@@ -184,5 +188,42 @@ export class PolarService {
     } catch (error) {
       return { success: false, error: makeError(error), data: null };
     }
+  }
+
+  polarProductIdToPlan(
+    productId: string,
+    interval: SubscriptionRecurringInterval,
+  ): FnResult<{ plan: Plan; benefits: string[]; interval: BillingInterval }> {
+    const polarProId = this.configService.get<string>('POLAR_PRODUCT_PRO');
+
+    if (!polarProId) {
+      return {
+        success: false,
+        error: new Error('Polar Pro ProductId Not Set In Env'),
+        data: null,
+      };
+    }
+
+    const plans = {
+      [polarProId]: {
+        plan: Plan.PRO,
+        benefits: benefits[Plan.PRO],
+        interval: mappedPolarIntervals[interval],
+      },
+    };
+
+    const selectedPlan = plans[productId];
+
+    if (!selectedPlan) {
+      return {
+        success: false,
+        error: new Error(
+          `Plan does not exist for Polar product with id:${productId}`,
+        ),
+        data: null,
+      };
+    }
+
+    return { success: true, data: selectedPlan, error: null };
   }
 }

@@ -1,45 +1,15 @@
 import { Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
 import { SubscriptionsController } from './subscriptions.controller';
 
 import { SubscriptionsService } from './subscriptions.service';
 
-//FIXME: MAKE IT A SERVICE
-process.env.POLAR_PRODUCT_PRO = 'test-value';
-
 import { RedisModule } from '../../core/redis/redis.module';
-import { PolarService } from '../../core/polar/polar.service';
-import { DatabaseService } from '../../core/database/database.service';
 import { DatabaseModule } from '../../core/database/database.module';
-import {
-  SubscriptionStatus,
-  SubscriptionProvider,
-} from '../../../generated/prisma/enums';
 import { Request, Response } from 'express';
-
-const mockDatabaseService = {
-  subscription: {
-    findFirst: jest.fn(),
-  },
-  user: {
-    findUniqueOrThrow: jest.fn(),
-  },
-};
-
-const mockPolarService = {
-  getAvailableProducts: jest.fn(),
-  cancelSubscription: jest.fn(),
-  getProduct: jest.fn(),
-  createCheckout: jest.fn(),
-};
-
-const mockConfigService = {
-  getOrThrow: jest.fn().mockReturnValue('test-value'),
-  get: jest.fn().mockReturnValue('test-value'),
-};
 
 const mockLogger = {
   log: jest.fn(),
@@ -61,6 +31,12 @@ const mockResponse = {
   redirect: jest.fn(),
 } as unknown as jest.Mocked<Response>;
 
+const mockSubscriptionService = {
+  cancelSubscription: jest.fn(),
+  getPolarPlans: jest.fn(),
+  createPolarCheckout: jest.fn(),
+};
+
 describe('SubscriptionsController', () => {
   let controller: SubscriptionsController;
 
@@ -68,10 +44,7 @@ describe('SubscriptionsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SubscriptionsController],
       providers: [
-        SubscriptionsService,
-        { useValue: mockPolarService, provide: PolarService },
-        { useValue: mockConfigService, provide: ConfigService },
-        { useValue: mockDatabaseService, provide: DatabaseService },
+        { provide: SubscriptionsService, useValue: mockSubscriptionService },
       ],
       imports: [
         JwtModule,
@@ -93,19 +66,8 @@ describe('SubscriptionsController', () => {
   });
 
   it('should cancel the subscription', async () => {
-    const subId = 'test-sub-id';
-
-    mockDatabaseService.subscription.findFirst.mockResolvedValue({
-      status: SubscriptionStatus.ACTIVE,
-      provider: SubscriptionProvider.POLAR,
-      provider_subscription_id: subId,
-      cancelled_at: null,
-      cancel_at_period_end: false,
-    });
-
-    mockPolarService.cancelSubscription.mockResolvedValue({
-      success: true,
-      error: false,
+    mockSubscriptionService.cancelSubscription.mockResolvedValue({
+      message: 'Success',
     });
 
     const response = await controller.cancelSubscription(mockRequest);
@@ -114,28 +76,8 @@ describe('SubscriptionsController', () => {
   });
 
   it('should get the polar plans', async () => {
-    const prices = [
-      { amountType: 'fixed', priceAmount: 20, priceCurrency: 'usd' },
-    ];
-
-    const result = {
-      result: {
-        pagination: { maxPagee: 1 },
-        items: [
-          {
-            id: 'test-value',
-            recurringInterval: 'day',
-            prices,
-            isRecurring: true,
-          },
-        ],
-      },
-    };
-
-    mockPolarService.getAvailableProducts.mockResolvedValue({
-      success: true,
-      data: result,
-      error: null,
+    mockSubscriptionService.getPolarPlans.mockResolvedValue({
+      data: [{ amount_in_dollars: 0.2 }],
     });
 
     const res = await controller.getPolarPlans();
@@ -144,39 +86,20 @@ describe('SubscriptionsController', () => {
   });
 
   it('should create the checkout url', async () => {
-    const userId = 'test-user-id';
-    const testProductId = 'test-product-id';
-
-    mockDatabaseService.user.findUniqueOrThrow.mockResolvedValue({
-      name: 'Test User',
-      emai: 'test@email.com',
-      id: userId,
+    mockSubscriptionService.createPolarCheckout.mockResolvedValue({
+      url: 'test-url',
     });
 
-    mockDatabaseService.subscription.findFirst.mockResolvedValue(null);
-
-    mockPolarService.getProduct.mockResolvedValue({
-      success: true,
-      data: true,
-      error: null,
-    });
-
-    const checkoutUrl = 'test-url';
-
-    mockPolarService.createCheckout.mockResolvedValue({
-      success: true,
-      data: { url: checkoutUrl },
-      error: null,
-    });
-
+    const productId = 'test-product-id';
     await controller.createPolarCheckout(mockRequest, mockResponse, {
-      product_id: testProductId,
+      product_id: productId,
     });
 
     expect(mockResponse.redirect).toHaveBeenCalled();
     expect(mockResponse.redirect).toHaveBeenCalledTimes(1);
-    expect(mockPolarService.getProduct).toHaveBeenCalledWith({
-      productId: testProductId,
-    });
+    expect(mockSubscriptionService.createPolarCheckout).toHaveBeenCalledWith(
+      testUserId,
+      { product_id: productId },
+    );
   });
 });

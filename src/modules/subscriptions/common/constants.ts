@@ -1,15 +1,1 @@
-import { BillingInterval, Plan } from '../../../../generated/prisma/enums';
-
-import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval.js';
-
-export const mappedPolarIntervals = {
-  [SubscriptionRecurringInterval.Day]: BillingInterval.DAY,
-  [SubscriptionRecurringInterval.Year]: BillingInterval.YEAR,
-  [SubscriptionRecurringInterval.Week]: BillingInterval.WEEK,
-  [SubscriptionRecurringInterval.Month]: BillingInterval.MONTH,
-};
-
-export const benefits = {
-  [Plan.FREE]: ['7Day lifetime', 'Up to 25mb file'],
-  [Plan.PRO]: ['Longer lifetimes (14days, 1Month)', 'Up to 100Mb files'],
-};
+export { benefits, mappedPolarIntervals } from '../../../common/constants';

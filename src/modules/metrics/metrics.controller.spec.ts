@@ -1,5 +1,6 @@
 import { Response } from 'express';
 
+import { Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -18,6 +19,15 @@ const mockResponse = {
   send: jest.fn(),
 } as unknown as Response;
 
+const mockLogger = {
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  fatal: jest.fn(),
+  verbose: jest.fn(),
+} as unknown as jest.Mocked<Logger>;
+
 describe('MetricsController', () => {
   let controller: MetricsController;
 
@@ -34,6 +44,7 @@ describe('MetricsController', () => {
     }).compile();
 
     controller = module.get<MetricsController>(MetricsController);
+    module.useLogger(mockLogger);
 
     jest.clearAllMocks();
   });

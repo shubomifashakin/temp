@@ -9,9 +9,6 @@ import {
 
 import { SubscriptionsService } from './subscriptions.service';
 
-//FIXME: MAKE IT A SERVICE
-process.env.POLAR_PRODUCT_PRO = 'test-value';
-
 import { PolarService } from '../../core/polar/polar.service';
 import { DatabaseService } from '../../core/database/database.service';
 import {
@@ -33,6 +30,7 @@ const mockPolarService = {
   cancelSubscription: jest.fn(),
   getProduct: jest.fn(),
   createCheckout: jest.fn(),
+  polarProductIdToPlan: jest.fn(),
 };
 
 const mockConfigService = {
@@ -242,6 +240,16 @@ describe('SubscriptionsService', () => {
     mockPolarService.getAvailableProducts.mockResolvedValue({
       success: true,
       data: result,
+      error: null,
+    });
+
+    mockPolarService.polarProductIdToPlan.mockReturnValue({
+      success: true,
+      data: {
+        plan: 'test-plan',
+        benefits: ['test-benefit'],
+        interval: 'day',
+      },
       error: null,
     });
 

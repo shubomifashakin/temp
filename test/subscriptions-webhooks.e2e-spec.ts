@@ -8,9 +8,7 @@ import cookieParser from 'cookie-parser';
 
 import { Test, TestingModule } from '@nestjs/testing';
 
-//FIXME: POLAR_PRO_PRODUC_ENV
 const testPolarProductId = 'test-polar-product-id';
-process.env.POLAR_PRODUCT_PRO = 'test-polar-product-id';
 
 import {
   ValidationPipe,
@@ -29,6 +27,7 @@ import { Order } from '@polar-sh/sdk/models/components/order';
 import { Subscription } from '@polar-sh/sdk/models/components/subscription';
 import { PrismaClientKnownRequestFilterFilter } from '../src/common/filters/prisma-client-known-request.filter';
 import { PrismaClientUnknownRequestFilterFilter } from '../src/common/filters/prisma-client-unknown-request.filter';
+import { BillingInterval, Plan } from '../generated/prisma/enums';
 
 const testSubscriptionId = 'test-subscription-id';
 
@@ -56,6 +55,7 @@ const mockPolarService = {
   getProduct: jest.fn(),
   createCheckout: jest.fn(),
   validateWebhookEvent: jest.fn(),
+  polarProductIdToPlan: jest.fn(),
 };
 
 const mockFetch = jest.fn();
@@ -117,6 +117,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
+
+    mockPolarService.polarProductIdToPlan.mockReturnValue({
+      success: true,
+      data: {
+        plan: Plan.PRO,
+        benefits: ['test-benefit'],
+        interval: BillingInterval.MONTH,
+      },
+      error: null,
+    });
   });
 
   afterEach(async () => {

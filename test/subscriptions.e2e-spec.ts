@@ -20,9 +20,7 @@ import { ValidationError } from 'class-validator';
 
 import { DatabaseService } from '../src/core/database/database.service';
 import { PolarService } from '../src/core/polar/polar.service';
-
-//FIXME:
-process.env.POLAR_PRODUCT_PRO = 'test-product-id';
+import { BillingInterval, Plan } from '../generated/prisma/enums';
 
 const mockLogger = {
   error: jest.fn(),
@@ -47,6 +45,7 @@ const mockPolarService = {
   getAvailableProducts: jest.fn(),
   getProduct: jest.fn(),
   createCheckout: jest.fn(),
+  polarProductIdToPlan: jest.fn(),
 };
 
 const mockFetch = jest.fn();
@@ -103,6 +102,16 @@ describe('SubscriptionsController (e2e)', () => {
 
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
+
+    mockPolarService.polarProductIdToPlan.mockReturnValue({
+      success: true,
+      data: {
+        plan: Plan.PRO,
+        benefits: ['test-benefit'],
+        interval: BillingInterval.MONTH,
+      },
+      error: null,
+    });
   });
 
   afterEach(async () => {
