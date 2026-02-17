@@ -1,8 +1,9 @@
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  InternalServerErrorException,
+  Logger,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -52,6 +53,15 @@ const mockJwtService = {
   decode: jest.fn(),
 };
 
+const mockLogger = {
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  fatal: jest.fn(),
+  verbose: jest.fn(),
+} as unknown as jest.Mocked<Logger>;
+
 describe('AuthService', () => {
   let service: AuthService;
 
@@ -71,6 +81,8 @@ describe('AuthService', () => {
       .compile();
 
     service = module.get<AuthService>(AuthService);
+
+    module.useLogger(mockLogger);
 
     jest.clearAllMocks();
     jest.resetAllMocks();

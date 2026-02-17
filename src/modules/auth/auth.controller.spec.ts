@@ -6,6 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   UnauthorizedException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
@@ -64,6 +65,15 @@ const mockResponse = {
   redirect: jest.fn(),
 } as unknown as jest.Mocked<Response>;
 
+const mockLogger = {
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  fatal: jest.fn(),
+  verbose: jest.fn(),
+} as unknown as jest.Mocked<Logger>;
+
 const mockRequest = {
   cookies: {
     [TOKEN.ACCESS.TYPE]: 'test-access-token',
@@ -92,6 +102,7 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
 
+    module.useLogger(mockLogger);
     jest.clearAllMocks();
   });
 

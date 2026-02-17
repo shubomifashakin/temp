@@ -7,7 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { centsToDollars, polarProductIdToPlan } from './common/utils';
+import { centsToDollars } from './common/utils';
 import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
 
@@ -105,7 +105,7 @@ export class SubscriptionsService {
         throw new InternalServerErrorException();
       }
 
-      const productInfo = polarProductIdToPlan(
+      const productInfo = this.polarService.polarProductIdToPlan(
         product.id,
         product.recurringInterval,
       );
@@ -125,7 +125,10 @@ export class SubscriptionsService {
       const amountInCents = allFixedPrices[0].priceAmount;
       const currency = allFixedPrices[0].priceCurrency;
 
-      const productInfo = polarProductIdToPlan(id, recurringInterval!);
+      const productInfo = this.polarService.polarProductIdToPlan(
+        id,
+        recurringInterval!,
+      );
 
       return {
         id,

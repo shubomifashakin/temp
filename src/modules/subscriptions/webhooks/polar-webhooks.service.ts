@@ -9,7 +9,7 @@ import { Order } from '@polar-sh/sdk/models/components/order';
 import { Subscription } from '@polar-sh/sdk/models/components/subscription';
 import { EventType } from '@polar-sh/sdk/models/operations/webhookslistwebhookdeliveries';
 
-import { polarProductIdToPlan } from '../common/utils';
+import { PolarService } from '../../../core/polar/polar.service';
 import { DatabaseService } from '../../../core/database/database.service';
 
 import { makeError } from '../../../common/utils';
@@ -22,6 +22,7 @@ export class PolarWebhooksService {
   constructor(
     private readonly configService: ConfigService,
     private readonly databaseService: DatabaseService,
+    private readonly polarService: PolarService,
   ) {}
 
   async handleEvent(
@@ -130,7 +131,10 @@ export class PolarWebhooksService {
       data: details,
       error: mapError,
       success: mapSuccess,
-    } = polarProductIdToPlan(data.productId, data.recurringInterval);
+    } = this.polarService.polarProductIdToPlan(
+      data.productId,
+      data.recurringInterval,
+    );
 
     if (!mapSuccess) {
       this.logger.error({
@@ -207,7 +211,10 @@ export class PolarWebhooksService {
       data: details,
       error: mapError,
       success: mapSuccess,
-    } = polarProductIdToPlan(data.productId, data.recurringInterval);
+    } = this.polarService.polarProductIdToPlan(
+      data.productId,
+      data.recurringInterval,
+    );
 
     if (!mapSuccess) {
       this.logger.error({
@@ -277,7 +284,10 @@ export class PolarWebhooksService {
       error,
       success,
       data: details,
-    } = polarProductIdToPlan(data.productId, data.recurringInterval);
+    } = this.polarService.polarProductIdToPlan(
+      data.productId,
+      data.recurringInterval,
+    );
 
     if (!success) {
       this.logger.error({
@@ -356,7 +366,10 @@ export class PolarWebhooksService {
       error,
       success,
       data: details,
-    } = polarProductIdToPlan(data.productId, data.recurringInterval);
+    } = this.polarService.polarProductIdToPlan(
+      data.productId,
+      data.recurringInterval,
+    );
 
     if (!success) {
       this.logger.error({
@@ -447,7 +460,7 @@ export class PolarWebhooksService {
       error,
       success,
       data: details,
-    } = polarProductIdToPlan(
+    } = this.polarService.polarProductIdToPlan(
       data.subscription.productId,
       data.subscription.recurringInterval,
     );

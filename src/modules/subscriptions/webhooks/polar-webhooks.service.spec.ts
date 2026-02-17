@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { PolarWebhooksService } from './polar-webhooks.service';
 
+import { PolarService } from '../../../core/polar/polar.service';
 import { DatabaseService } from '../../../core/database/database.service';
 
 import { Order } from '@polar-sh/sdk/models/components/order';
@@ -11,7 +12,9 @@ import { Subscription } from '@polar-sh/sdk/models/components/subscription';
 
 const testProductId = 'test-product-id';
 
-process.env.POLAR_PRODUCT_PRO = testProductId;
+const mockPolarService = {
+  polarProductIdToPlan: jest.fn(),
+};
 
 const mockDatabaseService = {
   subscription: {
@@ -34,6 +37,9 @@ const mockLogger = {
   verbose: jest.fn(),
 } as unknown as jest.Mocked<Logger>;
 
+const testInterval = 'day';
+const testPlan = 'test-plan';
+
 describe('PolarWebhooksService', () => {
   let service: PolarWebhooksService;
 
@@ -43,6 +49,7 @@ describe('PolarWebhooksService', () => {
         PolarWebhooksService,
         { useValue: mockDatabaseService, provide: DatabaseService },
         { useValue: mockConfigService, provide: ConfigService },
+        { useValue: mockPolarService, provide: PolarService },
       ],
     }).compile();
 
@@ -51,6 +58,16 @@ describe('PolarWebhooksService', () => {
     module.useLogger(mockLogger);
 
     jest.clearAllMocks();
+
+    mockPolarService.polarProductIdToPlan.mockReturnValue({
+      success: true,
+      data: {
+        plan: testPlan,
+        benefits: ['test-benefit'],
+        interval: testInterval,
+      },
+      error: null,
+    });
   });
 
   it('should be defined', () => {
@@ -187,11 +204,11 @@ describe('PolarWebhooksService', () => {
       create: {
         user_id: 'test-user-id',
         provider: 'POLAR',
-        plan: 'PRO',
+        plan: testPlan,
         status: 'INACTIVE',
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
-        interval: 'MONTH',
+        interval: testInterval,
         product_id: mockSubscription.productId,
         provider_subscription_id: mockSubscription.id,
         provider_customer_id: mockSubscription.customerId,
@@ -294,11 +311,11 @@ describe('PolarWebhooksService', () => {
       create: {
         status: 'ACTIVE',
         provider: 'POLAR',
-        plan: 'PRO',
+        plan: testPlan,
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
         product_id: mockSubscription.productId,
-        interval: 'MONTH',
+        interval: testInterval,
         provider_subscription_id: mockSubscription.id,
         provider_customer_id: mockSubscription.customerId,
         user_id: 'test-user-id',
@@ -314,11 +331,11 @@ describe('PolarWebhooksService', () => {
       update: {
         status: 'ACTIVE',
         provider: 'POLAR',
-        plan: 'PRO',
+        plan: testPlan,
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
         product_id: mockSubscription.productId,
-        interval: 'MONTH',
+        interval: testInterval,
         current_period_end: mockSubscription.currentPeriodEnd,
         interval_count: mockSubscription.recurringIntervalCount,
         cancel_at_period_end: mockSubscription.cancelAtPeriodEnd,
@@ -464,8 +481,8 @@ describe('PolarWebhooksService', () => {
       },
       data: {
         status: 'ACTIVE',
-        plan: 'PRO',
-        interval: 'MONTH',
+        plan: testPlan,
+        interval: testInterval,
         currency: mockSubscription.currency,
         product_id: mockSubscription.subscription!.productId,
         interval_count: mockSubscription.subscription!.recurringIntervalCount,
