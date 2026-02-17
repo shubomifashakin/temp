@@ -15,9 +15,9 @@ export class CreateLinkDto {
     description: 'A description for the link',
     example: 'Generated this link to share with friends',
   })
-  @IsString({ message: 'Invalid description' })
-  @MinLength(5, { message: 'Description is too short' })
   @MaxLength(100, { message: 'Description is too long' })
+  @MinLength(5, { message: 'Description is too short' })
+  @IsString({ message: 'Description should be a string' })
   description: string;
 
   @ApiProperty({

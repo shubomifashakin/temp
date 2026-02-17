@@ -162,7 +162,8 @@ export class PolarWebhooksService {
         current_period_end: data.currentPeriodEnd
           ? new Date(data.currentPeriodEnd)
           : null,
-        cancel_at_period_end: data.cancelAtPeriodEnd || false,
+        cancel_at_period_end: data.cancelAtPeriodEnd || true,
+        cancelled_at: data.canceledAt || new Date(),
         last_event_at: timestamp,
       },
       update: {
