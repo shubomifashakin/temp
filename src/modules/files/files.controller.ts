@@ -1,9 +1,8 @@
-import { type Response, type Request } from 'express';
+import { type Request } from 'express';
 
 import {
   Req,
   Get,
-  Res,
   Body,
   Post,
   Param,
@@ -27,6 +26,7 @@ import {
   ApiOperation,
   ApiConsumes,
   ApiBadRequestResponse,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 
 import { FilesService } from './files.service';
@@ -36,19 +36,17 @@ import { GetFileDto } from './dtos/get-file.dto';
 import { UploadFileDto } from './dtos/upload-file.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
-import { Public } from '../../common/decorators/public.decorator';
 import { SubscriptionPlanInterceptor } from '../../common/interceptors/subscription.interceptor';
 
 import { UpdateFileDto } from './dtos/update-file.dto';
 import { CreateLinkDto } from './dtos/create-link.dto';
 import { UpdateLinkDto } from './dtos/update-link.dto';
-import { LinkDetailsDto } from './dtos/link-details.dto';
-import { GetLinkFileDto } from './dtos/get-link-file.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 import { UploadFile } from './common/decorators/upload-file.decorator';
 
+@ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
@@ -277,33 +275,5 @@ export class FilesController {
     @Param('linkId') linkId: string,
   ) {
     return this.filesService.updateLink(req.user.id, fileId, linkId, dto);
-  }
-
-  @ApiOperation({ summary: 'Get file link details' })
-  @ApiResponse({ status: 200, type: LinkDetailsDto })
-  @ApiResponse({ status: 404, description: 'File link does not exist' })
-  @Public()
-  @Get('links/:linkId')
-  async getLinkDetails(@Param('linkId') linkId: string) {
-    return this.filesService.getLinkDetails(linkId);
-  }
-
-  @ApiOperation({
-    summary: 'Get linked file',
-    description: 'Redirects to the file URL',
-  })
-  @ApiBody({ type: GetLinkFileDto })
-  @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
-  @ApiResponse({ status: 404, description: 'File link does not exist' })
-  @Public()
-  @Post('links/:linkId')
-  async getLinkFile(
-    @Res() res: Response,
-    @Body() dto: GetLinkFileDto,
-    @Param('linkId') linkId: string,
-  ) {
-    const url = await this.filesService.getLinkFile(linkId, dto);
-
-    res.redirect(302, url.fileUrl);
   }
 }
