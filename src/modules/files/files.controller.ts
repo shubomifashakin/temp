@@ -11,7 +11,6 @@ import {
   Query,
   Delete,
   Logger,
-  HttpCode,
   UseGuards,
   Controller,
   UploadedFile,
@@ -58,7 +57,7 @@ export class FilesController {
 
   @UseInterceptors(SubscriptionPlanInterceptor)
   @ApiOperation({ summary: 'Upload a file' })
-  @ApiResponse({ status: 200, description: 'File was successfully uploaded' })
+  @ApiResponse({ status: 201, description: 'File was successfully uploaded' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -91,7 +90,6 @@ export class FilesController {
   })
   @UploadFile()
   @Post()
-  @HttpCode(201)
   async uploadFile(
     @Req() req: Request,
     @Body() body: UploadFileDto,
