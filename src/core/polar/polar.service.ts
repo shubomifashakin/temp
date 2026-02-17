@@ -196,16 +196,24 @@ export class PolarService {
   ): FnResult<{ plan: Plan; benefits: string[]; interval: BillingInterval }> {
     const polarProId = this.configService.get<string>('POLAR_PRODUCT_PRO');
 
-    if (!polarProId) {
+    const allPlanIds = [{ name: 'pro', id: polarProId }];
+
+    const missingPlan = allPlanIds.find(
+      (plan) => typeof plan.id === 'undefined' || plan.id === null,
+    );
+
+    if (missingPlan) {
       return {
         success: false,
-        error: new Error('Polar Pro ProductId Not Set In Env'),
+        error: new Error(
+          `Polar ${missingPlan.name.toUpperCase()} ProductId Not Set In Env`,
+        ),
         data: null,
       };
     }
 
     const plans = {
-      [polarProId]: {
+      [polarProId!]: {
         plan: Plan.PRO,
         benefits: benefits[Plan.PRO],
         interval: mappedPolarIntervals[interval],
