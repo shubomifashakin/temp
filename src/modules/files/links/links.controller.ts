@@ -15,7 +15,6 @@ export class LinksController {
   @ApiResponse({ status: 404, description: 'Link does not exist' })
   @Get(':linkId')
   async getLinkDetails(@Param('linkId') linkId: string) {
-    console.log('reached');
     return this.linksService.getLinkDetails(linkId);
   }
 
