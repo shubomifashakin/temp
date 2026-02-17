@@ -130,6 +130,24 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
     });
 
     describe('subscription.active', () => {
+      const data = {
+        type: 'subscription.active' as EventType,
+        timestamp: new Date(),
+        data: {
+          id: testSubscriptionId,
+          recurringInterval: 'month',
+          amount: 200,
+          currency: 'usd',
+          productId: testPolarProductId,
+          customerId: 'test-customer-id',
+          startedAt: new Date(),
+          recurringIntervalCount: 1,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(),
+          cancelAtPeriodEnd: false,
+        } as unknown as Subscription,
+      };
+
       beforeEach(async () => {
         await databaseService.user.deleteMany();
         await databaseService.refreshToken.deleteMany();
@@ -147,24 +165,14 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
           success: true,
           error: null,
           data: {
-            type: 'subscription.active' as EventType,
+            ...data,
             timestamp: new Date(),
             data: {
-              id: testSubscriptionId,
-              recurringInterval: 'month',
-              amount: 200,
-              currency: 'usd',
-              productId: testPolarProductId,
-              customerId: 'test-customer-id',
+              ...data.data,
               metadata: {
                 userId: user.id,
               },
-              startedAt: new Date(),
-              recurringIntervalCount: 1,
-              currentPeriodStart: new Date(),
-              currentPeriodEnd: new Date(),
-              cancelAtPeriodEnd: false,
-            } as unknown as Subscription,
+            },
           },
         });
 
@@ -215,24 +223,14 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
           success: true,
           error: null,
           data: {
-            type: 'subscription.active' as EventType,
+            ...data,
             timestamp: new Date(100),
             data: {
-              id: testSubscriptionId,
-              recurringInterval: 'month',
-              amount: 200,
-              currency: 'usd',
-              productId: testPolarProductId,
-              customerId: 'test-customer-id',
+              ...data.data,
               metadata: {
                 userId: user.id,
               },
-              startedAt: new Date(),
-              recurringIntervalCount: 1,
-              currentPeriodStart: new Date(),
-              currentPeriodEnd: new Date(),
-              cancelAtPeriodEnd: false,
-            } as unknown as Subscription,
+            },
           },
         });
 
@@ -255,6 +253,25 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
     });
 
     describe('subscription.canceled', () => {
+      const data = {
+        type: 'subscription.canceled' as EventType,
+        timestamp: new Date(Date.now() * 5),
+        data: {
+          id: testSubscriptionId,
+          recurringInterval: 'month',
+          amount: 200,
+          currency: 'usd',
+          productId: testPolarProductId,
+          customerId: 'test-customer-id',
+          startedAt: new Date(),
+          recurringIntervalCount: 1,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(),
+          cancelAtPeriodEnd: true,
+          canceledAt: new Date(),
+        } as unknown as Subscription,
+      };
+
       beforeEach(async () => {
         await databaseService.user.deleteMany();
         await databaseService.refreshToken.deleteMany();
@@ -290,25 +307,9 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
           success: true,
           error: null,
           data: {
-            type: 'subscription.canceled' as EventType,
+            ...data,
             timestamp: new Date(Date.now() * 5),
-            data: {
-              id: testSubscriptionId,
-              recurringInterval: 'month',
-              amount: 200,
-              currency: 'usd',
-              productId: testPolarProductId,
-              customerId: 'test-customer-id',
-              metadata: {
-                userId: user.id,
-              },
-              startedAt: new Date(),
-              recurringIntervalCount: 1,
-              currentPeriodStart: new Date(),
-              currentPeriodEnd: new Date(),
-              cancelAtPeriodEnd: true,
-              canceledAt: new Date(),
-            } as unknown as Subscription,
+            data: { ...data.data, metadata: { userId: user.id } },
           },
         });
 
@@ -359,25 +360,9 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
           success: true,
           error: null,
           data: {
-            type: 'subscription.canceled' as EventType,
+            ...data,
             timestamp: new Date(100),
-            data: {
-              id: testSubscriptionId,
-              recurringInterval: 'month',
-              amount: 200,
-              currency: 'usd',
-              productId: testPolarProductId,
-              customerId: 'test-customer-id',
-              metadata: {
-                userId: user.id,
-              },
-              startedAt: new Date(),
-              recurringIntervalCount: 1,
-              currentPeriodStart: new Date(),
-              currentPeriodEnd: new Date(),
-              cancelAtPeriodEnd: true,
-              canceledAt: new Date(),
-            } as unknown as Subscription,
+            data: { ...data.data, metadata: { userId: user.id } },
           },
         });
 
@@ -692,6 +677,29 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
     });
 
     describe('order.created', () => {
+      const data = {
+        currency: 'usd',
+        status: 'paid',
+        billingReason: 'subscription_cycle',
+        subscription: {
+          id: testSubscriptionId,
+          recurringInterval: 'month',
+          amount: 200,
+          currency: 'usd',
+          productId: testPolarProductId,
+          customerId: 'test-customer-id',
+          startedAt: new Date(),
+          recurringIntervalCount: 1,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(),
+          cancelAtPeriodEnd: true,
+          canceledAt: null,
+        },
+      } as unknown as Pick<
+        Order,
+        'subscription' | 'currency' | 'billingReason' | 'status'
+      >;
+
       beforeEach(async () => {
         await databaseService.user.deleteMany();
         await databaseService.refreshToken.deleteMany();
@@ -731,30 +739,14 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             type: 'order.created' as EventType,
             timestamp: new Date(100),
             data: {
-              currency: 'usd',
-              status: 'paid',
-              billingReason: 'subscription_cycle',
+              ...data,
               subscription: {
-                id: testSubscriptionId,
-                recurringInterval: 'month',
-                amount: 200,
-                currency: 'usd',
-                productId: testPolarProductId,
-                customerId: 'test-customer-id',
+                ...data.subscription,
                 metadata: {
                   userId: user.id,
                 },
-                startedAt: new Date(),
-                recurringIntervalCount: 1,
-                currentPeriodStart: new Date(),
-                currentPeriodEnd: new Date(),
-                cancelAtPeriodEnd: true,
-                canceledAt: null,
               },
-            } as unknown as Pick<
-              Order,
-              'subscription' | 'currency' | 'billingReason' | 'status'
-            >,
+            },
           },
         });
 
@@ -814,30 +806,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             type: 'order.created' as EventType,
             timestamp: new Date(),
             data: {
-              currency: 'usd',
-              status: 'paid',
-              billingReason: 'subscription_cycle',
+              ...data,
               subscription: {
-                id: testSubscriptionId,
-                recurringInterval: 'month',
-                amount: 200,
-                currency: 'usd',
-                productId: testPolarProductId,
-                customerId: 'test-customer-id',
+                ...data.subscription,
+                currentPeriodStart: newCurrentPeriodStart,
+                currentPeriodEnd: newCurrentPeriodEnd,
                 metadata: {
                   userId: user.id,
                 },
-                startedAt: new Date(),
-                recurringIntervalCount: 1,
-                currentPeriodStart: newCurrentPeriodStart,
-                currentPeriodEnd: newCurrentPeriodEnd,
-                cancelAtPeriodEnd: true,
-                canceledAt: null,
               },
-            } as unknown as Pick<
-              Order,
-              'subscription' | 'currency' | 'billingReason' | 'status'
-            >,
+            },
           },
         });
 
