@@ -17,10 +17,10 @@ export class S3Service implements OnModuleDestroy {
 
   constructor(private readonly configService: ConfigService) {
     this.s3Client = new S3Client({
-      region: configService.getOrThrow('AWS_REGION'),
+      region: configService.get<string>('AWS_REGION')!,
       credentials: {
-        accessKeyId: configService.getOrThrow('AWS_ACCESS_KEY'),
-        secretAccessKey: configService.getOrThrow('AWS_SECRET_KEY'),
+        accessKeyId: configService.get<string>('AWS_ACCESS_KEY')!,
+        secretAccessKey: configService.get<string>('AWS_SECRET_KEY')!,
       },
     });
   }

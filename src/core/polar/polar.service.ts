@@ -32,9 +32,9 @@ export class PolarService {
 
   constructor(private readonly configService: ConfigService) {
     this.polar = new Polar({
-      accessToken: this.configService.getOrThrow('POLAR_ACCESS_TOKEN'),
+      accessToken: this.configService.get<string>('POLAR_ACCESS_TOKEN'),
       server:
-        this.configService.getOrThrow('NODE_ENV') === 'production'
+        this.configService.get<string>('NODE_ENV') === 'production'
           ? 'production'
           : 'sandbox',
     });
