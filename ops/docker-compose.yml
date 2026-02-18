@@ -51,8 +51,6 @@ services:
   temp:
     image: 545plea/temp:latest
     container_name: temp
-    ports:
-      - 3000:3000
     env_file:
       - ./.env
     depends_on:
