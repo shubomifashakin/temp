@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -10,17 +9,26 @@ import {
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
+import { AppConfigService } from '../app-config/app-config.service';
 
 @Injectable()
 export class S3Service implements OnModuleDestroy {
   private readonly s3Client: S3Client;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: AppConfigService) {
+    if (
+      !configService.AwsRegion.success ||
+      !configService.AwsAccessKey.success ||
+      !configService.AwsSecretKey.success
+    ) {
+      throw new Error('AWS region, access key, or secret key not found');
+    }
+
     this.s3Client = new S3Client({
-      region: configService.get<string>('AWS_REGION')!,
+      region: configService.AwsRegion.data,
       credentials: {
-        accessKeyId: configService.get<string>('AWS_ACCESS_KEY')!,
-        secretAccessKey: configService.get<string>('AWS_SECRET_KEY')!,
+        accessKeyId: configService.AwsAccessKey.data,
+        secretAccessKey: configService.AwsSecretKey.data,
       },
     });
   }

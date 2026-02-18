@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
@@ -22,6 +21,7 @@ import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
 import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval';
 
+import { AppConfigService } from '../app-config/app-config.service';
 import { BillingInterval, Plan } from '../../../generated/prisma/enums';
 import { benefits, mappedPolarIntervals } from '../../common/constants';
 
@@ -30,11 +30,15 @@ export class PolarService {
   private readonly polar: Polar;
   private readonly logger = new Logger(PolarService.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: AppConfigService) {
+    if (!configService.PolarAccessToken.success) {
+      throw new Error('Polar access token not found');
+    }
+
     this.polar = new Polar({
-      accessToken: this.configService.get<string>('POLAR_ACCESS_TOKEN'),
+      accessToken: this.configService.PolarAccessToken.data!,
       server:
-        this.configService.get<string>('NODE_ENV') === 'production'
+        this.configService.NodeEnv.data === 'production'
           ? 'production'
           : 'sandbox',
     });
@@ -161,9 +165,7 @@ export class PolarService {
     data: Order | Subscription;
   }> {
     try {
-      const polarSecret = this.configService.get<string>(
-        'POLAR_WEBHOOK_SECRET',
-      );
+      const polarSecret = this.configService.PolarWebhookSecret.data;
 
       if (!polarSecret) {
         this.logger.error({
@@ -194,7 +196,7 @@ export class PolarService {
     productId: string,
     interval: SubscriptionRecurringInterval,
   ): FnResult<{ plan: Plan; benefits: string[]; interval: BillingInterval }> {
-    const polarProId = this.configService.get<string>('POLAR_PRODUCT_PRO');
+    const polarProId = this.configService.PolarProductIdPro.data;
 
     const allPlanIds = [{ name: 'pro', id: polarProId }];
 

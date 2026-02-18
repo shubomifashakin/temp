@@ -4,23 +4,27 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ThrottlerStorageRecord } from '@nestjs/throttler/dist/throttler-storage-record.interface';
 
 import { createClient, RedisClientType, SetOptions } from 'redis';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
+import { AppConfigService } from '../app-config/app-config.service';
 
 @Injectable()
 export class RedisService implements OnModuleDestroy, OnModuleInit {
   private readonly client: RedisClientType;
   logger = new Logger(RedisService.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: AppConfigService) {
+    if (!configService.RedisUrl.success) {
+      throw new Error('Redis URL not found');
+    }
+
     this.client = createClient({
       name: 'Temp-Backend',
-      url: configService.get<string>('REDIS_URL'),
+      url: configService.RedisUrl.data,
     });
   }
 
