@@ -78,11 +78,21 @@ export class FilesService {
       throw new BadRequestException('You already have a file with this name');
     }
 
+    const s3Bucket = this.configService.S3BucketName;
+    if (!s3Bucket.success) {
+      this.logger.error({
+        error: s3Bucket.error,
+        message: 'S3 bucket name not set in env',
+      });
+
+      throw new InternalServerErrorException();
+    }
+
     const { success, error } = await this.s3Service.uploadToS3({
       key: key,
       body: file,
       tags: `lifetime=${dto.lifetime}`,
-      bucket: this.configService.S3BucketName.data!,
+      bucket: s3Bucket.data,
     });
 
     if (!success) {
