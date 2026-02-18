@@ -9,6 +9,7 @@ import { DatabaseService } from '../../../core/database/database.service';
 
 import { Order } from '@polar-sh/sdk/models/components/order';
 import { Subscription } from '@polar-sh/sdk/models/components/subscription';
+import { AppConfigService } from '../../../core/app-config/app-config.service';
 
 const testProductId = 'test-product-id';
 
@@ -21,6 +22,12 @@ const mockDatabaseService = {
     findUnique: jest.fn(),
     upsert: jest.fn(),
     update: jest.fn(),
+  },
+};
+
+const mockAppConfigService = {
+  PolarWebhookSecret: {
+    data: 'polar-webhook-secret',
   },
 };
 
@@ -50,6 +57,7 @@ describe('PolarWebhooksService', () => {
         { useValue: mockDatabaseService, provide: DatabaseService },
         { useValue: mockConfigService, provide: ConfigService },
         { useValue: mockPolarService, provide: PolarService },
+        { useValue: mockAppConfigService, provide: AppConfigService },
       ],
     }).compile();
 

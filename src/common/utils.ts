@@ -32,14 +32,6 @@ class EnvConfig {
 
   @IsString()
   @IsNotEmpty()
-  RESEND_API_KEY: string;
-
-  @IsString()
-  @IsNotEmpty()
-  MAILER_FROM: string;
-
-  @IsString()
-  @IsNotEmpty()
   GOOGLE_CLIENT_ID: string;
 
   @IsString()

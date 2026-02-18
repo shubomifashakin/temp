@@ -1,53 +1,23 @@
 import { Response } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { LinksController } from './links.controller';
 import { LinksService } from './links.service';
 
-import { S3Service } from '../../../core/s3/s3.service';
-import { RedisService } from '../../../core/redis/redis.service';
-import { DatabaseService } from '../../../core/database/database.service';
 import { DatabaseModule } from '../../../core/database/database.module';
 import { RedisModule } from '../../../core/redis/redis.module';
 import { S3Module } from '../../../core/s3/s3.module';
 import { SqsModule } from '../../../core/sqs/sqs.module';
 import { HasherModule } from '../../../core/hasher/hasher.module';
 import { PrometheusModule } from '../../../core/prometheus/prometheus.module';
+import { AppConfigModule } from '../../../core/app-config/app-config.module';
+import { AppConfigService } from '../../../core/app-config/app-config.service';
 
 const mockResponse = {
   redirect: jest.fn(),
 } as unknown as jest.Mocked<Response>;
-
-const mockDatabaseService = {
-  file: {
-    create: jest.fn(),
-    findUniqueOrThrow: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    findMany: jest.fn(),
-  },
-  link: {
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    findMany: jest.fn(),
-    findUniqueOrThrow: jest.fn(),
-  },
-};
-
-const mockRedisService = {
-  get: jest.fn(),
-  set: jest.fn(),
-  delete: jest.fn(),
-};
-
-const mockS3Service = {
-  uploadToS3: jest.fn(),
-  generatePresignedGetUrl: jest.fn(),
-};
 
 const mockLogger = {
   error: jest.fn(),
@@ -57,30 +27,66 @@ const mockLogger = {
   verbose: jest.fn(),
 };
 
+const mockAppConfigService = {
+  RedisUrl: {
+    data: undefined,
+    success: true,
+  },
+  DatabaseUrl: {
+    data: undefined,
+    success: true,
+  },
+  AwsAccessKey: {
+    data: 'test-value',
+    success: true,
+  },
+  AwsSecretKey: {
+    data: 'test-value',
+    success: true,
+  },
+  AwsRegion: {
+    data: 'test-value',
+    success: true,
+  },
+  NodeEnv: {
+    data: 'test-value',
+    success: true,
+  },
+  ServiceName: {
+    data: 'test-value',
+    success: true,
+  },
+  S3BucketName: {
+    data: 'test-value',
+    success: true,
+  },
+};
+
+const mockLinksService = {
+  getLinkDetails: jest.fn(),
+  getLinkFile: jest.fn(),
+};
+
 describe('LinksController', () => {
   let controller: LinksController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LinksController],
-      providers: [LinksService],
+      providers: [{ provide: LinksService, useValue: mockLinksService }],
       imports: [
         DatabaseModule,
         RedisModule,
         S3Module,
         SqsModule,
         HasherModule,
-        ConfigModule.forRoot({ isGlobal: true }),
+        AppConfigModule,
         PrometheusModule,
         JwtModule,
       ],
     })
-      .overrideProvider(DatabaseService)
-      .useValue(mockDatabaseService)
-      .overrideProvider(RedisService)
-      .useValue(mockRedisService)
-      .overrideProvider(S3Service)
-      .useValue(mockS3Service)
+      .overrideProvider(AppConfigService)
+      .useValue(mockAppConfigService)
       .compile();
 
     controller = module.get<LinksController>(LinksController);
@@ -94,38 +100,10 @@ describe('LinksController', () => {
   });
 
   it('should generate the presigned url for the file', async () => {
-    const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
-      password: null,
-      file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
-      },
-    };
-
-    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
-
-    mockRedisService.get.mockResolvedValue({
-      success: true,
-      error: null,
-      data: null,
-    });
-
     const testPresignedUrl = 'test-presigned-url';
-    mockS3Service.generatePresignedGetUrl.mockResolvedValue({
-      success: true,
-      error: null,
-      data: testPresignedUrl,
+    mockLinksService.getLinkFile.mockResolvedValue({
+      fileUrl: testPresignedUrl,
     });
-
-    mockRedisService.set.mockResolvedValue({
-      success: true,
-      error: null,
-    });
-
-    mockDatabaseService.link.update.mockResolvedValue(true);
 
     const testLinkId = 'test-link-id';
     await controller.getLinkFile(

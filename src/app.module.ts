@@ -23,6 +23,7 @@ import { RedisService } from './core/redis/redis.service';
 import { HasherModule } from './core/hasher/hasher.module';
 import { DatabaseModule } from './core/database/database.module';
 import { PrometheusModule } from './core/prometheus/prometheus.module';
+import { AppConfigModule } from './core/app-config/app-config.module';
 
 import { validateConfig } from './common/utils';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
@@ -30,7 +31,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: false,
       validate: (config) => {
         validateConfig(config);
 
@@ -172,6 +173,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
         };
       },
     }),
+    AppConfigModule,
     RedisModule,
     DatabaseModule,
     SqsModule,

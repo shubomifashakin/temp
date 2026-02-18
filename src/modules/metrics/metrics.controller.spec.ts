@@ -1,13 +1,13 @@
 import { Response } from 'express';
 
 import { Logger } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { MetricsController } from './metrics.controller';
 
 import { PrometheusModule } from '../../core/prometheus/prometheus.module';
 import { PrometheusService } from '../../core/prometheus/prometheus.service';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
 
 const mockPrometheusService = {
   getContentType: jest.fn(),
@@ -40,7 +40,7 @@ describe('MetricsController', () => {
           useValue: mockPrometheusService,
         },
       ],
-      imports: [ConfigModule.forRoot({ isGlobal: true }), PrometheusModule],
+      imports: [AppConfigModule, PrometheusModule],
     }).compile();
 
     controller = module.get<MetricsController>(MetricsController);

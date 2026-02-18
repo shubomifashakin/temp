@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 import { v4 as uuid } from 'uuid';
 
@@ -29,7 +29,7 @@ export class AuthService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
     private readonly redisService: RedisService,
     private readonly jwtService: JwtService,
   ) {}
@@ -96,14 +96,29 @@ export class AuthService {
 
     const response_type = 'code';
 
-    const client_Id = this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID');
+    const client_Id = this.configService.GoogleClientId;
+    this.logger.error({
+      message: 'Failed to get google client id',
+      error: client_Id.error,
+    });
 
-    const baseUrl = this.configService.getOrThrow<string>('BASE_URL');
+    if (!client_Id.success) {
+      throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
+    }
 
-    const redirect_uri = baseUrl + '/api/v1/auth/google/callback';
+    const baseUrl = this.configService.BaseUrl;
+    if (!baseUrl.success) {
+      this.logger.error({
+        message: 'Failed to get base url',
+        error: baseUrl.error,
+      });
+      throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
+    }
+
+    const redirect_uri = baseUrl.data + '/api/v1/auth/google/callback';
 
     const searchParams = new URLSearchParams({
-      client_id: client_Id,
+      client_id: client_Id.data,
       redirect_uri,
       response_type,
       scope: scopes.join(' '),
@@ -162,13 +177,32 @@ export class AuthService {
       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
     }
 
-    const client_Id = this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID');
+    const client_Id = this.configService.GoogleClientId;
 
-    const client_secret = this.configService.getOrThrow<string>(
-      'GOOGLE_CLIENT_SECRET',
-    );
+    const client_secret = this.configService.GoogleClientSecret;
 
-    const baseUrl = this.configService.getOrThrow<string>('BASE_URL');
+    const baseUrl = this.configService.BaseUrl;
+
+    if (!baseUrl.success || !client_Id.success || !client_secret.success) {
+      const message = !baseUrl.success
+        ? 'Failed to get base url'
+        : !client_Id.success
+          ? 'Failed to get client id'
+          : 'Failed to get client secret';
+
+      const error = !baseUrl.success
+        ? baseUrl.error
+        : !client_Id.success
+          ? client_Id.error
+          : client_secret.error;
+
+      this.logger.error({
+        message,
+        error,
+      });
+
+      throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
+    }
 
     const url = `https://oauth2.googleapis.com/token`;
 
@@ -180,9 +214,9 @@ export class AuthService {
       body: new URLSearchParams({
         code,
         grant_type: 'authorization_code',
-        client_id: client_Id,
-        client_secret,
-        redirect_uri: baseUrl + '/api/v1/auth/google/callback',
+        client_id: client_Id.data,
+        client_secret: client_secret.data,
+        redirect_uri: baseUrl.data + '/api/v1/auth/google/callback',
       }),
     });
 

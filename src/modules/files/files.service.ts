@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
@@ -29,6 +28,7 @@ import { RedisService } from '../../core/redis/redis.service';
 import { HasherService } from '../../core/hasher/hasher.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { PrometheusService } from '../../core/prometheus/prometheus.service';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 @Injectable()
 export class FilesService {
@@ -41,7 +41,7 @@ export class FilesService {
     private readonly s3Service: S3Service,
     private readonly sqsService: SqsService,
     private readonly redisService: RedisService,
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
     private readonly hasherService: HasherService,
     private readonly databaseService: DatabaseService,
     private readonly prometheusService: PrometheusService,
@@ -82,7 +82,7 @@ export class FilesService {
       key: key,
       body: file,
       tags: `lifetime=${dto.lifetime}`,
-      bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
+      bucket: this.configService.S3BucketName.data!,
     });
 
     if (!success) {
@@ -223,7 +223,7 @@ export class FilesService {
 
     const queued = await this.sqsService.pushMessage({
       message: { s3Key: s3Key.s3_key },
-      queueUrl: this.configService.getOrThrow('SQS_QUEUE_URL'),
+      queueUrl: this.configService.SqsQueueUrl.data!,
     });
 
     if (!queued.success) {
@@ -496,5 +496,9 @@ export class FilesService {
         expires_at: dto.expiresAt,
       },
     });
+
+    return {
+      message: 'success',
+    };
   }
 }

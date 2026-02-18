@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
@@ -13,6 +12,7 @@ import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto'
 
 import { PolarService } from '../../core/polar/polar.service';
 import { DatabaseService } from '../../core/database/database.service';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -20,7 +20,7 @@ export class SubscriptionsService {
 
   constructor(
     private readonly polarService: PolarService,
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
     private readonly databaseService: DatabaseService,
   ) {}
 
@@ -73,6 +73,17 @@ export class SubscriptionsService {
     const limit = 10;
     const page = cursor || 1;
 
+    const polarOrganizationId = this.configService.PolarOrganizationId;
+
+    if (!polarOrganizationId.success) {
+      this.logger.error({
+        error: polarOrganizationId.error,
+        message: 'Failed to fetch polar organization id',
+      });
+
+      throw new InternalServerErrorException();
+    }
+
     const { success, data, error } =
       await this.polarService.getAvailableProducts({
         page,
@@ -80,7 +91,7 @@ export class SubscriptionsService {
         isRecurring: true,
         visibility: ['public'],
         sorting: ['price_amount'],
-        organizationId: this.configService.getOrThrow('POLAR_ORGANIZATION_ID'),
+        organizationId: polarOrganizationId.data,
       });
 
     if (!success || !data?.result?.items) {
@@ -164,8 +175,8 @@ export class SubscriptionsService {
       throw new BadRequestException('User already has an active subscription');
     }
 
-    const returnUrl = this.configService.get<string>('CHECKOUT_RETURN_URL');
-    const successUrl = this.configService.get<string>('CHECKOUT_SUCCESS_URL');
+    const returnUrl = this.configService.CheckoutReturnUrl.data!;
+    const successUrl = this.configService.CheckoutSuccessUrl.data!;
 
     if (!returnUrl || !successUrl) {
       this.logger.error({

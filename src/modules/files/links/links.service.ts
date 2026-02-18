@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
@@ -8,14 +7,13 @@ import {
 } from '@nestjs/common';
 
 import { S3Service } from '../../../core/s3/s3.service';
-import { SqsService } from '../../../core/sqs/sqs.service';
 import { RedisService } from '../../../core/redis/redis.service';
 import { HasherService } from '../../../core/hasher/hasher.service';
 import { DatabaseService } from '../../../core/database/database.service';
-import { PrometheusService } from '../../../core/prometheus/prometheus.service';
 import { LinkDetailsDto } from '../dtos/link-details.dto';
 import { GetLinkFileDto } from '../dtos/get-link-file.dto';
 import { makePresignedUrlCacheKey } from '../common/utils';
+import { AppConfigService } from '../../../core/app-config/app-config.service';
 
 @Injectable()
 export class LinksService {
@@ -23,12 +21,10 @@ export class LinksService {
 
   constructor(
     private readonly s3Service: S3Service,
-    private readonly sqsService: SqsService,
     private readonly redisService: RedisService,
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
     private readonly hasherService: HasherService,
     private readonly databaseService: DatabaseService,
-    private readonly prometheusService: PrometheusService,
   ) {}
 
   async getLinkDetails(linkId: string): Promise<LinkDetailsDto> {
@@ -156,7 +152,7 @@ export class LinksService {
       await this.s3Service.generatePresignedGetUrl({
         ttl,
         key: linkFound.file.s3_key,
-        bucket: this.configService.getOrThrow('S3_BUCKET_NAME'),
+        bucket: this.configService.S3BucketName.data!,
       });
 
     const { success: cacheSuccess, error: cacheError } =

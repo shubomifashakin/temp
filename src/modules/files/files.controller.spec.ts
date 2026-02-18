@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -14,6 +13,8 @@ import { RedisModule } from '../../core/redis/redis.module';
 import { HasherModule } from '../../core/hasher/hasher.module';
 import { DatabaseModule } from '../../core/database/database.module';
 import { PrometheusModule } from '../../core/prometheus/prometheus.module';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 const mockLogger = {
   error: jest.fn(),
@@ -33,6 +34,37 @@ const mockFilesService = {
   getFileLinks: jest.fn(),
   revokeLink: jest.fn(),
   updateLink: jest.fn(),
+};
+
+const mockAppConfigService = {
+  RedisUrl: {
+    data: undefined,
+    success: true,
+  },
+  DatabaseUrl: {
+    data: undefined,
+    success: true,
+  },
+  AwsAccessKey: {
+    data: 'test-value',
+    success: true,
+  },
+  AwsSecretKey: {
+    data: 'test-value',
+    success: true,
+  },
+  AwsRegion: {
+    data: 'test-value',
+    success: true,
+  },
+  NodeEnv: {
+    data: 'test-value',
+    success: true,
+  },
+  ServiceName: {
+    data: 'test-value',
+    success: true,
+  },
 };
 
 const testUserId = 'test-user-id';
@@ -56,11 +88,14 @@ describe('FilesController', () => {
         S3Module,
         SqsModule,
         HasherModule,
-        ConfigModule.forRoot({ isGlobal: true }),
+        AppConfigModule,
         PrometheusModule,
         JwtModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(AppConfigService)
+      .useValue(mockAppConfigService)
+      .compile();
 
     controller = module.get<FilesController>(FilesController);
     module.useLogger(mockLogger);

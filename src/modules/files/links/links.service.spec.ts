@@ -1,5 +1,4 @@
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 
@@ -16,6 +15,8 @@ import { RedisModule } from '../../../core/redis/redis.module';
 import { HasherModule } from '../../../core/hasher/hasher.module';
 import { DatabaseModule } from '../../../core/database/database.module';
 import { PrometheusModule } from '../../../core/prometheus/prometheus.module';
+import { AppConfigModule } from '../../../core/app-config/app-config.module';
+import { AppConfigService } from '../../../core/app-config/app-config.service';
 
 const mockDatabaseService = {
   file: {
@@ -38,6 +39,37 @@ const mockRedisService = {
   get: jest.fn(),
   set: jest.fn(),
   delete: jest.fn(),
+};
+
+const mockConfigService = {
+  S3BucketName: {
+    data: 'test-bucket',
+  },
+  AwsRegion: {
+    data: 'test-region',
+    success: true,
+    error: null,
+  },
+  AwsAccessKey: {
+    data: 'test-access-key',
+    success: true,
+    error: null,
+  },
+  AwsSecretKey: {
+    data: 'test-secret-key',
+    success: true,
+    error: null,
+  },
+  ServiceName: {
+    data: 'test-service-name',
+    success: true,
+    error: null,
+  },
+  NodeEnv: {
+    data: 'test-node-env',
+    success: true,
+    error: null,
+  },
 };
 
 const mockS3Service = {
@@ -65,7 +97,7 @@ describe('LinksService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [LinksService],
       imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
+        AppConfigModule,
         JwtModule,
         S3Module,
         SqsModule,
@@ -83,6 +115,8 @@ describe('LinksService', () => {
       .useValue(mockS3Service)
       .overrideProvider(HasherService)
       .useValue(mockHasherService)
+      .overrideProvider(AppConfigService)
+      .useValue(mockConfigService)
       .compile();
 
     service = module.get<LinksService>(LinksService);

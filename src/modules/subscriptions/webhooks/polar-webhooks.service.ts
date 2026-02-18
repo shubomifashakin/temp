@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   Logger,
   Injectable,
@@ -14,13 +13,14 @@ import { DatabaseService } from '../../../core/database/database.service';
 
 import { makeError } from '../../../common/utils';
 import { FnResult } from '../../../types/common.types';
+import { AppConfigService } from '../../../core/app-config/app-config.service';
 
 @Injectable()
 export class PolarWebhooksService {
   private readonly logger = new Logger(PolarWebhooksService.name);
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
     private readonly databaseService: DatabaseService,
     private readonly polarService: PolarService,
   ) {}
@@ -30,7 +30,7 @@ export class PolarWebhooksService {
     data: Subscription | Order,
     timestamp: Date,
   ) {
-    const polarSecret = this.configService.get<string>('POLAR_WEBHOOK_SECRET');
+    const polarSecret = this.configService.PolarWebhookSecret.data;
 
     if (!polarSecret) {
       throw new InternalServerErrorException();

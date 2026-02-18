@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import { Request, Response } from 'express';
 import { Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
 
 import { SubscriptionsController } from './subscriptions.controller';
 
@@ -10,7 +10,8 @@ import { SubscriptionsService } from './subscriptions.service';
 
 import { RedisModule } from '../../core/redis/redis.module';
 import { DatabaseModule } from '../../core/database/database.module';
-import { Request, Response } from 'express';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 const mockLogger = {
   log: jest.fn(),
@@ -32,6 +33,17 @@ const mockResponse = {
   redirect: jest.fn(),
 } as unknown as jest.Mocked<Response>;
 
+const mockAppConfigService = {
+  RedisUrl: {
+    data: undefined,
+    success: true,
+  },
+  DatabaseUrl: {
+    data: undefined,
+    success: true,
+  },
+};
+
 const mockSubscriptionService = {
   cancelSubscription: jest.fn(),
   getPolarPlans: jest.fn(),
@@ -47,13 +59,11 @@ describe('SubscriptionsController', () => {
       providers: [
         { provide: SubscriptionsService, useValue: mockSubscriptionService },
       ],
-      imports: [
-        JwtModule,
-        RedisModule,
-        DatabaseModule,
-        ConfigModule.forRoot({ isGlobal: true }),
-      ],
-    }).compile();
+      imports: [JwtModule, RedisModule, DatabaseModule, AppConfigModule],
+    })
+      .overrideProvider(AppConfigService)
+      .useValue(mockAppConfigService)
+      .compile();
 
     controller = module.get<SubscriptionsController>(SubscriptionsController);
 

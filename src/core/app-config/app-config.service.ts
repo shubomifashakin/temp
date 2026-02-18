@@ -67,26 +67,6 @@ export class AppConfigService {
     }
   }
 
-  get ResendApiKey(): FnResult<string> {
-    try {
-      const key = this.configService.getOrThrow<string>('RESEND_API_KEY');
-
-      return { success: true, data: key, error: null };
-    } catch (error) {
-      return { success: false, data: null, error: makeError(error) };
-    }
-  }
-
-  get MailerFrom(): FnResult<string> {
-    try {
-      const email = this.configService.getOrThrow<string>('MAILER_FROM');
-
-      return { success: true, data: email, error: null };
-    } catch (error) {
-      return { success: false, data: null, error: makeError(error) };
-    }
-  }
-
   get LogLevel(): FnResult<string> {
     try {
       const level = this.configService.get<string>('LOG_LEVEL', 'info');

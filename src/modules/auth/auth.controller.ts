@@ -15,7 +15,7 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 import { AuthService } from './auth.service';
 
@@ -25,7 +25,7 @@ import { TOKEN } from '../../common/constants';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
   ) {}
 
   @ApiOperation({
@@ -64,8 +64,8 @@ export class AuthController {
   ) {
     const userInfo = await this.authService.callback(state, code);
 
-    const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
-    const domain = this.configService.getOrThrow<string>('DOMAIN');
+    const frontendUrl = this.configService.FrontendUrl.data!;
+    const domain = this.configService.Domain.data!;
 
     res.cookie(TOKEN.ACCESS.TYPE, userInfo.accessToken, {
       httpOnly: true,
@@ -97,7 +97,7 @@ export class AuthController {
     const refreshToken = req.cookies[TOKEN.REFRESH.TYPE] as string;
     await this.authService.logout(accessToken, refreshToken);
 
-    const domain = this.configService.getOrThrow<string>('DOMAIN');
+    const domain = this.configService.Domain.data!;
 
     res.clearCookie(TOKEN.ACCESS.TYPE, {
       domain: domain,
@@ -134,7 +134,7 @@ export class AuthController {
     const refreshToken = req.cookies[TOKEN.REFRESH.TYPE] as string;
     const tokens = await this.authService.refresh(refreshToken);
 
-    const domain = this.configService.getOrThrow<string>('DOMAIN');
+    const domain = this.configService.Domain.data!;
 
     res.cookie(TOKEN.ACCESS.TYPE, tokens.accessToken, {
       httpOnly: true,

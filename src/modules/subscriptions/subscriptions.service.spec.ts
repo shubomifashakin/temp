@@ -15,6 +15,7 @@ import {
   SubscriptionStatus,
   SubscriptionProvider,
 } from '../../../generated/prisma/enums';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 const mockDatabaseService = {
   subscription: {
@@ -22,6 +23,24 @@ const mockDatabaseService = {
   },
   user: {
     findUniqueOrThrow: jest.fn(),
+  },
+};
+
+const mockAppConfigService = {
+  PolarOrganizationId: {
+    success: true,
+    data: 'test-value',
+    error: null,
+  },
+  CheckoutReturnUrl: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  CheckoutSuccessUrl: {
+    data: 'test-value',
+    success: true,
+    error: null,
   },
 };
 
@@ -57,6 +76,7 @@ describe('SubscriptionsService', () => {
         { useValue: mockPolarService, provide: PolarService },
         { useValue: mockConfigService, provide: ConfigService },
         { useValue: mockDatabaseService, provide: DatabaseService },
+        { useValue: mockAppConfigService, provide: AppConfigService },
       ],
       imports: [],
     }).compile();

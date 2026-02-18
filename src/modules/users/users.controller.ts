@@ -1,6 +1,5 @@
 import { type Response, type Request } from 'express';
 
-import { ConfigService } from '@nestjs/config';
 import {
   ApiBody,
   ApiResponse,
@@ -13,10 +12,12 @@ import {
   Req,
   Res,
   Patch,
+  Logger,
   Delete,
   HttpCode,
   UseGuards,
   Controller,
+  InternalServerErrorException,
 } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -26,14 +27,17 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 
 import { TOKEN } from '../../common/constants';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 @UseGuards(AuthGuard)
 @ApiCookieAuth('access_token')
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(
     private readonly UsersService: UsersService,
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
   ) {}
 
   @ApiOperation({ summary: 'Get logged in users info' })
@@ -68,17 +72,25 @@ export class UsersController {
   ) {
     const response = await this.UsersService.deleteMyInfo(req.user.id);
 
-    const domain = this.configService.getOrThrow<string>('DOMAIN');
+    const domain = this.configService.Domain;
+    if (!domain.success) {
+      this.logger.error({
+        message: 'Domain not configured',
+        error: domain.error,
+      });
+
+      throw new InternalServerErrorException();
+    }
 
     res.clearCookie(TOKEN.ACCESS.TYPE, {
-      domain: domain,
+      domain: domain.data,
       httpOnly: true,
       secure: true,
       sameSite: 'none',
     });
 
     res.clearCookie(TOKEN.REFRESH.TYPE, {
-      domain: domain,
+      domain: domain.data,
       httpOnly: true,
       secure: true,
       sameSite: 'none',
