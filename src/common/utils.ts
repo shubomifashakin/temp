@@ -87,6 +87,26 @@ class EnvConfig {
   @IsString()
   @IsNotEmpty()
   METRICS_BEARER_TOKEN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AWS_ACCESS_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AWS_SECRET_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AWS_REGION: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_BUCKET_NAME: string;
+
+  @IsString()
+  @IsNotEmpty()
+  SQS_QUEUE_URL: string;
 }
 
 export function validateConfig(config: Record<string, string>) {
