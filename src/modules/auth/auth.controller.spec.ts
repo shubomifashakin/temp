@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthService } from './auth.service';
@@ -11,6 +10,8 @@ import { AuthController } from './auth.controller';
 
 import { RedisModule } from '../../core/redis/redis.module';
 import { DatabaseModule } from '../../core/database/database.module';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 import { TOKEN } from '../../common/constants';
 
@@ -38,6 +39,29 @@ const mockAuthService = {
   refresh: jest.fn(),
 };
 
+const mockAppConfigService = {
+  FrontendUrl: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  Domain: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  DatabaseUrl: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  RedisUrl: {
+    data: 'redis://localhost:6379',
+    success: true,
+    error: null,
+  },
+};
+
 const mockRequest = {
   cookies: {
     [TOKEN.ACCESS.TYPE]: 'test-access-token',
@@ -52,13 +76,11 @@ describe('AuthController', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [{ useValue: mockAuthService, provide: AuthService }],
       controllers: [AuthController],
-      imports: [
-        DatabaseModule,
-        RedisModule,
-        JwtModule,
-        ConfigModule.forRoot({ isGlobal: true }),
-      ],
-    }).compile();
+      imports: [DatabaseModule, RedisModule, JwtModule, AppConfigModule],
+    })
+      .overrideProvider(AppConfigService)
+      .useValue(mockAppConfigService)
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
 

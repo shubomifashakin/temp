@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { AppConfigService } from '../../../../../core/app-config/app-config.service';
 
 import { Observable } from 'rxjs';
 
@@ -16,7 +16,7 @@ import { Observable } from 'rxjs';
 export class WebhooksGuard implements CanActivate {
   logger = new Logger(WebhooksGuard.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: AppConfigService) {}
 
   canActivate(
     context: ExecutionContext,
@@ -27,17 +27,18 @@ export class WebhooksGuard implements CanActivate {
 
     if (!signature) throw new UnauthorizedException('Missing signature');
 
-    const secret = this.configService.get<string>('FILES_WEBHOOKS_SECRET');
+    const secret = this.configService.FilesWebhooksSecret;
 
-    if (!secret) {
+    if (!secret.success) {
       this.logger.error({
         message: 'Webhooks secret not configured',
+        error: secret.error,
       });
 
       throw new InternalServerErrorException();
     }
 
-    if (secret !== signature) {
+    if (secret.data !== signature) {
       throw new UnauthorizedException('Invalid signature');
     }
 

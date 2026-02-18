@@ -1,7 +1,6 @@
 import { type Request, type Response } from 'express';
 
 import { Logger } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -13,6 +12,8 @@ import { RedisService } from '../../core/redis/redis.service';
 
 import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
+import { AppConfigService } from '../../core/app-config/app-config.service';
 
 const mockDatabaseService = {
   user: {
@@ -40,6 +41,13 @@ const mockLogger = {
   verbose: jest.fn(),
 } as unknown as jest.Mocked<Logger>;
 
+const mockAppConfigService = {
+  Domain: {
+    success: true,
+    data: 'test-domain.com',
+  },
+};
+
 const mockJwtService = {
   verifyAsync: jest.fn(),
 };
@@ -55,10 +63,6 @@ const mockResponse = {
   clearCookie: jest.fn(),
 } as unknown as jest.Mocked<Response>;
 
-const mockConfigService = {
-  getOrThrow: jest.fn(),
-};
-
 describe('UsersController', () => {
   let controller: UsersController;
 
@@ -66,7 +70,7 @@ describe('UsersController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [UsersService],
-      imports: [DatabaseModule, RedisModule, JwtModule, ConfigModule],
+      imports: [DatabaseModule, RedisModule, JwtModule, AppConfigModule],
     })
       .overrideProvider(DatabaseService)
       .useValue(mockDatabaseService)
@@ -74,8 +78,8 @@ describe('UsersController', () => {
       .useValue(mockRedisService)
       .overrideProvider(JwtService)
       .useValue(mockJwtService)
-      .overrideProvider(ConfigService)
-      .useValue(mockConfigService)
+      .overrideProvider(AppConfigService)
+      .useValue(mockAppConfigService)
       .compile();
 
     controller = module.get<UsersController>(UsersController);

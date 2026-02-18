@@ -1,4 +1,3 @@
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { WebhooksService } from './webhooks.service';
@@ -6,6 +5,7 @@ import { WebhooksController } from './webhooks.controller';
 
 import { RedisService } from '../../../core/redis/redis.service';
 import { DatabaseService } from '../../../core/database/database.service';
+import { AppConfigModule } from '../../../core/app-config/app-config.module';
 
 const mockDatabaseService = {
   file: {
@@ -24,7 +24,7 @@ describe('WebhooksController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [WebhooksController],
-      imports: [ConfigModule],
+      imports: [AppConfigModule],
       providers: [
         WebhooksService,
         {

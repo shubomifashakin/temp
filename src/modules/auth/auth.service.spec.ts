@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthService } from './auth.service';
 
@@ -16,10 +15,8 @@ import { DatabaseService } from '../../core/database/database.service';
 import { DatabaseModule } from '../../core/database/database.module';
 
 import { makeOauthStateKey } from '../../common/utils';
-
-const mockConfigService = {
-  getOrThrow: jest.fn().mockReturnValue('test'),
-};
+import { AppConfigService } from '../../core/app-config/app-config.service';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
 
 const mockRedisService = {
   set: jest.fn(),
@@ -63,16 +60,35 @@ const mockLogger = {
   verbose: jest.fn(),
 } as unknown as jest.Mocked<Logger>;
 
+const mockAppConfigService = {
+  GoogleClientId: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  GoogleClientSecret: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  BaseUrl: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+};
+
 describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
-      imports: [DatabaseModule, RedisModule, ConfigModule, JwtModule],
+      providers: [
+        AuthService,
+        { useValue: mockAppConfigService, provide: AppConfigService },
+      ],
+      imports: [DatabaseModule, RedisModule, AppConfigModule, JwtModule],
     })
-      .overrideProvider(ConfigService)
-      .useValue(mockConfigService)
       .overrideProvider(RedisService)
       .useValue(mockRedisService)
       .overrideProvider(DatabaseService)
@@ -96,9 +112,8 @@ describe('AuthService', () => {
   it('should return a valid authorize url', async () => {
     const baseUrl = 'test-base-url';
     const clientId = 'test-client-id';
-    mockConfigService.getOrThrow
-      .mockReturnValueOnce(clientId)
-      .mockReturnValueOnce(baseUrl);
+    mockAppConfigService.GoogleClientId.data = clientId;
+    mockAppConfigService.BaseUrl.data = baseUrl;
 
     mockRedisService.set.mockResolvedValue({ success: true });
 

@@ -32,14 +32,6 @@ class EnvConfig {
 
   @IsString()
   @IsNotEmpty()
-  RESEND_API_KEY: string;
-
-  @IsString()
-  @IsNotEmpty()
-  MAILER_FROM: string;
-
-  @IsString()
-  @IsNotEmpty()
   GOOGLE_CLIENT_ID: string;
 
   @IsString()
@@ -78,15 +70,34 @@ class EnvConfig {
   @IsNotEmpty()
   POLAR_ORGANIZATION_ID: string;
 
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   CHECKOUT_SUCCESS_URL: string;
 
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   CHECKOUT_RETURN_URL: string;
 
   @IsString()
   @IsNotEmpty()
   METRICS_BEARER_TOKEN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AWS_ACCESS_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AWS_SECRET_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AWS_REGION: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_BUCKET_NAME: string;
+
+  @IsUrl()
+  SQS_QUEUE_URL: string;
 }
 
 export function validateConfig(config: Record<string, string>) {

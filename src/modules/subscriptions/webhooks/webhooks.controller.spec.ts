@@ -1,7 +1,6 @@
 import { Request } from 'express';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
 
 import { WebhooksController } from './webhooks.controller';
 
@@ -9,6 +8,8 @@ import { PolarWebhooksService } from './polar-webhooks.service';
 
 import { PolarModule } from '../../../core/polar/polar.module';
 import { DatabaseModule } from '../../../core/database/database.module';
+import { AppConfigModule } from '../../../core/app-config/app-config.module';
+import { AppConfigService } from '../../../core/app-config/app-config.service';
 
 const mockLogger = {
   log: jest.fn(),
@@ -33,6 +34,25 @@ const mockRequest = {
   },
 } as jest.Mocked<Request>;
 
+const mockAppConfigService = {
+  RedisUrl: {
+    data: undefined,
+    success: true,
+  },
+  DatabaseUrl: {
+    data: undefined,
+    success: true,
+  },
+  PolarAccessToken: {
+    data: 'test-value',
+    success: true,
+  },
+  NodeEnv: {
+    data: 'test-value',
+    success: true,
+  },
+};
+
 describe('WebhooksController', () => {
   let controller: WebhooksController;
 
@@ -45,12 +65,11 @@ describe('WebhooksController', () => {
           useValue: mockPolarWebhookEventService,
         },
       ],
-      imports: [
-        DatabaseModule,
-        ConfigModule.forRoot({ isGlobal: true }),
-        PolarModule,
-      ],
-    }).compile();
+      imports: [DatabaseModule, PolarModule, AppConfigModule],
+    })
+      .overrideProvider(AppConfigService)
+      .useValue(mockAppConfigService)
+      .compile();
 
     controller = module.get<WebhooksController>(WebhooksController);
 

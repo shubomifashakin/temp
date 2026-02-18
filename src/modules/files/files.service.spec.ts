@@ -1,5 +1,4 @@
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   NotFoundException,
@@ -24,6 +23,8 @@ import { DatabaseModule } from '../../core/database/database.module';
 import { DatabaseService } from '../../core/database/database.service';
 import { PrometheusModule } from '../../core/prometheus/prometheus.module';
 import { PrometheusService } from '../../core/prometheus/prometheus.service';
+import { AppConfigService } from '../../core/app-config/app-config.service';
+import { AppConfigModule } from '../../core/app-config/app-config.module';
 
 const mockDatabaseService = {
   file: {
@@ -40,6 +41,19 @@ const mockDatabaseService = {
     delete: jest.fn(),
     findMany: jest.fn(),
     findUniqueOrThrow: jest.fn(),
+  },
+};
+
+const mockAppConfigService = {
+  S3BucketName: {
+    data: 'test-value',
+    success: true,
+    error: null,
+  },
+  SqsQueueUrl: {
+    data: 'test-value',
+    success: true,
+    error: null,
   },
 };
 
@@ -86,9 +100,9 @@ describe('FilesService', () => {
       providers: [
         FilesService,
         { provide: PrometheusService, useValue: mockPrometheusService },
+        { provide: AppConfigService, useValue: mockAppConfigService },
       ],
       imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
         JwtModule,
         S3Module,
         SqsModule,
@@ -96,6 +110,7 @@ describe('FilesService', () => {
         HasherModule,
         DatabaseModule,
         PrometheusModule,
+        AppConfigModule,
       ],
     })
       .overrideProvider(DatabaseService)
