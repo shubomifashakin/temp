@@ -70,10 +70,10 @@ class EnvConfig {
   @IsNotEmpty()
   POLAR_ORGANIZATION_ID: string;
 
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   CHECKOUT_SUCCESS_URL: string;
 
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   CHECKOUT_RETURN_URL: string;
 
   @IsString()
@@ -96,8 +96,7 @@ class EnvConfig {
   @IsNotEmpty()
   S3_BUCKET_NAME: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsUrl()
   SQS_QUEUE_URL: string;
 }
 
