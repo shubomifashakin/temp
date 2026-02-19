@@ -16,6 +16,7 @@ import {
   ParseUUIDPipe,
   BadRequestException,
   InternalServerErrorException,
+  PayloadTooLargeException,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -27,6 +28,7 @@ import {
   ApiConsumes,
   ApiBadRequestResponse,
   ApiCookieAuth,
+  ApiPayloadTooLargeResponse,
 } from '@nestjs/swagger';
 
 import { FilesService } from './files.service';
@@ -58,6 +60,9 @@ export class FilesController {
   @ApiOperation({ summary: 'Upload a file' })
   @ApiResponse({ status: 201, description: 'File was successfully uploaded' })
   @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiPayloadTooLargeResponse({
+    description: 'File too large',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'File upload data with metadata',
@@ -117,7 +122,7 @@ export class FilesController {
     }
 
     if (file.size > PLAN_INFO[req.user.plan].MAX_FILE_SIZE_BYTES) {
-      throw new BadRequestException(
+      throw new PayloadTooLargeException(
         `${req.user.plan} users cannot upload files larger than ${PLAN_INFO[req.user.plan].MAX_FILE_SIZE_MB}MB`,
       );
     }

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';
-import { BadRequestException } from '@nestjs/common';
+import { PayloadTooLargeException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { FilesService } from './files.service';
@@ -129,7 +129,7 @@ describe('FilesController', () => {
         },
         { size: 1024 * 10000 * 1000 } as Express.Multer.File,
       ),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(PayloadTooLargeException);
   });
 
   it('should get all files', async () => {

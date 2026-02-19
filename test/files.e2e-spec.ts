@@ -166,6 +166,68 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(400);
     });
 
+    it(
+      'should not upload a very large file, larger than max',
+      async () => {
+        await databaseService.user.create({
+          data: {
+            email: testEmail,
+            name: 'Test User',
+          },
+        });
+
+        mockJwtService.verifyAsync.mockResolvedValue({
+          jti: 'test-jti',
+          userId: 'test-user-id',
+        });
+
+        const response = await request(app.getHttpServer())
+          .post('/files')
+          .attach('file', Buffer.alloc(160 * 1024 * 1024, 'x'), 'test.png')
+          .field('lifetime', 'short')
+          .field('description', 'This is a test file')
+          .field('name', 'Test File')
+          .set('Cookie', ['access_token=test-token']);
+
+        expect(response.status).toBe(413);
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('large');
+      },
+      100 * 1000,
+    );
+
+    it(
+      'should not allow a free user to  upload a file larger than their limit',
+      async () => {
+        await databaseService.user.create({
+          data: {
+            email: testEmail,
+            name: 'Test User',
+          },
+        });
+
+        mockJwtService.verifyAsync.mockResolvedValue({
+          jti: 'test-jti',
+          userId: 'test-user-id',
+        });
+
+        const response = await request(app.getHttpServer())
+          .post('/files')
+          .attach('file', Buffer.alloc(50 * 1024 * 1024, 'x'), 'test.png')
+          .field('lifetime', 'short')
+          .field('description', 'This is a test file')
+          .field('name', 'Test File')
+          .set('Cookie', ['access_token=test-token']);
+
+        console.log(response.body, '545p');
+
+        expect(response.status).toBe(413);
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toContain('large');
+      },
+      100 * 1000,
+    );
+
     it('should not upload the file if there is no description', async () => {
       await databaseService.user.create({
         data: {
@@ -237,7 +299,7 @@ describe('FilesController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', Buffer.from('test file content'), 'test.png')
+        .attach('file', Buffer.alloc(20 * 1024 * 1024, 'x'), 'test.png')
         .field('lifetime', 'short')
         .field('description', 'This is a test file')
         .field('name', 'Test File')
