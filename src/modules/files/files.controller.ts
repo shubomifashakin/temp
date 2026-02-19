@@ -45,6 +45,7 @@ import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 import { UploadFile } from './common/decorators/upload-file.decorator';
+import { CreateLinkGuard } from './common/guards/create-link.guard';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
@@ -210,6 +211,7 @@ export class FilesController {
     status: 404,
     description: 'File does not exist',
   })
+  @UseGuards(CreateLinkGuard)
   @Post(':id/links')
   async createLink(
     @Req() req: Request,

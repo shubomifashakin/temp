@@ -728,6 +728,125 @@ describe('FilesController (e2e)', () => {
       expect(response.body).toHaveProperty('id');
     });
 
+    it('should not create another link for the file if the user is not subscribed and has already created a link', async () => {
+      const userId = await databaseService.user.create({
+        data: {
+          email: testEmail,
+          name: 'Test User',
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const fileId = await databaseService.file.create({
+        data: {
+          description: 'Test File',
+          s3_key: 'test-file',
+          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          size: 1024,
+          user_id: userId.id,
+          status: 'safe',
+          name: 'Test File',
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await databaseService.link.create({
+        data: {
+          file_id: fileId.id,
+          description: 'Test link',
+        },
+      });
+
+      mockJwtService.verifyAsync.mockResolvedValue({
+        jti: 'test-jti',
+        userId: userId.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/files/${fileId.id}/links`)
+        .set('Cookie', ['access_token=test-token'])
+        .send({
+          description: 'Test link',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should create another link for the file if the user is subscribed', async () => {
+      const userId = await databaseService.user.create({
+        data: {
+          email: testEmail,
+          name: 'Test User',
+          subscriptions: {
+            create: {
+              provider_customer_id: 'test-provider-customer',
+              provider_subscription_id: 'subscription_id',
+              status: 'ACTIVE',
+              provider: 'POLAR',
+              current_period_end: new Date(
+                Date.now() + 1000 * 60 * 60 * 24 * 30,
+              ),
+              current_period_start: new Date(),
+              interval: 'MONTH',
+              interval_count: 1,
+              plan: 'PRO',
+              currency: 'usd',
+              product_id: 'test',
+              cancel_at_period_end: false,
+              started_at: new Date(),
+              amount: 20,
+              last_event_at: new Date(),
+            },
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const fileId = await databaseService.file.create({
+        data: {
+          description: 'Test File',
+          s3_key: 'test-file',
+          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          size: 1024,
+          user_id: userId.id,
+          status: 'safe',
+          name: 'Test File',
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await databaseService.link.create({
+        data: {
+          file_id: fileId.id,
+          description: 'Test link',
+        },
+      });
+
+      mockJwtService.verifyAsync.mockResolvedValue({
+        jti: 'test-jti',
+        userId: userId.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/files/${fileId.id}/links`)
+        .set('Cookie', ['access_token=test-token'])
+        .send({
+          description: 'Test link',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty('id');
+    });
+
     it('should not create a link for the file if the file is not safe', async () => {
       const userId = await databaseService.user.create({
         data: {
