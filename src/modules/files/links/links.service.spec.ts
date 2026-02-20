@@ -130,11 +130,11 @@ describe('LinksService', () => {
 
   it('should get link details', async () => {
     const resolvedValue = {
-      created_at: new Date(),
-      expires_at: new Date(),
+      createdAt: new Date(),
+      expiresAt: new Date(),
       description: 'test description',
-      click_count: 1,
-      last_accessed_at: new Date(),
+      clickCount: 1,
+      lastAccessedAt: new Date(),
       password: 'test-password',
 
       file: {
@@ -143,7 +143,7 @@ describe('LinksService', () => {
         },
         status: 'safe',
         description: 'Test file description',
-        deleted_at: null,
+        deletedAt: null,
       },
     };
 
@@ -152,29 +152,29 @@ describe('LinksService', () => {
     const res = await service.getLinkDetails('test-link-id');
 
     expect(res).toEqual({
-      created_at: resolvedValue.created_at,
-      expires_at: resolvedValue.expires_at,
+      createdAt: resolvedValue.createdAt,
+      expiresAt: resolvedValue.expiresAt,
       description: resolvedValue.description,
-      click_count: resolvedValue.click_count,
-      last_accessed_at: resolvedValue.last_accessed_at,
-      password_protected: resolvedValue.password !== null,
+      clickCount: resolvedValue.clickCount,
+      lastAccessedAt: resolvedValue.lastAccessedAt,
+      passwordProtected: resolvedValue.password !== null,
 
-      file_creator: resolvedValue.file.user.name,
-      file_status: resolvedValue.file.status,
-      file_description: resolvedValue.file.description,
-      file_deleted: resolvedValue.file.deleted_at !== null,
+      fileCreator: resolvedValue.file.user.name,
+      fileStatus: resolvedValue.file.status,
+      fileDescription: resolvedValue.file.description,
+      fileDeleted: resolvedValue.file.deletedAt !== null,
     });
   });
 
   it('should generate the presigned url for the file', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() + 100000),
+      deletedAt: null,
       password: null,
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: null,
+        expiresAt: new Date(Date.now() + 100000),
       },
     };
 
@@ -212,13 +212,13 @@ describe('LinksService', () => {
 
   it('should use the cached presigned url for the file', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() + 100000),
+      deletedAt: null,
       password: null,
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: null,
+        expiresAt: new Date(Date.now() + 100000),
       },
     };
 
@@ -254,13 +254,13 @@ describe('LinksService', () => {
 
   it('should not generate the presigned url for the file since link has expired', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() - 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() - 100000),
+      deletedAt: null,
       password: null,
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: null,
+        expiresAt: new Date(Date.now() + 100000),
       },
     };
 
@@ -276,14 +276,14 @@ describe('LinksService', () => {
 
   it('should not generate the presigned url for the file since link has been revoked', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() + 100000),
+      deletedAt: null,
       password: null,
-      revoked_at: new Date(),
+      revokedAt: new Date(),
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: null,
+        expiresAt: new Date(Date.now() + 100000),
       },
     };
 
@@ -299,13 +299,13 @@ describe('LinksService', () => {
 
   it('should not generate the presigned url for the file since file has been deleted', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() + 100000),
+      deletedAt: null,
       password: null,
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: new Date(),
-        expires_at: new Date(Date.now() + 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: new Date(),
+        expiresAt: new Date(Date.now() + 100000),
       },
     };
 
@@ -321,13 +321,13 @@ describe('LinksService', () => {
 
   it('should not generate the presigned url for the file since file has expired', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() + 100000),
+      deletedAt: null,
       password: null,
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() - 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: null,
+        expiresAt: new Date(Date.now() - 100000),
       },
     };
 
@@ -343,13 +343,13 @@ describe('LinksService', () => {
 
   it('should not generate the presigned url for the file since password supplied is incorrect', async () => {
     const resolvedValue = {
-      expires_at: new Date(Date.now() + 100000),
-      deleted_at: null,
+      expiresAt: new Date(Date.now() + 100000),
+      deletedAt: null,
       password: 'test-password',
       file: {
-        s3_key: 'test-s3-key',
-        deleted_at: null,
-        expires_at: new Date(Date.now() + 100000),
+        s3Key: 'test-s3-key',
+        deletedAt: null,
+        expiresAt: new Date(Date.now() + 100000),
       },
     };
 

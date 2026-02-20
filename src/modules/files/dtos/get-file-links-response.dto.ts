@@ -20,40 +20,40 @@ class Link {
     description: 'Whether the link is password protected',
     example: false,
   })
-  @IsBoolean({ message: 'password_protected must be a boolean' })
-  password_protected: boolean;
+  @IsBoolean({ message: 'passwordProtected must be a boolean' })
+  passwordProtected: boolean;
 
   @ApiProperty({
     description: 'Whether the link has been revoked',
     example: false,
     nullable: true,
   })
-  @IsDate({ message: 'revoked_at must be a date' })
+  @IsDate({ message: 'revokedAt must be a date' })
   @IsOptional()
-  revoked_at: Date | null;
+  revokedAt: Date | null;
 
   @ApiProperty({
     description: 'Date and time when the link was created',
     example: '2025-01-01T00:00:00.000Z',
   })
-  @IsDate({ message: 'created_at must be a date' })
-  created_at: Date;
+  @IsDate({ message: 'createdAt must be a date' })
+  createdAt: Date;
 
   @ApiProperty({
     description: 'Number of times the link has been accessed',
     example: 5,
   })
-  @IsNumber({}, { message: 'click_count must be a number' })
-  click_count: number;
+  @IsNumber({}, { message: 'clickCount must be a number' })
+  clickCount: number;
 
   @ApiProperty({
     nullable: true,
     example: '2025-01-01T00:00:00.000Z',
     description: 'Date when the link expires',
   })
-  @IsDate({ message: 'expires_at must be a date' })
+  @IsDate({ message: 'expiresAt must be a date' })
   @IsOptional()
-  expires_at: Date | null;
+  expiresAt: Date | null;
 
   @ApiProperty({
     description: 'Description of the  link',
@@ -67,9 +67,9 @@ class Link {
     example: '2025-01-01T00:00:00.000Z',
     description: 'Date and time when the  link was last accessed',
   })
-  @IsDate({ message: 'last_accessed_at must be a date' })
+  @IsDate({ message: 'lastAccessedAt must be a date' })
   @IsOptional()
-  last_accessed_at: Date | null;
+  lastAccessedAt: Date | null;
 }
 
 export class GetFileLinksResponseDto {

@@ -90,7 +90,7 @@ export class SubscriptionsService {
   ): Promise<GetSubscriptionResponse> {
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
-        user_id: userId,
+        userId: userId,
         status: 'ACTIVE',
       },
       select: {
@@ -99,14 +99,14 @@ export class SubscriptionsService {
         amount: true,
         currency: true,
         provider: true,
-        cancelled_at: true,
-        current_period_end: true,
-        current_period_start: true,
-        cancel_at_period_end: true,
-        provider_subscription_id: true,
+        cancelledAt: true,
+        currentPeriodEnd: true,
+        currentPeriodStart: true,
+        cancelAtPeriodEnd: true,
+        providerSubscriptionId: true,
       },
       orderBy: {
-        created_at: 'desc',
+        createdAt: 'desc',
       },
     });
 
@@ -116,26 +116,26 @@ export class SubscriptionsService {
   async cancelSubscription(userId: string) {
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
-        user_id: userId,
+        userId: userId,
         status: 'ACTIVE',
       },
       select: {
         id: true,
         status: true,
         provider: true,
-        cancelled_at: true,
-        cancel_at_period_end: true,
-        provider_subscription_id: true,
+        cancelledAt: true,
+        cancelAtPeriodEnd: true,
+        providerSubscriptionId: true,
       },
       orderBy: {
-        last_event_at: 'desc',
+        lastEventAt: 'desc',
       },
     });
 
     if (
       !subscription ||
       subscription.status !== 'ACTIVE' ||
-      subscription.cancel_at_period_end
+      subscription.cancelAtPeriodEnd
     ) {
       return { message: 'success' };
     }
@@ -143,7 +143,7 @@ export class SubscriptionsService {
     if (subscription.provider === 'POLAR') {
       const { success, error } = await this.polarService.cancelSubscription({
         cancel: true,
-        id: subscription.provider_subscription_id,
+        id: subscription.providerSubscriptionId,
       });
 
       if (!success) {
@@ -161,7 +161,7 @@ export class SubscriptionsService {
         id: subscription.id,
       },
       data: {
-        cancel_at_period_end: true,
+        cancelAtPeriodEnd: true,
       },
     });
 
@@ -240,7 +240,7 @@ export class SubscriptionsService {
       return {
         amount: centsToDollars(amountInCents),
         currency,
-        product_id: id,
+        productId: id,
         name: productInfo.data!.plan,
         benefits: productInfo.data!.benefits,
         interval: productInfo.data!.interval,
@@ -273,10 +273,10 @@ export class SubscriptionsService {
       await this.databaseService.subscription.findFirst({
         where: {
           status: 'ACTIVE',
-          user_id: userId,
+          userId: userId,
         },
         orderBy: {
-          last_event_at: 'desc',
+          lastEventAt: 'desc',
         },
       });
 
@@ -306,7 +306,7 @@ export class SubscriptionsService {
 
     if (dto.provider === 'polar') {
       result = await this.checkoutWithPolar({
-        productId: dto.product_id,
+        productId: dto.productId,
         user: {
           id: user.id,
           name: user.name,

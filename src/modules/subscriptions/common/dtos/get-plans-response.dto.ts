@@ -31,8 +31,8 @@ class Plan {
   @ApiProperty({
     description: 'The product ID for the subscription',
   })
-  @IsString({ message: 'product_id should be a string' })
-  product_id: string;
+  @IsString({ message: 'productId should be a string' })
+  productId: string;
 
   @ApiProperty({
     description: 'benefits that come with the subscription',

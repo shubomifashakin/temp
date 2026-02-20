@@ -26,7 +26,7 @@ export class WebhooksService {
 
       const data = await this.databaseService.file.update({
         where: {
-          s3_key: validatedData.key,
+          s3Key: validatedData.key,
         },
         data: {
           status: validatedData.infected ? 'unsafe' : 'safe',
@@ -50,10 +50,10 @@ export class WebhooksService {
 
       await this.databaseService.file.updateMany({
         where: {
-          s3_key: { in: deletedData.keys },
+          s3Key: { in: deletedData.keys },
         },
         data: {
-          deleted_at: deletedData.deleted_at,
+          deletedAt: deletedData.deletedAt,
         },
       });
 

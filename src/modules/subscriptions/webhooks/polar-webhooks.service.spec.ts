@@ -137,7 +137,7 @@ describe('PolarWebhooksService', () => {
 
   it('should handle not process the event since its old', async () => {
     mockDatabaseService.subscription.findUnique.mockResolvedValue({
-      last_event_at: new Date(),
+      lastEventAt: new Date(),
     });
 
     mockDatabaseService.subscription.upsert.mockResolvedValue(null);
@@ -207,42 +207,42 @@ describe('PolarWebhooksService', () => {
     expect(res.message).toBeDefined();
     expect(mockDatabaseService.subscription.upsert).toHaveBeenCalledWith({
       where: {
-        provider_subscription_id: mockSubscription.id,
+        providerSubscriptionId: mockSubscription.id,
       },
       create: {
-        user_id: 'test-user-id',
+        userId: 'test-user-id',
         provider: 'POLAR',
         plan: testPlan,
         status: 'INACTIVE',
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
         interval: testInterval,
-        product_id: mockSubscription.productId,
-        provider_subscription_id: mockSubscription.id,
-        provider_customer_id: mockSubscription.customerId,
-        interval_count: mockSubscription.recurringIntervalCount,
-        started_at: mockSubscription.startedAt,
-        current_period_start: mockSubscription.currentPeriodStart,
-        current_period_end: mockSubscription.currentPeriodEnd
+        productId: mockSubscription.productId,
+        providerSubscriptionId: mockSubscription.id,
+        providerCustomerId: mockSubscription.customerId,
+        intervalCount: mockSubscription.recurringIntervalCount,
+        startedAt: mockSubscription.startedAt,
+        currentPeriodStart: mockSubscription.currentPeriodStart,
+        currentPeriodEnd: mockSubscription.currentPeriodEnd
           ? new Date(mockSubscription.currentPeriodEnd)
           : null,
-        cancel_at_period_end: mockSubscription.cancelAtPeriodEnd || false,
-        ended_at: mockSubscription.endedAt,
-        last_event_at: timestamp,
+        cancelAtPeriodEnd: mockSubscription.cancelAtPeriodEnd || false,
+        endedAt: mockSubscription.endedAt,
+        lastEventAt: timestamp,
       },
       update: {
         status: 'INACTIVE',
         provider: 'POLAR',
-        product_id: mockSubscription.productId,
-        ended_at: mockSubscription.endedAt,
-        last_event_at: timestamp,
+        productId: mockSubscription.productId,
+        endedAt: mockSubscription.endedAt,
+        lastEventAt: timestamp,
       },
     });
   });
 
   it('should not process the revoke event because its old', async () => {
     mockDatabaseService.subscription.findUnique.mockResolvedValue({
-      last_event_at: new Date(),
+      lastEventAt: new Date(),
     });
 
     mockDatabaseService.subscription.upsert.mockResolvedValue(null);
@@ -314,7 +314,7 @@ describe('PolarWebhooksService', () => {
     expect(res.message).toBeDefined();
     expect(mockDatabaseService.subscription.upsert).toHaveBeenCalledWith({
       where: {
-        provider_subscription_id: mockSubscription.id,
+        providerSubscriptionId: mockSubscription.id,
       },
       create: {
         status: 'ACTIVE',
@@ -322,19 +322,19 @@ describe('PolarWebhooksService', () => {
         plan: testPlan,
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
-        product_id: mockSubscription.productId,
+        productId: mockSubscription.productId,
         interval: testInterval,
-        provider_subscription_id: mockSubscription.id,
-        provider_customer_id: mockSubscription.customerId,
-        user_id: 'test-user-id',
-        started_at: mockSubscription.startedAt,
-        interval_count: mockSubscription.recurringIntervalCount,
-        current_period_start: mockSubscription.currentPeriodStart,
-        current_period_end: mockSubscription.currentPeriodEnd
+        providerSubscriptionId: mockSubscription.id,
+        providerCustomerId: mockSubscription.customerId,
+        userId: 'test-user-id',
+        startedAt: mockSubscription.startedAt,
+        intervalCount: mockSubscription.recurringIntervalCount,
+        currentPeriodStart: mockSubscription.currentPeriodStart,
+        currentPeriodEnd: mockSubscription.currentPeriodEnd
           ? new Date(mockSubscription.currentPeriodEnd)
           : null,
-        cancel_at_period_end: mockSubscription.cancelAtPeriodEnd || false,
-        last_event_at: timestamp,
+        cancelAtPeriodEnd: mockSubscription.cancelAtPeriodEnd || false,
+        lastEventAt: timestamp,
       },
       update: {
         status: 'ACTIVE',
@@ -342,20 +342,20 @@ describe('PolarWebhooksService', () => {
         plan: testPlan,
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
-        product_id: mockSubscription.productId,
+        productId: mockSubscription.productId,
         interval: testInterval,
-        current_period_end: mockSubscription.currentPeriodEnd,
-        interval_count: mockSubscription.recurringIntervalCount,
-        cancel_at_period_end: mockSubscription.cancelAtPeriodEnd,
-        current_period_start: mockSubscription.currentPeriodStart,
-        last_event_at: timestamp,
+        currentPeriodEnd: mockSubscription.currentPeriodEnd,
+        intervalCount: mockSubscription.recurringIntervalCount,
+        cancelAtPeriodEnd: mockSubscription.cancelAtPeriodEnd,
+        currentPeriodStart: mockSubscription.currentPeriodStart,
+        lastEventAt: timestamp,
       },
     });
   });
 
   it('should not process the active event because its old', async () => {
     mockDatabaseService.subscription.findUnique.mockResolvedValue({
-      last_event_at: new Date(),
+      lastEventAt: new Date(),
     });
 
     mockDatabaseService.subscription.upsert.mockResolvedValue(null);
@@ -485,22 +485,22 @@ describe('PolarWebhooksService', () => {
     expect(res.message).toBeDefined();
     expect(mockDatabaseService.subscription.update).toHaveBeenCalledWith({
       where: {
-        provider_subscription_id: mockSubscription.subscription!.id,
+        providerSubscriptionId: mockSubscription.subscription!.id,
       },
       data: {
         status: 'ACTIVE',
         plan: testPlan,
         interval: testInterval,
         currency: mockSubscription.currency,
-        product_id: mockSubscription.subscription!.productId,
-        interval_count: mockSubscription.subscription!.recurringIntervalCount,
-        cancel_at_period_end: mockSubscription.subscription!.cancelAtPeriodEnd,
+        productId: mockSubscription.subscription!.productId,
+        intervalCount: mockSubscription.subscription!.recurringIntervalCount,
+        cancelAtPeriodEnd: mockSubscription.subscription!.cancelAtPeriodEnd,
         amount: mockSubscription.subscription!.amount,
-        current_period_start: mockSubscription.subscription!.currentPeriodStart,
-        current_period_end: mockSubscription.subscription!.currentPeriodEnd
+        currentPeriodStart: mockSubscription.subscription!.currentPeriodStart,
+        currentPeriodEnd: mockSubscription.subscription!.currentPeriodEnd
           ? new Date(mockSubscription.subscription!.currentPeriodEnd)
           : null,
-        last_event_at: timestamp,
+        lastEventAt: timestamp,
       },
     });
   });

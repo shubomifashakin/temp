@@ -145,19 +145,19 @@ describe('FilesWebhooksController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
-          user_id: user.id,
+          userId: user.id,
           name: 'Test file',
-          s3_key: 'test-key',
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const body = {
         type: 'file:validated',
         data: {
-          key: file.s3_key,
+          key: file.s3Key,
           infected: false,
         },
       };
@@ -193,18 +193,18 @@ describe('FilesWebhooksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           name: 'Test file',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const body = {
         type: 'file:invalid',
         data: {
-          key: file.s3_key,
+          key: file.s3Key,
           infected: false,
         },
       };
@@ -230,19 +230,19 @@ describe('FilesWebhooksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           name: 'Test file',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const body = {
         type: 'file:deleted',
         data: {
-          keys: [file.s3_key],
-          deleted_at: new Date(),
+          keys: [file.s3Key],
+          deletedAt: new Date(),
         },
       };
 
@@ -259,9 +259,9 @@ describe('FilesWebhooksController (e2e)', () => {
         },
       });
 
-      expect(file.deleted_at).toBe(null);
+      expect(file.deletedAt).toBe(null);
 
-      expect(updatedFile?.deleted_at).toEqual(body.data.deleted_at);
+      expect(updatedFile?.deletedAt).toEqual(body.data.deletedAt);
     });
 
     it('should return 400 for invalid deleted file event', async () => {
@@ -277,19 +277,19 @@ describe('FilesWebhooksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           name: 'Test file',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const body = {
         type: 'file:deleted',
         data: {
-          invalid: [file.s3_key],
-          deleted_at: new Date(),
+          invalid: [file.s3Key],
+          deletedAt: new Date(),
         },
       };
 

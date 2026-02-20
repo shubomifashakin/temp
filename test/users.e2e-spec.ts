@@ -127,8 +127,8 @@ describe('UsersController (e2e)', () => {
       expect(response.body).toHaveProperty('name');
       expect(response.body.name).toBe('Test User');
       expect(response.body).toHaveProperty('email');
-      expect(response.body).toHaveProperty('created_at');
-      expect(response.body).toHaveProperty('updated_at');
+      expect(response.body).toHaveProperty('createdAt');
+      expect(response.body).toHaveProperty('updatedAt');
 
       await redisService.delete(makeUserKey(userId.id));
     });
@@ -141,18 +141,18 @@ describe('UsersController (e2e)', () => {
           subscriptions: {
             create: {
               plan: 'PRO',
-              current_period_end: new Date(),
-              current_period_start: new Date(),
-              cancel_at_period_end: false,
+              currentPeriodEnd: new Date(),
+              currentPeriodStart: new Date(),
+              cancelAtPeriodEnd: false,
               status: 'ACTIVE',
-              started_at: new Date(),
-              provider_customer_id: 'test-customer-id',
+              startedAt: new Date(),
+              providerCustomerId: 'test-customer-id',
               amount: 2,
-              provider_subscription_id: 'test-subscription-id',
+              providerSubscriptionId: 'test-subscription-id',
               provider: 'POLAR',
-              product_id: 'test-product-id',
+              productId: 'test-product-id',
               currency: 'usd',
-              last_event_at: new Date(),
+              lastEventAt: new Date(),
             },
           },
         },
@@ -171,8 +171,8 @@ describe('UsersController (e2e)', () => {
       expect(response.body).toHaveProperty('name');
       expect(response.body.name).toBe('Test User');
       expect(response.body).toHaveProperty('email');
-      expect(response.body).toHaveProperty('created_at');
-      expect(response.body).toHaveProperty('updated_at');
+      expect(response.body).toHaveProperty('createdAt');
+      expect(response.body).toHaveProperty('updatedAt');
       expect(response.body).toHaveProperty('subscription');
       expect(response.body.subscription).toHaveProperty('plan');
       expect(response.body.subscription.plan).toBe('PRO');

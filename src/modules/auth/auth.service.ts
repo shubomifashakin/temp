@@ -69,9 +69,9 @@ export class AuthService {
 
       await this.databaseService.refreshToken.create({
         data: {
-          token_id: refreshTokenId,
-          user_id: userInfo.id,
-          expires_at: new Date(Date.now() + TOKEN.REFRESH.EXPIRATION_MS),
+          tokenId: refreshTokenId,
+          userId: userInfo.id,
+          expiresAt: new Date(Date.now() + TOKEN.REFRESH.EXPIRATION_MS),
         },
       });
 
@@ -96,13 +96,13 @@ export class AuthService {
 
     const response_type = 'code';
 
-    const client_Id = this.configService.GoogleClientId;
+    const clientId = this.configService.GoogleClientId;
     this.logger.error({
       message: 'Failed to get google client id',
-      error: client_Id.error,
+      error: clientId.error,
     });
 
-    if (!client_Id.success) {
+    if (!clientId.success) {
       throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 
@@ -118,7 +118,7 @@ export class AuthService {
     const redirect_uri = baseUrl.data + '/api/v1/auth/google/callback';
 
     const searchParams = new URLSearchParams({
-      client_id: client_Id.data,
+      client_id: clientId.data,
       redirect_uri,
       response_type,
       scope: scopes.join(' '),
@@ -177,24 +177,24 @@ export class AuthService {
       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
     }
 
-    const client_Id = this.configService.GoogleClientId;
+    const clientId = this.configService.GoogleClientId;
 
-    const client_secret = this.configService.GoogleClientSecret;
+    const clientSecret = this.configService.GoogleClientSecret;
 
     const baseUrl = this.configService.BaseUrl;
 
-    if (!baseUrl.success || !client_Id.success || !client_secret.success) {
+    if (!baseUrl.success || !clientId.success || !clientSecret.success) {
       const message = !baseUrl.success
         ? 'Failed to get base url'
-        : !client_Id.success
+        : !clientId.success
           ? 'Failed to get client id'
           : 'Failed to get client secret';
 
       const error = !baseUrl.success
         ? baseUrl.error
-        : !client_Id.success
-          ? client_Id.error
-          : client_secret.error;
+        : !clientId.success
+          ? clientId.error
+          : clientSecret.error;
 
       this.logger.error({
         message,
@@ -214,8 +214,8 @@ export class AuthService {
       body: new URLSearchParams({
         code,
         grant_type: 'authorization_code',
-        client_id: client_Id.data,
-        client_secret: client_secret.data,
+        client_id: clientId.data,
+        client_secret: clientSecret.data,
         redirect_uri: baseUrl.data + '/api/v1/auth/google/callback',
       }),
     });
@@ -282,7 +282,7 @@ export class AuthService {
           accounts: {
             create: {
               provider: 'google',
-              provider_id: decodedInfo.sub,
+              providerId: decodedInfo.sub,
             },
           },
         },
@@ -342,7 +342,7 @@ export class AuthService {
 
     const refreshExists = await this.databaseService.refreshToken.findUnique({
       where: {
-        token_id: refreshTokenId,
+        tokenId: refreshTokenId,
       },
     });
 
@@ -352,7 +352,7 @@ export class AuthService {
 
     await this.databaseService.refreshToken.delete({
       where: {
-        token_id: refreshTokenId,
+        tokenId: refreshTokenId,
       },
     });
 
@@ -370,7 +370,7 @@ export class AuthService {
 
     const refreshExists = await this.databaseService.refreshToken.findUnique({
       where: {
-        token_id: refreshTokenId,
+        tokenId: refreshTokenId,
       },
       select: {
         user: {
@@ -378,7 +378,7 @@ export class AuthService {
             id: true,
           },
         },
-        expires_at: true,
+        expiresAt: true,
       },
     });
 
@@ -386,13 +386,13 @@ export class AuthService {
       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
     }
 
-    if (new Date() > refreshExists.expires_at) {
+    if (new Date() > refreshExists.expiresAt) {
       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
     }
 
     await this.databaseService.refreshToken.delete({
       where: {
-        token_id: refreshTokenId,
+        tokenId: refreshTokenId,
       },
     });
 

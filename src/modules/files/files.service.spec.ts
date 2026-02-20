@@ -247,7 +247,7 @@ describe('FilesService', () => {
   it('should delete a single file', async () => {
     const testS3Key = 'test-key';
     mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
-      s3_key: testS3Key,
+      s3Key: testS3Key,
     });
 
     mockSqsService.pushMessage.mockResolvedValue({
@@ -385,8 +385,8 @@ describe('FilesService', () => {
       id: testFileId,
       size: 200,
       status: 'pending',
-      deleted_at: null,
-      expires_at: new Date(Date.now() * 100),
+      deletedAt: null,
+      expiresAt: new Date(Date.now() * 100),
       password: null,
     });
 
@@ -399,15 +399,15 @@ describe('FilesService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
-  it('should not generate link for file that is deleted', async () => {
+  it('should not create link for file that is deleted', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
     mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'safe',
-      deleted_at: new Date(),
-      expires_at: new Date(Date.now() * 100),
+      deletedAt: new Date(),
+      expiresAt: new Date(Date.now() * 100),
       password: null,
     });
 
@@ -420,15 +420,15 @@ describe('FilesService', () => {
     ).rejects.toThrow(NotFoundException);
   });
 
-  it('should not generate link for file that is expired', async () => {
+  it('should not create link for file that is expired', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
     mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'safe',
-      deleted_at: null,
-      expires_at: new Date(Date.now() - 100000),
+      deletedAt: null,
+      expiresAt: new Date(Date.now() - 100000),
       password: null,
     });
 
@@ -471,14 +471,14 @@ describe('FilesService', () => {
     expect(mockDatabaseService.link.update).toHaveBeenCalledWith({
       where: {
         id: testLinkId,
-        file_id: testFileId,
+        fileId: testFileId,
         file: {
-          user_id: testUserId,
+          userId: testUserId,
         },
       },
       data: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        revoked_at: expect.any(Date),
+        revokedAt: expect.any(Date),
       },
     });
   });
