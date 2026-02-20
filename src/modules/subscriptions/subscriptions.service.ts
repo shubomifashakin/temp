@@ -101,6 +101,7 @@ export class SubscriptionsService {
         amount: true,
         currency: true,
         provider: true,
+        productId: true,
         cancelledAt: true,
         currentPeriodEnd: true,
         currentPeriodStart: true,

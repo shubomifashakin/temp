@@ -23,6 +23,14 @@ class SubscriptionDetails {
   id: string;
 
   @ApiProperty({
+    description:
+      'The product ID for the subscription. The product the user is currently subscribed to.',
+    example: 'prod1234',
+  })
+  @IsString({ message: 'Product ID should be a string' })
+  productId: string;
+
+  @ApiProperty({
     description: 'The current status of the subscription',
     enum: SubscriptionStatus,
     example: SubscriptionStatus.ACTIVE,
