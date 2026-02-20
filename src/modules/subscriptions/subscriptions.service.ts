@@ -91,6 +91,7 @@ export class SubscriptionsService {
         status: 'ACTIVE',
       },
       select: {
+        id: true,
         status: true,
         provider: true,
         cancelled_at: true,
@@ -125,6 +126,15 @@ export class SubscriptionsService {
         throw new InternalServerErrorException();
       }
     }
+
+    await this.databaseService.subscription.update({
+      where: {
+        id: subscription.id,
+      },
+      data: {
+        cancel_at_period_end: true,
+      },
+    });
 
     return { message: 'success' };
   }

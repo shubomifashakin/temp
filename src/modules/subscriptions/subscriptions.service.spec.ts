@@ -20,6 +20,7 @@ import { AppConfigService } from '../../core/app-config/app-config.service';
 const mockDatabaseService = {
   subscription: {
     findFirst: jest.fn(),
+    update: jest.fn(),
   },
   user: {
     findUniqueOrThrow: jest.fn(),
@@ -108,6 +109,8 @@ describe('SubscriptionsService', () => {
       success: true,
       error: false,
     });
+
+    mockDatabaseService.subscription.update.mockResolvedValue(true);
 
     const response = await service.cancelSubscription(testUserId);
 

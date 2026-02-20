@@ -39,7 +39,7 @@ export class SubscriptionsController {
       The users subscription would remain active until its expiry`,
   })
   @ApiResponse({ description: 'Subscription cancelled', status: 201 })
-  @Delete()
+  @Delete('current')
   async cancelSubscription(@Req() req: Request) {
     return this.subscriptionsService.cancelSubscription(req.user.id);
   }

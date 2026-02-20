@@ -119,7 +119,7 @@ describe('SubscriptionsController (e2e)', () => {
     await app.close();
   });
 
-  describe('DELETE /subscriptions', () => {
+  describe('DELETE /subscriptions/current', () => {
     beforeEach(async () => {
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
@@ -161,16 +161,24 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .delete('/subscriptions')
+        .delete('/subscriptions/current')
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: 'success' });
+
+      const subscriptionInfo = await databaseService.subscription.findFirst({
+        where: {
+          user_id: user.id,
+        },
+      });
+
+      expect(subscriptionInfo?.cancel_at_period_end).toBe(true);
     });
 
     it('should not cancel subscription if unauthenticated', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/subscriptions')
+        .delete('/subscriptions/current')
         .set('Cookie', []);
 
       expect(response.status).toBe(401);
@@ -212,7 +220,7 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .delete('/subscriptions')
+        .delete('/subscriptions/current')
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
