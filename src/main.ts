@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -19,12 +20,18 @@ import { PrismaClientUnknownRequestFilterFilter } from './common/filters/prisma-
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: {
-      methods: '*',
-      credentials: true,
-      origin: process.env.FRONTEND_URL,
-    },
     bufferLogs: true,
+  });
+
+  const config = app.get(ConfigService);
+  app.enableCors({
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      config.get('FRONTEND_URL')!,
+    ],
   });
 
   if (process.env.NODE_ENV !== 'production') {

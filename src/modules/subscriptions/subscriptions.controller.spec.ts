@@ -46,8 +46,8 @@ const mockAppConfigService = {
 
 const mockSubscriptionService = {
   cancelSubscription: jest.fn(),
-  getPolarPlans: jest.fn(),
-  createPolarCheckout: jest.fn(),
+  getPlans: jest.fn(),
+  createCheckout: jest.fn(),
 };
 
 describe('SubscriptionsController', () => {
@@ -87,30 +87,34 @@ describe('SubscriptionsController', () => {
   });
 
   it('should get the polar plans', async () => {
-    mockSubscriptionService.getPolarPlans.mockResolvedValue({
-      data: [{ amount_in_dollars: 0.2 }],
+    mockSubscriptionService.getPlans.mockResolvedValue({
+      data: {
+        month: [{ currency: 'usd', plans: [{ amount: 0.2 }] }],
+        year: [],
+      },
     });
 
-    const res = await controller.getPolarPlans();
-    expect(res.data).toHaveLength(1);
-    expect(res.data[0].amount_in_dollars).toBe(0.2);
+    const res = await controller.getPlans();
+    expect(res.data.month).toHaveLength(1);
+    expect(res.data.month[0].plans[0].amount).toBe(0.2);
   });
 
   it('should create the checkout url', async () => {
-    mockSubscriptionService.createPolarCheckout.mockResolvedValue({
+    mockSubscriptionService.createCheckout.mockResolvedValue({
       url: 'test-url',
     });
 
     const productId = 'test-product-id';
-    await controller.createPolarCheckout(mockRequest, mockResponse, {
+    await controller.createCheckout(mockRequest, mockResponse, {
       product_id: productId,
+      provider: 'polar',
     });
 
     expect(mockResponse.redirect).toHaveBeenCalled();
     expect(mockResponse.redirect).toHaveBeenCalledTimes(1);
-    expect(mockSubscriptionService.createPolarCheckout).toHaveBeenCalledWith(
+    expect(mockSubscriptionService.createCheckout).toHaveBeenCalledWith(
       testUserId,
-      { product_id: productId },
+      { product_id: productId, provider: 'polar' },
     );
   });
 });
