@@ -192,7 +192,7 @@ describe('SubscriptionsService', () => {
 
     const res = await service.createCheckout(userId, {
       productId: testProductId,
-      provider: 'polar',
+      provider: 'POLAR',
     });
 
     expect(res.url).toEqual(checkoutUrl);
@@ -219,7 +219,7 @@ describe('SubscriptionsService', () => {
     await expect(
       service.createCheckout(userId, {
         productId: testProductId,
-        provider: 'polar',
+        provider: 'POLAR',
       }),
     ).rejects.toThrow(NotFoundException);
   });
@@ -239,7 +239,7 @@ describe('SubscriptionsService', () => {
     await expect(
       service.createCheckout(userId, {
         productId: testProductId,
-        provider: 'polar',
+        provider: 'POLAR',
       }),
     ).rejects.toThrow(BadRequestException);
   });
