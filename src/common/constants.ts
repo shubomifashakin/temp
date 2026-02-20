@@ -51,6 +51,18 @@ export const mappedPolarIntervals = {
 };
 
 export const benefits = {
-  [Plan.FREE]: ['7Day lifetime', 'Up to 25mb file'],
-  [Plan.PRO]: ['Longer lifetimes (14days, 1Month)', 'Up to 100Mb files'],
+  [Plan.FREE]: [
+    'Max file size of 25mb',
+    '7 day retention',
+    '1 link per file',
+    'Virus Scanning',
+    'Click Tracking',
+  ],
+  [Plan.PRO]: [
+    'Everything in free',
+    '14 & 31 day retention',
+    'Unlimited links',
+    'Max file size of 150mb',
+    'All new features',
+  ],
 };
