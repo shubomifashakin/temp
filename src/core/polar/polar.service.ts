@@ -76,6 +76,7 @@ export class PolarService {
         page,
         visibility,
         isRecurring,
+        isArchived: false,
       });
 
       return { success: true, data: products, error: null };
