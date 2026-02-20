@@ -24,7 +24,7 @@ class File {
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'expiresAt must be a date' })
-  expires_at: Date;
+  expiresAt: Date;
 
   @ApiProperty({
     description: 'Size of the file in bytes',

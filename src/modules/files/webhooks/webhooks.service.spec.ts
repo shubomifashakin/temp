@@ -48,7 +48,7 @@ describe('WebhooksService', () => {
 
     mockDatabaseService.file.update.mockResolvedValue({
       id: 'test-id',
-      s3_key: 'test-key',
+      s3Key: 'test-key',
       status: 'safe',
     });
 
@@ -59,7 +59,7 @@ describe('WebhooksService', () => {
 
     expect(mockDatabaseService.file.update).toHaveBeenCalledWith({
       where: {
-        s3_key: 'test-key',
+        s3Key: 'test-key',
       },
       data: {
         status: 'safe',
@@ -72,7 +72,7 @@ describe('WebhooksService', () => {
       type: 'file:deleted',
       data: {
         keys: ['test-key-1', 'test-key-2'],
-        deleted_at: new Date(),
+        deletedAt: new Date(),
       },
     };
 
@@ -83,10 +83,10 @@ describe('WebhooksService', () => {
 
     expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
       where: {
-        s3_key: { in: ['test-key-1', 'test-key-2'] },
+        s3Key: { in: ['test-key-1', 'test-key-2'] },
       },
       data: {
-        deleted_at: dto.data.deleted_at,
+        deletedAt: dto.data.deletedAt,
       },
     });
   });

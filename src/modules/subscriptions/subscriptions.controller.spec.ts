@@ -106,7 +106,7 @@ describe('SubscriptionsController', () => {
 
     const productId = 'test-product-id';
     await controller.createCheckout(mockRequest, mockResponse, {
-      product_id: productId,
+      productId: productId,
       provider: 'polar',
     });
 
@@ -114,7 +114,7 @@ describe('SubscriptionsController', () => {
     expect(mockResponse.redirect).toHaveBeenCalledTimes(1);
     expect(mockSubscriptionService.createCheckout).toHaveBeenCalledWith(
       testUserId,
-      { product_id: productId, provider: 'polar' },
+      { productId: productId, provider: 'polar' },
     );
   });
 });

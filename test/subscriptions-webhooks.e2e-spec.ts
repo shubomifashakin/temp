@@ -195,7 +195,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
@@ -212,18 +212,18 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: false,
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: false,
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -253,12 +253,12 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.last_event_at).toEqual(lastEventAt);
+        expect(subscription?.lastEventAt).toEqual(lastEventAt);
       });
     });
 
@@ -296,18 +296,18 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: false,
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: false,
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -332,12 +332,12 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.cancel_at_period_end).toBe(true);
+        expect(subscription?.cancelAtPeriodEnd).toBe(true);
       });
 
       it('should not process the polar subscription.canceled event because its old ', async () => {
@@ -349,18 +349,18 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: false,
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: false,
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -385,12 +385,12 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.cancel_at_period_end).toBe(false);
+        expect(subscription?.cancelAtPeriodEnd).toBe(false);
       });
     });
 
@@ -409,19 +409,19 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: true,
-                cancelled_at: new Date(),
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: true,
+                cancelledAt: new Date(),
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -462,12 +462,12 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.cancel_at_period_end).toBe(true);
+        expect(subscription?.cancelAtPeriodEnd).toBe(true);
       });
 
       it('should process the polar subscription.uncanceled event ', async () => {
@@ -479,19 +479,19 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: true,
-                cancelled_at: new Date(),
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: true,
+                cancelledAt: new Date(),
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -532,12 +532,12 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.cancel_at_period_end).toBe(false);
+        expect(subscription?.cancelAtPeriodEnd).toBe(false);
       });
     });
 
@@ -556,18 +556,18 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: false,
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: false,
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -608,7 +608,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
@@ -625,18 +625,18 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: false,
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: false,
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -677,7 +677,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
@@ -724,19 +724,19 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: new Date(),
-                current_period_start: new Date(),
-                cancel_at_period_end: true,
-                cancelled_at: new Date(),
+                currentPeriodEnd: new Date(),
+                currentPeriodStart: new Date(),
+                cancelAtPeriodEnd: true,
+                cancelledAt: new Date(),
                 status: 'ACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -769,7 +769,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 
@@ -788,19 +788,19 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             subscriptions: {
               create: {
                 plan: 'PRO',
-                current_period_end: currentPeriodEnd,
-                current_period_start: currentPeriodStart,
-                cancel_at_period_end: true,
-                cancelled_at: new Date(),
+                currentPeriodEnd: currentPeriodEnd,
+                currentPeriodStart: currentPeriodStart,
+                cancelAtPeriodEnd: true,
+                cancelledAt: new Date(),
                 status: 'INACTIVE',
-                started_at: new Date(),
-                provider_customer_id: 'test-customer-id',
+                startedAt: new Date(),
+                providerCustomerId: 'test-customer-id',
                 amount: 2,
-                provider_subscription_id: testSubscriptionId,
+                providerSubscriptionId: testSubscriptionId,
                 provider: 'POLAR',
-                product_id: 'test-product-id',
+                productId: 'test-product-id',
                 currency: 'usd',
-                last_event_at: lastEventAt,
+                lastEventAt: lastEventAt,
               },
             },
           },
@@ -838,7 +838,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
 
         const subscription = await databaseService.subscription.findFirst({
           where: {
-            provider_subscription_id: testSubscriptionId,
+            providerSubscriptionId: testSubscriptionId,
           },
         });
 

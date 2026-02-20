@@ -68,7 +68,7 @@ export class FilesService {
     const fileWithNameeExist = await this.databaseService.file.findUnique({
       where: {
         files_name_unique: {
-          user_id: userId,
+          userId: userId,
           name: dto.name,
         },
       },
@@ -106,12 +106,12 @@ export class FilesService {
 
     const response = await this.databaseService.file.create({
       data: {
-        s3_key: key,
+        s3Key: key,
         name: dto.name,
-        user_id: userId,
+        userId: userId,
         size: file.size,
         description: dto.description,
-        expires_at: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
+        expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
       },
     });
 
@@ -131,13 +131,13 @@ export class FilesService {
 
     const files = await this.databaseService.file.findMany({
       where: {
-        user_id: userId,
+        userId: userId,
       },
       select: {
         id: true,
         size: true,
         status: true,
-        expires_at: true,
+        expiresAt: true,
         description: true,
         name: true,
       },
@@ -149,7 +149,7 @@ export class FilesService {
       }),
       take: limit + 1,
       orderBy: {
-        created_at: 'desc',
+        createdAt: 'desc',
       },
     });
 
@@ -183,18 +183,18 @@ export class FilesService {
     const file = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
-        user_id: userId,
+        userId: userId,
       },
       select: {
         id: true,
         size: true,
         status: true,
-        user_id: true,
-        deleted_at: true,
+        userId: true,
+        deletedAt: true,
         description: true,
-        created_at: true,
-        updated_at: true,
-        expires_at: true,
+        createdAt: true,
+        updatedAt: true,
+        expiresAt: true,
         name: true,
       },
     });
@@ -219,20 +219,20 @@ export class FilesService {
     const s3Key = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
-        user_id: userId,
+        userId: userId,
       },
       select: {
-        s3_key: true,
-        deleted_at: true,
+        s3Key: true,
+        deletedAt: true,
       },
     });
 
-    if (s3Key.deleted_at) {
+    if (s3Key.deletedAt) {
       return { message: 'success' };
     }
 
     const queued = await this.sqsService.pushMessage({
-      message: { s3Key: s3Key.s3_key },
+      message: { s3Key: s3Key.s3Key },
       queueUrl: this.configService.SqsQueueUrl.data!,
     });
 
@@ -248,10 +248,10 @@ export class FilesService {
     await this.databaseService.file.update({
       where: {
         id: fileId,
-        user_id: userId,
+        userId: userId,
       },
       data: {
-        deleted_at: new Date(),
+        deletedAt: new Date(),
       },
     });
 
@@ -277,7 +277,7 @@ export class FilesService {
     const file = await this.databaseService.file.update({
       where: {
         id: fileId,
-        user_id: userId,
+        userId: userId,
       },
       data: {
         description: dto.description,
@@ -288,12 +288,12 @@ export class FilesService {
         size: true,
         name: true,
         status: true,
-        user_id: true,
-        deleted_at: true,
+        userId: true,
+        deletedAt: true,
         description: true,
-        created_at: true,
-        updated_at: true,
-        expires_at: true,
+        createdAt: true,
+        updatedAt: true,
+        expiresAt: true,
       },
     });
 
@@ -321,7 +321,7 @@ export class FilesService {
     const file = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
-        user_id: userId,
+        userId: userId,
       },
     });
 
@@ -329,11 +329,11 @@ export class FilesService {
       throw new BadRequestException('File is not safe');
     }
 
-    if (file.deleted_at) {
+    if (file.deletedAt) {
       throw new NotFoundException('File has been deleted');
     }
 
-    if (new Date() > file.expires_at) {
+    if (new Date() > file.expiresAt) {
       throw new NotFoundException('File has expired');
     }
 
@@ -359,8 +359,8 @@ export class FilesService {
     const link = await this.databaseService.link.create({
       data: {
         password,
-        file_id: fileId,
-        expires_at: dto.expiresAt,
+        fileId: fileId,
+        expiresAt: dto.expiresAt,
         description: dto.description,
       },
     });
@@ -381,20 +381,20 @@ export class FilesService {
 
     const files = await this.databaseService.link.findMany({
       where: {
-        file_id: fileId,
+        fileId: fileId,
         file: {
-          user_id: userId,
+          userId: userId,
         },
       },
       select: {
         id: true,
         password: true,
-        revoked_at: true,
-        created_at: true,
-        click_count: true,
-        expires_at: true,
+        revokedAt: true,
+        createdAt: true,
+        clickCount: true,
+        expiresAt: true,
         description: true,
-        last_accessed_at: true,
+        lastAccessedAt: true,
       },
       ...(cursor && {
         cursor: {
@@ -404,7 +404,7 @@ export class FilesService {
       }),
       take: limit + 1,
       orderBy: {
-        created_at: 'desc',
+        createdAt: 'desc',
       },
     });
 
@@ -413,7 +413,7 @@ export class FilesService {
       const { password, ...safeFile } = file;
       return {
         ...safeFile,
-        password_protected: password !== null,
+        passwordProtected: password !== null,
       };
     });
     const nextCursor = hasNextPage ? data[data.length - 1].id : null;
@@ -429,27 +429,27 @@ export class FilesService {
     const linkDetails = await this.databaseService.link.findUniqueOrThrow({
       where: {
         id: linkId,
-        file_id: fileId,
+        fileId: fileId,
         file: {
-          user_id: userId,
+          userId: userId,
         },
       },
     });
 
-    if (linkDetails.revoked_at) {
+    if (linkDetails.revokedAt) {
       return { message: 'success' };
     }
 
     await this.databaseService.link.update({
       where: {
         id: linkId,
-        file_id: fileId,
+        fileId: fileId,
         file: {
-          user_id: userId,
+          userId: userId,
         },
       },
       data: {
-        revoked_at: new Date(),
+        revokedAt: new Date(),
       },
     });
 
@@ -495,15 +495,15 @@ export class FilesService {
     await this.databaseService.link.update({
       where: {
         id: linkId,
-        file_id: fileId,
+        fileId: fileId,
         file: {
-          user_id: userId,
+          userId: userId,
         },
       },
       data: {
         password,
         description: dto.description,
-        expires_at: dto.expiresAt,
+        expiresAt: dto.expiresAt,
       },
     });
 

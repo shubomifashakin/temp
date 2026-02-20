@@ -391,10 +391,10 @@ describe('FilesController (e2e)', () => {
       await databaseService.file.createMany({
         data: Array.from({ length: 20 }).map((_, i) => ({
           description: `Test File ${i}`,
-          s3_key: `test-file-${i}`,
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: `test-file-${i}`,
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           name: `Test File ${i}`,
         })),
       });
@@ -461,10 +461,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'pending',
           name: 'Test File',
         },
@@ -487,14 +487,14 @@ describe('FilesController (e2e)', () => {
       expect(response.body.id).toEqual(fileId.id);
       expect(response.body).toHaveProperty('description');
       expect(response.body.description).toEqual('Test File');
-      expect(response.body).toHaveProperty('expires_at');
-      expect(response.body.expires_at).toBeDefined();
+      expect(response.body).toHaveProperty('expiresAt');
+      expect(response.body.expiresAt).toBeDefined();
       expect(response.body).toHaveProperty('size');
       expect(response.body.size).toEqual(1024);
       expect(response.body).toHaveProperty('status');
       expect(response.body.status).toEqual('pending');
-      expect(response.body).toHaveProperty('user_id');
-      expect(response.body.user_id).toEqual(userId.id);
+      expect(response.body).toHaveProperty('userId');
+      expect(response.body.userId).toEqual(userId.id);
 
       await redisService.delete(makeFileCacheKey(fileId.id));
     });
@@ -546,16 +546,16 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'pending',
           name: 'Test File',
         },
         select: {
           id: true,
-          deleted_at: true,
+          deletedAt: true,
         },
       });
 
@@ -579,12 +579,12 @@ describe('FilesController (e2e)', () => {
       const file = await databaseService.file.findFirst({
         where: {
           id: fileId.id,
-          user_id: userId.id,
+          userId: userId.id,
         },
       });
 
-      expect(fileId.deleted_at).toBeNull();
-      expect(file?.deleted_at).toEqual(expect.any(Date));
+      expect(fileId.deletedAt).toBeNull();
+      expect(file?.deletedAt).toEqual(expect.any(Date));
     });
 
     it('should not delete the file if the file does not exist', async () => {
@@ -626,16 +626,16 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'pending',
           name: 'Test File',
         },
         select: {
           id: true,
-          deleted_at: true,
+          deletedAt: true,
         },
       });
 
@@ -679,10 +679,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'pending',
           name: 'Test File',
         },
@@ -762,10 +762,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'safe',
           name: 'Test File',
         },
@@ -804,10 +804,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'safe',
           name: 'Test File',
         },
@@ -818,7 +818,7 @@ describe('FilesController (e2e)', () => {
 
       await databaseService.link.create({
         data: {
-          file_id: fileId.id,
+          fileId: fileId.id,
           description: 'Test link',
         },
       });
@@ -846,23 +846,21 @@ describe('FilesController (e2e)', () => {
           name: 'Test User',
           subscriptions: {
             create: {
-              provider_customer_id: 'test-provider-customer',
-              provider_subscription_id: 'subscription_id',
+              providerCustomerId: 'test-provider-customer',
+              providerSubscriptionId: 'subscription_id',
               status: 'ACTIVE',
               provider: 'POLAR',
-              current_period_end: new Date(
-                Date.now() + 1000 * 60 * 60 * 24 * 30,
-              ),
-              current_period_start: new Date(),
+              currentPeriodEnd: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+              currentPeriodStart: new Date(),
               interval: 'MONTH',
-              interval_count: 1,
+              intervalCount: 1,
               plan: 'PRO',
               currency: 'usd',
-              product_id: 'test',
-              cancel_at_period_end: false,
-              started_at: new Date(),
+              productId: 'test',
+              cancelAtPeriodEnd: false,
+              startedAt: new Date(),
               amount: 20,
-              last_event_at: new Date(),
+              lastEventAt: new Date(),
             },
           },
         },
@@ -874,10 +872,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'safe',
           name: 'Test File',
         },
@@ -888,7 +886,7 @@ describe('FilesController (e2e)', () => {
 
       await databaseService.link.create({
         data: {
-          file_id: fileId.id,
+          fileId: fileId.id,
           description: 'Test link',
         },
       });
@@ -923,10 +921,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'pending',
           name: 'Test File',
         },
@@ -965,12 +963,12 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'safe',
-          deleted_at: new Date(),
+          deletedAt: new Date(),
           name: 'Test File',
         },
         select: {
@@ -1008,10 +1006,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(100),
+          s3Key: 'test-file',
+          expiresAt: new Date(100),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           status: 'safe',
           name: 'Test File',
         },
@@ -1087,10 +1085,10 @@ describe('FilesController (e2e)', () => {
       const fileId = await databaseService.file.create({
         data: {
           description: 'Test File',
-          s3_key: 'test-file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          s3Key: 'test-file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
           size: 1024,
-          user_id: userId.id,
+          userId: userId.id,
           name: 'Test File',
           status: 'safe',
         },
@@ -1101,7 +1099,7 @@ describe('FilesController (e2e)', () => {
 
       await databaseService.link.createMany({
         data: Array.from({ length: 15 }).map((_, idx) => ({
-          file_id: fileId.id,
+          fileId: fileId.id,
           description: `Test Link ${idx}`,
         })),
       });
@@ -1186,11 +1184,11 @@ describe('FilesController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
           name: 'Test file',
         },
       });
@@ -1198,12 +1196,12 @@ describe('FilesController (e2e)', () => {
       const link = await databaseService.link.create({
         data: {
           id: 'test-link-id',
-          file_id: file.id,
+          fileId: file.id,
           description: 'Test link',
         },
         select: {
           id: true,
-          revoked_at: true,
+          revokedAt: true,
         },
       });
 
@@ -1225,8 +1223,8 @@ describe('FilesController (e2e)', () => {
         },
       });
 
-      expect(link.revoked_at).toBeNull();
-      expect(revokedState.revoked_at).not.toBeNull();
+      expect(link.revokedAt).toBeNull();
+      expect(revokedState.revokedAt).not.toBeNull();
     });
   });
 
@@ -1267,19 +1265,19 @@ describe('FilesController (e2e)', () => {
       const file = await databaseService.file.create({
         data: {
           id: 'test-file-id',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
           name: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const link = await databaseService.link.create({
         data: {
           id: 'test-link-id',
-          file_id: file.id,
+          fileId: file.id,
           description: 'Test link',
         },
       });

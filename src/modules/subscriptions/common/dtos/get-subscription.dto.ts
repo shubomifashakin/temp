@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 
 import {
+  Plan,
   SubscriptionProvider,
   SubscriptionStatus,
 } from '../../../../../generated/prisma/enums';
@@ -16,7 +17,7 @@ import {
 class SubscriptionDetails {
   @ApiProperty({
     description: 'The unique identifier for the subscription',
-    example: 'sub_123456789',
+    example: 'sub1234',
   })
   @IsString({ message: 'Subscription ID should be a string' })
   id: string;
@@ -45,6 +46,14 @@ class SubscriptionDetails {
   currency: string;
 
   @ApiProperty({
+    description: 'The plan for the subscription',
+    enum: Plan,
+    example: Plan.FREE,
+  })
+  @IsEnum(Plan, { message: 'Invalid plan' })
+  plan: Plan;
+
+  @ApiProperty({
     description: 'The payment provider handling the subscription',
     enum: SubscriptionProvider,
     example: SubscriptionProvider.POLAR,
@@ -54,26 +63,25 @@ class SubscriptionDetails {
 
   @ApiProperty({
     description: 'Timestamp when the subscription was cancelled',
-    required: false,
+    nullable: true,
   })
   @IsOptional()
   @IsDate({ message: 'Cancelled at should be a date' })
-  cancelled_at: Date | null;
+  cancelledAt: Date | null;
 
   @ApiProperty({
     description: 'Timestamp when the current billing period ends',
-    required: false,
   })
   @IsOptional()
   @IsDate({ message: 'Current period end should be a date' })
-  current_period_end: Date | null;
+  currentPeriodEnd: Date;
 
   @ApiProperty({
     description: 'Timestamp when the current billing period started',
     required: false,
   })
   @IsDate({ message: 'Current period start should be a date' })
-  current_period_start: Date;
+  currentPeriodStart: Date;
 
   @ApiProperty({
     description:
@@ -81,14 +89,14 @@ class SubscriptionDetails {
     example: false,
   })
   @IsBoolean({ message: 'Cancel at period end should be a boolean' })
-  cancel_at_period_end: boolean;
+  cancelAtPeriodEnd: boolean;
 
   @ApiProperty({
     description: 'The subscription ID from the payment provider',
-    example: 'polar_sub_123456789',
+    example: 'polarsub123',
   })
   @IsString({ message: 'Provider subscription ID should be a string' })
-  provider_subscription_id: string;
+  providerSubscriptionId: string;
 }
 
 export class GetSubscriptionResponse {

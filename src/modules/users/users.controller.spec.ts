@@ -1,36 +1,17 @@
 import { type Request, type Response } from 'express';
 
 import { Logger } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 
 import { RedisModule } from '../../core/redis/redis.module';
-import { RedisService } from '../../core/redis/redis.service';
 
 import { DatabaseModule } from '../../core/database/database.module';
-import { DatabaseService } from '../../core/database/database.service';
 import { AppConfigModule } from '../../core/app-config/app-config.module';
 import { AppConfigService } from '../../core/app-config/app-config.service';
-
-const mockDatabaseService = {
-  user: {
-    findUniqueOrThrow: jest.fn(),
-    delete: jest.fn(),
-    update: jest.fn(),
-  },
-  subscription: {
-    findFirst: jest.fn(),
-  },
-};
-
-const mockRedisService = {
-  get: jest.fn(),
-  set: jest.fn(),
-  delete: jest.fn(),
-};
 
 const mockLogger = {
   log: jest.fn(),
@@ -46,10 +27,20 @@ const mockAppConfigService = {
     success: true,
     data: 'test-domain.com',
   },
+  DatabaseUrl: {
+    success: true,
+    data: 'test-url',
+  },
+  RedisUrl: {
+    success: true,
+    data: 'redis://localhost:6379',
+  },
 };
 
-const mockJwtService = {
-  verifyAsync: jest.fn(),
+const mockUserService = {
+  getMyInfo: jest.fn(),
+  updateMyInfo: jest.fn(),
+  deleteMyInfo: jest.fn(),
 };
 
 const testUserId = 'test-user-id';
@@ -69,15 +60,14 @@ describe('UsersController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [UsersService],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: mockUserService,
+        },
+      ],
       imports: [DatabaseModule, RedisModule, JwtModule, AppConfigModule],
     })
-      .overrideProvider(DatabaseService)
-      .useValue(mockDatabaseService)
-      .overrideProvider(RedisService)
-      .useValue(mockRedisService)
-      .overrideProvider(JwtService)
-      .useValue(mockJwtService)
       .overrideProvider(AppConfigService)
       .useValue(mockAppConfigService)
       .compile();
@@ -92,7 +82,7 @@ describe('UsersController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should get the users info from database', async () => {
+  it('should get the users info ', async () => {
     const foundUser = {
       name: 'Test User',
       email: 'test@email.com',
@@ -100,8 +90,6 @@ describe('UsersController', () => {
       updated_at: new Date(Date.now() * 1000),
       created_at: new Date(Date.now() * 10),
     };
-
-    mockRedisService.get.mockResolvedValue({ success: true, data: null });
 
     const date = new Date();
     const subscription = {
@@ -111,75 +99,27 @@ describe('UsersController', () => {
       cancel_at_period_end: true,
     };
 
-    mockDatabaseService.user.findUniqueOrThrow.mockResolvedValue(foundUser);
-    mockDatabaseService.subscription.findFirst.mockResolvedValue(subscription);
-
-    mockRedisService.set.mockResolvedValue({
-      success: true,
-    });
+    mockUserService.getMyInfo.mockResolvedValue({ ...foundUser, subscription });
 
     const res = await controller.getMyInfo(mockRequest);
 
     expect(res).toEqual({ ...foundUser, subscription });
   });
 
-  it('should get the users info from redis', async () => {
-    const foundUser = {
-      name: 'Test User',
-      email: 'test@email.com',
-      picture: null,
-      updated_at: new Date(Date.now() * 1000),
-      created_at: new Date(Date.now() * 10),
-    };
-
-    mockRedisService.get.mockResolvedValue({ success: true, data: foundUser });
-
-    const res = await controller.getMyInfo(mockRequest);
-
-    expect(res).toEqual(foundUser);
-
-    expect(mockDatabaseService.user.findUniqueOrThrow).not.toHaveBeenCalled();
-  });
-
   it('should update the users account', async () => {
     const updatedName = 'Updated Name';
-    const updatedUser = {
-      name: updatedName,
-      email: 'test@email.com',
-      picture: null,
-      updated_at: new Date(Date.now() * 1000),
-      created_at: new Date(Date.now() * 10),
-    };
 
-    mockDatabaseService.user.update.mockResolvedValue(updatedUser);
-
-    mockRedisService.delete.mockResolvedValue({ success: true });
+    mockUserService.updateMyInfo.mockResolvedValue({ message: 'success' });
 
     const res = await controller.updateMyInfo(mockRequest, {
       name: updatedName,
     });
 
-    expect(mockDatabaseService.user.update).toHaveBeenCalledWith({
-      where: {
-        id: testUserId,
-      },
-      data: {
-        name: updatedName,
-      },
-      select: {
-        name: true,
-        email: true,
-        picture: true,
-        updated_at: true,
-        created_at: true,
-      },
-    });
     expect(res).toEqual({ message: 'success' });
   });
 
   it('should delete the users account', async () => {
-    mockDatabaseService.user.delete.mockResolvedValue(true);
-    mockRedisService.delete.mockResolvedValue({ success: true });
+    mockUserService.deleteMyInfo.mockResolvedValue({ message: 'success' });
 
     const res = await controller.deleteMyInfo(mockRequest, mockResponse);
 

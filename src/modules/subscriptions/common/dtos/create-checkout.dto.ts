@@ -1,19 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
+import { SubscriptionProvider } from '../../../../../generated/prisma/enums';
 
 export class CreateCheckoutDto {
   @ApiProperty({
     description: 'The product ID to create a checkout for',
   })
   @IsString({ message: 'Product ID must be a string' })
-  product_id: string;
+  productId: string;
 
   @ApiProperty({
     description: 'The provider to checkout with',
-    enum: ['polar'],
-    default: 'polar',
+    enum: SubscriptionProvider,
+    default: SubscriptionProvider.POLAR,
   })
-  @IsString({ message: 'Provider must be a string' })
-  provider: 'polar';
+  @IsEnum(SubscriptionProvider, { message: 'unknown subscription provider' })
+  provider: SubscriptionProvider;
 }

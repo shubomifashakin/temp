@@ -28,8 +28,8 @@ export class FileDeletedEventPayload {
 
   @ApiProperty({ description: 'the date the file was deleted' })
   @Type(() => Date)
-  @IsDate({ message: 'deleted_at should be a valid date' })
-  deleted_at: Date;
+  @IsDate({ message: 'deletedAt should be a valid date' })
+  deletedAt: Date;
 }
 
 export class FileValidatedEventPayload {

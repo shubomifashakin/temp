@@ -106,6 +106,16 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
     }
   }
 
+  async flushAll() {
+    try {
+      await this.client.flushAll();
+
+      return { success: true, data: null, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
   async onModuleInit() {
     await this.client.connect();
 

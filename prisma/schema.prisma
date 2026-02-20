@@ -19,136 +19,137 @@ enum FileStatus {
   pending
 }
 
-enum SubscriptionProviders {
-  polar
-}
-
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  name       String
-  picture    String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  picture   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  files          File[]
-  accounts       Accounts[]
-  refresh_tokens RefreshToken[]
-  subscriptions  Subscription[]
+  files         File[]
+  accounts      Accounts[]
+  refreshTokens RefreshToken[]
+  subscriptions Subscription[]
+
+  @@map("users")
 }
 
 model Accounts {
-  id          String   @id @default(uuid())
-  user_id     String
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider    Provider
-  provider_id String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   Provider
+  providerId String   @map("provider_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  @@index(name: "accounts_user_id_idx", fields: [user_id])
+  @@index(name: "accounts_user_id_idx", fields: [userId])
+  @@map("accounts")
 }
 
 model RefreshToken {
-  id         String   @id @default(uuid())
-  user_id    String
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  token_id   String   @unique
-  expires_at DateTime
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenId   String   @unique @map("token_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@index(name: "refresh_tokens_user_id_idx", fields: [user_id])
+  @@index(name: "refresh_tokens_user_id_idx", fields: [userId])
+  @@map("refresh_tokens")
 }
 
 model File {
   id          String @id @default(uuid())
   description String @db.VarChar(100)
-  s3_key      String @unique
+  s3Key       String @unique @map("s3_key")
   name        String @db.VarChar(50)
 
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
-  deleted_at DateTime?
-  expires_at DateTime
-  size       Int
-  status     FileStatus @default(pending)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  deletedAt DateTime?  @map("deleted_at")
+  expiresAt DateTime   @map("expires_at")
+  size      Int
+  status    FileStatus @default(pending)
 
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   links Link[]
 
-@@unique(name: "files_name_unique", [name, user_id])
-  @@index(name: "files_user_id_idx", fields: [user_id])
+  @@unique(name: "files_name_unique", [name, userId])
+  @@index(name: "files_user_id_idx", fields: [userId])
+  @@map("files")
 }
 
 model Link {
   id String @id @default(nanoid(13))
 
-  click_count Int @default(0)
+  clickCount Int @default(0) @map("click_count")
 
   description String @db.VarChar(100)
 
-  file_id String
-  file    File   @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  fileId String @map("file_id")
+  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
-  last_accessed_at DateTime?
+  lastAccessedAt DateTime? @map("last_accessed_at")
 
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  revoked_at DateTime?
-  expires_at DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  revokedAt DateTime? @map("revoked_at")
+  expiresAt DateTime? @map("expires_at")
 
   password String?
 
-  @@unique(name: "id_file_id_unique", [id, file_id])
-  @@index(name: "file_id_idx", fields: [file_id])
+  @@unique(name: "id_file_id_unique", [id, fileId])
+  @@index(name: "file_id_idx", fields: [fileId])
+  @@map("links")
 }
 
 model Subscription {
   id String @id @default(uuid())
 
-  user_id String 
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  provider                 SubscriptionProvider
-  provider_subscription_id String               @unique 
-  provider_customer_id     String
+  provider               SubscriptionProvider
+  providerSubscriptionId String               @unique @map("provider_subscription_id")
+  providerCustomerId     String               @map("provider_customer_id")
 
-  product_id String 
-  plan       Plan    
+  productId String @map("product_id")
+  plan      Plan
 
   amount   Int
-  currency String  
+  currency String
 
-  interval       BillingInterval @default(MONTH)
-  interval_count Int             @default(1)
+  interval      BillingInterval @default(MONTH)
+  intervalCount Int             @default(1) @map("interval_count")
 
   status SubscriptionStatus @default(ACTIVE)
 
-  started_at           DateTime
-  current_period_start DateTime
-  current_period_end   DateTime?
+  startedAt          DateTime @map("started_at")
+  currentPeriodStart DateTime @map("current_period_start")
+  currentPeriodEnd   DateTime @map("current_period_end")
 
-  trial_ends_at DateTime?
-  cancelled_at  DateTime?
-  ended_at      DateTime?
+  trialEndsAt DateTime? @map("trial_ends_at")
+  cancelledAt DateTime? @map("cancelled_at")
+  endedAt     DateTime? @map("ended_at")
 
-  last_event_at DateTime
+  lastEventAt DateTime @map("last_event_at")
 
-  cancel_at_period_end Boolean @default(false)
+  cancelAtPeriodEnd Boolean @default(false) @map("cancel_at_period_end")
 
   metadata Json?
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-
-  @@unique(name: "subscriptions_provider_id_user_id_unique",fields:[provider_subscription_id,user_id])
-  @@index(name: "subscriptions_user_id_idx", fields: [user_id])
-  @@index(name: "subscriptions_provider_subscription_id_idx", fields: [provider_subscription_id])
-  @@index(name: "subscriptions_provider_provider_customer_id_idx", fields: [provider, provider_customer_id])
+  @@unique(name: "subscriptions_provider_id_user_id_unique", fields: [providerSubscriptionId, userId])
+  @@index(name: "subscriptions_user_id_idx", fields: [userId])
+  @@index(name: "subscriptions_provider_subscription_id_idx", fields: [providerSubscriptionId])
+  @@index(name: "subscriptions_provider_provider_customer_id_idx", fields: [provider, providerCustomerId])
   @@index(name: "subscriptions_status_idx", fields: [status])
   @@map("subscriptions")
 }
