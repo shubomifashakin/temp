@@ -2,7 +2,6 @@ import { type Request, type Response } from 'express';
 
 import {
   ApiBody,
-  ApiQuery,
   ApiResponse,
   ApiOperation,
   ApiCookieAuth,
@@ -16,17 +15,15 @@ import {
   Res,
   Body,
   Post,
-  Query,
   Delete,
   UseGuards,
   Controller,
-  ParseIntPipe,
 } from '@nestjs/common';
 
 import { SubscriptionsService } from './subscriptions.service';
 
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
-import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
+import { GetPlansResponse } from './common/dtos/get-plans-response.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
 
@@ -47,23 +44,17 @@ export class SubscriptionsController {
     return this.subscriptionsService.cancelSubscription(req.user.id);
   }
 
-  @ApiOperation({ summary: 'Get available polar subscription plans' })
+  @ApiOperation({
+    summary: 'Get available subscription plans across all providers',
+  })
   @ApiResponse({
     status: 200,
-    type: PolarPlanResponseDto,
-    description: 'The available plans',
+    type: GetPlansResponse,
+    description: 'The available plans across all providers',
   })
-  @ApiQuery({
-    name: 'cursor',
-    required: false,
-    description: 'pagination cursor',
-    type: 'number',
-  })
-  @Get('plans/polar')
-  async getPolarPlans(
-    @Query('cursor', new ParseIntPipe({ optional: true })) cursor?: number,
-  ): Promise<PolarPlanResponseDto> {
-    return this.subscriptionsService.getPolarPlans(cursor);
+  @Get('plans')
+  async getPlans(): Promise<GetPlansResponse> {
+    return this.subscriptionsService.getPlans();
   }
 
   @ApiOperation({ summary: 'Create Polar checkout' })

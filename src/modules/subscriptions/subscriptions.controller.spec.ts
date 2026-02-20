@@ -46,7 +46,7 @@ const mockAppConfigService = {
 
 const mockSubscriptionService = {
   cancelSubscription: jest.fn(),
-  getPolarPlans: jest.fn(),
+  getPlans: jest.fn(),
   createPolarCheckout: jest.fn(),
 };
 
@@ -87,13 +87,16 @@ describe('SubscriptionsController', () => {
   });
 
   it('should get the polar plans', async () => {
-    mockSubscriptionService.getPolarPlans.mockResolvedValue({
-      data: [{ amount_in_dollars: 0.2 }],
+    mockSubscriptionService.getPlans.mockResolvedValue({
+      data: {
+        month: [{ currency: 'usd', plans: [{ amount: 0.2 }] }],
+        year: [],
+      },
     });
 
-    const res = await controller.getPolarPlans();
-    expect(res.data).toHaveLength(1);
-    expect(res.data[0].amount_in_dollars).toBe(0.2);
+    const res = await controller.getPlans();
+    expect(res.data.month).toHaveLength(1);
+    expect(res.data.month[0].plans[0].amount).toBe(0.2);
   });
 
   it('should create the checkout url', async () => {

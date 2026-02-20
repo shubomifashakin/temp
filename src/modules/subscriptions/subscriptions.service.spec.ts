@@ -249,7 +249,7 @@ describe('SubscriptionsService', () => {
         items: [
           {
             id: 'test-value',
-            recurringInterval: 'day',
+            recurringInterval: 'month',
             prices,
             isRecurring: true,
           },
@@ -268,13 +268,14 @@ describe('SubscriptionsService', () => {
       data: {
         plan: 'test-plan',
         benefits: ['test-benefit'],
-        interval: 'day',
+        interval: 'MONTH',
       },
       error: null,
     });
 
-    const res = await service.getPolarPlans();
-    expect(res.data).toHaveLength(1);
-    expect(res.data[0].amount_in_dollars).toBe(0.2);
+    const res = await service.getPlans();
+    expect(res.data.month).toBeDefined();
+    expect(res.data.year).toBeDefined();
+    expect(res.data.month[0].plans[0].amount).toBe(0.2);
   });
 });

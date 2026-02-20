@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 
 import { centsToDollars } from './common/utils';
-import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
+import {
+  PlanInfo,
+  GetPlansResponse,
+} from './common/dtos/get-plans-response.dto';
 import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
 
 import { PolarService } from '../../core/polar/polar.service';
@@ -69,9 +72,8 @@ export class SubscriptionsService {
     return { message: 'success' };
   }
 
-  async getPolarPlans(cursor?: number): Promise<PolarPlanResponseDto> {
+  async getPlans(): Promise<GetPlansResponse> {
     const limit = 10;
-    const page = cursor || 1;
 
     const polarOrganizationId = this.configService.PolarOrganizationId;
 
@@ -86,7 +88,7 @@ export class SubscriptionsService {
 
     const { success, data, error } =
       await this.polarService.getAvailableProducts({
-        page,
+        page: 1,
         limit,
         isRecurring: true,
         visibility: ['public'],
@@ -103,8 +105,6 @@ export class SubscriptionsService {
       throw new InternalServerErrorException();
     }
 
-    const hasNextPage = data.result.pagination.maxPage > page;
-    const next = hasNextPage ? page + 1 : null;
     const products = data.result.items;
 
     for (const product of products) {
@@ -129,7 +129,7 @@ export class SubscriptionsService {
       }
     }
 
-    const transformed = products.map((plan) => {
+    const transformedPolarPlans = products.map((plan) => {
       const { id, prices, recurringInterval } = plan;
 
       const allFixedPrices = prices.filter((p) => p.amountType === 'fixed');
@@ -142,17 +142,30 @@ export class SubscriptionsService {
       );
 
       return {
-        id,
+        amount: centsToDollars(amountInCents),
         currency,
+        product_id: id,
         name: productInfo.data!.plan,
         benefits: productInfo.data!.benefits,
         interval: productInfo.data!.interval,
-        amount_in_cents: amountInCents,
-        amount_in_dollars: centsToDollars(amountInCents),
       };
     });
 
-    return { hasNextPage, cursor: next, data: transformed };
+    const polarPlanCycles = transformedPolarPlans.reduce(
+      (acc, plan) => {
+        if (plan.interval === 'MONTH') {
+          acc.month.push({ plans: [plan], currency: 'usd', provider: 'polar' });
+        } else {
+          acc.year.push({ plans: [plan], currency: 'usd', provider: 'polar' });
+        }
+        return acc;
+      },
+      { month: [] as PlanInfo[], year: [] as PlanInfo[] },
+    );
+
+    return {
+      data: { month: polarPlanCycles.month, year: polarPlanCycles.year },
+    };
   }
 
   async createPolarCheckout(userId: string, dto: CreatePolarCheckoutDto) {

@@ -220,13 +220,13 @@ describe('SubscriptionsController (e2e)', () => {
     });
   });
 
-  describe('GET /subscriptions/plans/polar', () => {
+  describe('GET /subscriptions/plans', () => {
     beforeEach(async () => {
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
     });
 
-    it('should get polar plans successfully', async () => {
+    it('should get plans successfully', async () => {
       mockPolarService.getAvailableProducts.mockResolvedValue({
         success: true,
         data: {
@@ -266,69 +266,15 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get('/subscriptions/plans/polar')
-        .query({ cursor: 1 })
+        .get('/subscriptions/plans')
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('hasNextPage');
-      expect(response.body).toHaveProperty('cursor');
       expect(response.body).toHaveProperty('data');
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data[0]).toHaveProperty('id');
-      expect(response.body.data[0]).toHaveProperty('currency');
-      expect(response.body.data[0]).toHaveProperty('name');
-      expect(response.body.data[0]).toHaveProperty('benefits');
-      expect(response.body.data[0]).toHaveProperty('interval');
-      expect(response.body.data[0]).toHaveProperty('amount_in_cents');
-      expect(response.body.data[0]).toHaveProperty('amount_in_dollars');
-    });
-
-    it('should get polar plans without cursor', async () => {
-      mockPolarService.getAvailableProducts.mockResolvedValue({
-        success: true,
-        data: {
-          result: {
-            items: [
-              {
-                id: 'test-product-id',
-                isRecurring: true,
-                recurringInterval: 'month',
-                prices: [
-                  {
-                    amountType: 'fixed',
-                    priceAmount: 500,
-                    priceCurrency: 'usd',
-                  },
-                ],
-              },
-            ],
-            pagination: {
-              maxPage: 2,
-            },
-          },
-        },
-        error: null,
-      });
-
-      const user = await databaseService.user.create({
-        data: {
-          email: testEmail,
-          name: 'Test User',
-        },
-      });
-
-      mockJwtService.verifyAsync.mockResolvedValue({
-        jti: 'test-jti',
-        userId: user.id,
-      });
-      const response = await request(app.getHttpServer())
-        .get('/subscriptions/plans/polar')
-        .set('Cookie', ['access_token=test-token']);
-
-      expect(response.status).toBe(200);
-      expect(response.body.hasNextPage).toBe(true);
-      expect(response.body.cursor).toBe(2);
+      expect(response.body.data).toHaveProperty('month');
+      expect(response.body.data.month).toHaveLength(1);
+      expect(response.body.data).toHaveProperty('year');
+      expect(response.body.data.year).toHaveLength(0);
     });
 
     it('should handle polar service failure', async () => {
@@ -351,7 +297,7 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get('/subscriptions/plans/polar')
+        .get('/subscriptions/plans')
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
@@ -359,7 +305,7 @@ describe('SubscriptionsController (e2e)', () => {
 
     it('should not get plans if user is not authenticated', async () => {
       const response = await request(app.getHttpServer())
-        .get('/subscriptions/plans/polar')
+        .get('/subscriptions/plans')
         .set('Cookie', []);
 
       expect(response.status).toBe(401);
