@@ -26,12 +26,29 @@ import { CreateCheckoutDto } from './common/dtos/create-checkout.dto';
 import { GetPlansResponse } from './common/dtos/get-plans-response.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
+
+  @ApiOperation({
+    summary: 'Get a users active subscription',
+    description: 'Get a users active subscription, if any.',
+  })
+  @ApiResponse({
+    description: 'Subscription retrieved',
+    status: 200,
+    type: GetSubscriptionResponse,
+  })
+  @Get('current')
+  async getCurrentSubscription(
+    @Req() req: Request,
+  ): Promise<GetSubscriptionResponse> {
+    return this.subscriptionsService.getSubscriptionDetails(req.user.id);
+  }
 
   @ApiOperation({
     summary: 'Cancel a users active subscription once the period is over',

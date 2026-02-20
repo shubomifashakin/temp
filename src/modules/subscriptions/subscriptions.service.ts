@@ -19,6 +19,7 @@ import { AppConfigService } from '../../core/app-config/app-config.service';
 
 import { FnResult } from '../../types/common.types';
 import { makeError } from '../../common/utils';
+import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -82,6 +83,34 @@ export class SubscriptionsService {
     } catch (error) {
       return { success: false, error: makeError(error), data: null };
     }
+  }
+
+  async getSubscriptionDetails(
+    userId: string,
+  ): Promise<GetSubscriptionResponse> {
+    const subscription = await this.databaseService.subscription.findFirst({
+      where: {
+        user_id: userId,
+        status: 'ACTIVE',
+      },
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        currency: true,
+        provider: true,
+        cancelled_at: true,
+        current_period_end: true,
+        current_period_start: true,
+        cancel_at_period_end: true,
+        provider_subscription_id: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return { data: subscription };
   }
 
   async cancelSubscription(userId: string) {
