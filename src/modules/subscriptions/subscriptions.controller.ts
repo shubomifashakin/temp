@@ -2,7 +2,6 @@ import { type Request, type Response } from 'express';
 
 import {
   ApiBody,
-  ApiQuery,
   ApiResponse,
   ApiOperation,
   ApiCookieAuth,
@@ -16,19 +15,18 @@ import {
   Res,
   Body,
   Post,
-  Query,
   Delete,
   UseGuards,
   Controller,
-  ParseIntPipe,
 } from '@nestjs/common';
 
 import { SubscriptionsService } from './subscriptions.service';
 
-import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
-import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
+import { CreateCheckoutDto } from './common/dtos/create-checkout.dto';
+import { GetPlansResponse } from './common/dtos/get-plans-response.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
@@ -37,51 +35,61 @@ export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @ApiOperation({
+    summary: 'Get a users active subscription',
+    description: 'Get a users active subscription, if any.',
+  })
+  @ApiResponse({
+    description: 'Subscription retrieved',
+    status: 200,
+    type: GetSubscriptionResponse,
+  })
+  @Get('current')
+  async getCurrentSubscription(
+    @Req() req: Request,
+  ): Promise<GetSubscriptionResponse> {
+    return this.subscriptionsService.getSubscriptionDetails(req.user.id);
+  }
+
+  @ApiOperation({
     summary: 'Cancel a users active subscription once the period is over',
     description: `Cancel a users active subscription once the period is over, it is idempotent. 
       The users subscription would remain active until its expiry`,
   })
   @ApiResponse({ description: 'Subscription cancelled', status: 201 })
-  @Delete()
+  @Delete('current')
   async cancelSubscription(@Req() req: Request) {
     return this.subscriptionsService.cancelSubscription(req.user.id);
   }
 
-  @ApiOperation({ summary: 'Get available polar subscription plans' })
+  @ApiOperation({
+    summary: 'Get available subscription plans across all providers',
+  })
   @ApiResponse({
     status: 200,
-    type: PolarPlanResponseDto,
-    description: 'The available plans',
+    type: GetPlansResponse,
+    description: 'The available plans across all providers',
   })
-  @ApiQuery({
-    name: 'cursor',
-    required: false,
-    description: 'pagination cursor',
-    type: 'number',
-  })
-  @Get('plans/polar')
-  async getPolarPlans(
-    @Query('cursor', new ParseIntPipe({ optional: true })) cursor?: number,
-  ): Promise<PolarPlanResponseDto> {
-    return this.subscriptionsService.getPolarPlans(cursor);
+  @Get('plans')
+  async getPlans(): Promise<GetPlansResponse> {
+    return this.subscriptionsService.getPlans();
   }
 
-  @ApiOperation({ summary: 'Create Polar checkout' })
-  @ApiBody({ type: CreatePolarCheckoutDto })
-  @ApiTemporaryRedirectResponse({ description: 'Redirects to Polar checkout' })
+  @ApiOperation({ summary: 'Create checkout' })
+  @ApiBody({ type: CreateCheckoutDto })
+  @ApiTemporaryRedirectResponse({ description: 'Redirects to checkout url' })
   @ApiBadRequestResponse({
     description: 'User already has an active subscription',
   })
   @ApiNotFoundResponse({
     description: 'The product that was being checked out does not exist.',
   })
-  @Post('checkout/polar')
-  async createPolarCheckout(
+  @Post('checkout')
+  async createCheckout(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() dto: CreatePolarCheckoutDto,
+    @Body() dto: CreateCheckoutDto,
   ) {
-    const result = await this.subscriptionsService.createPolarCheckout(
+    const result = await this.subscriptionsService.createCheckout(
       req.user.id,
       dto,
     );

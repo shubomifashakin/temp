@@ -7,12 +7,19 @@ import {
 } from '@nestjs/common';
 
 import { centsToDollars } from './common/utils';
-import { PolarPlanResponseDto } from './common/dtos/polar-plans-response.dto';
-import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
+import {
+  PlanInfo,
+  GetPlansResponse,
+} from './common/dtos/get-plans-response.dto';
+import { CreateCheckoutDto } from './common/dtos/create-checkout.dto';
 
 import { PolarService } from '../../core/polar/polar.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { AppConfigService } from '../../core/app-config/app-config.service';
+
+import { FnResult } from '../../types/common.types';
+import { makeError } from '../../common/utils';
+import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -24,6 +31,88 @@ export class SubscriptionsService {
     private readonly databaseService: DatabaseService,
   ) {}
 
+  private async checkoutWithPolar({
+    productId,
+    successUrl,
+    returnUrl,
+    user,
+  }: {
+    productId: string;
+    successUrl: string;
+    returnUrl: string;
+    user: { id: string; name: string; email: string };
+  }): Promise<FnResult<{ url: string } | null>> {
+    try {
+      const productExists = await this.polarService.getProduct({
+        productId,
+      });
+
+      if (!productExists.success) {
+        this.logger.error({
+          message: 'Failed to check if product exists',
+          error: productExists.error,
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      if (productExists.success && !productExists.data) {
+        this.logger.warn({
+          message: `Product with id: ${productId} does not exist`,
+        });
+
+        return {
+          data: null,
+          error: null,
+          success: true,
+        };
+      }
+
+      const result = await this.polarService.createCheckout({
+        productId,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+        successUrl,
+        returnUrl,
+      });
+
+      return result;
+    } catch (error) {
+      return { success: false, error: makeError(error), data: null };
+    }
+  }
+
+  async getSubscriptionDetails(
+    userId: string,
+  ): Promise<GetSubscriptionResponse> {
+    const subscription = await this.databaseService.subscription.findFirst({
+      where: {
+        user_id: userId,
+        status: 'ACTIVE',
+      },
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        currency: true,
+        provider: true,
+        cancelled_at: true,
+        current_period_end: true,
+        current_period_start: true,
+        cancel_at_period_end: true,
+        provider_subscription_id: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return { data: subscription };
+  }
+
   async cancelSubscription(userId: string) {
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
@@ -31,6 +120,7 @@ export class SubscriptionsService {
         status: 'ACTIVE',
       },
       select: {
+        id: true,
         status: true,
         provider: true,
         cancelled_at: true,
@@ -66,12 +156,20 @@ export class SubscriptionsService {
       }
     }
 
+    await this.databaseService.subscription.update({
+      where: {
+        id: subscription.id,
+      },
+      data: {
+        cancel_at_period_end: true,
+      },
+    });
+
     return { message: 'success' };
   }
 
-  async getPolarPlans(cursor?: number): Promise<PolarPlanResponseDto> {
+  async getPlans(): Promise<GetPlansResponse> {
     const limit = 10;
-    const page = cursor || 1;
 
     const polarOrganizationId = this.configService.PolarOrganizationId;
 
@@ -86,7 +184,7 @@ export class SubscriptionsService {
 
     const { success, data, error } =
       await this.polarService.getAvailableProducts({
-        page,
+        page: 1,
         limit,
         isRecurring: true,
         visibility: ['public'],
@@ -103,8 +201,6 @@ export class SubscriptionsService {
       throw new InternalServerErrorException();
     }
 
-    const hasNextPage = data.result.pagination.maxPage > page;
-    const next = hasNextPage ? page + 1 : null;
     const products = data.result.items;
 
     for (const product of products) {
@@ -129,7 +225,7 @@ export class SubscriptionsService {
       }
     }
 
-    const transformed = products.map((plan) => {
+    const transformedPolarPlans = products.map((plan) => {
       const { id, prices, recurringInterval } = plan;
 
       const allFixedPrices = prices.filter((p) => p.amountType === 'fixed');
@@ -142,20 +238,33 @@ export class SubscriptionsService {
       );
 
       return {
-        id,
+        amount: centsToDollars(amountInCents),
         currency,
+        product_id: id,
         name: productInfo.data!.plan,
         benefits: productInfo.data!.benefits,
         interval: productInfo.data!.interval,
-        amount_in_cents: amountInCents,
-        amount_in_dollars: centsToDollars(amountInCents),
       };
     });
 
-    return { hasNextPage, cursor: next, data: transformed };
+    const polarPlanCycles = transformedPolarPlans.reduce(
+      (acc, plan) => {
+        if (plan.interval === 'MONTH') {
+          acc.month.push({ plans: [plan], currency: 'usd', provider: 'polar' });
+        } else {
+          acc.year.push({ plans: [plan], currency: 'usd', provider: 'polar' });
+        }
+        return acc;
+      },
+      { month: [] as PlanInfo[], year: [] as PlanInfo[] },
+    );
+
+    return {
+      data: { month: polarPlanCycles.month, year: polarPlanCycles.year },
+    };
   }
 
-  async createPolarCheckout(userId: string, dto: CreatePolarCheckoutDto) {
+  async createCheckout(userId: string, dto: CreateCheckoutDto) {
     const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id: userId },
     });
@@ -189,47 +298,38 @@ export class SubscriptionsService {
       throw new InternalServerErrorException();
     }
 
-    const productExists = await this.polarService.getProduct({
-      productId: dto.product_id,
-    });
+    let result: FnResult<{ url: string } | null> = {
+      success: false,
+      data: null,
+      error: new Error('Invalid provider'),
+    };
 
-    if (!productExists.success) {
+    if (dto.provider === 'polar') {
+      result = await this.checkoutWithPolar({
+        productId: dto.product_id,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+        successUrl,
+        returnUrl,
+      });
+    }
+
+    if (!result.success) {
       this.logger.error({
-        message: 'Failed to check if product exists',
-        error: productExists.error,
+        error: result.error,
+        message: `Failed to generate ${dto.provider} checkout session`,
       });
 
       throw new InternalServerErrorException();
     }
 
-    if (productExists.success && !productExists.data) {
-      this.logger.warn({
-        message: `Product with id: ${dto.product_id} does not exist`,
-      });
-
-      throw new NotFoundException('Product does not exist');
+    if (result.success && !result.data) {
+      throw new NotFoundException('product does not exist');
     }
 
-    const { success, data, error } = await this.polarService.createCheckout({
-      productId: dto.product_id,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
-      successUrl,
-      returnUrl,
-    });
-
-    if (!success || !data?.url) {
-      this.logger.error({
-        error,
-        message: 'Failed to generate checkout session',
-      });
-
-      throw new InternalServerErrorException();
-    }
-
-    return { url: data.url };
+    return { url: result.data!.url };
   }
 }

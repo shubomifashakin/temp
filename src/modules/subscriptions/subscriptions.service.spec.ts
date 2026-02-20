@@ -20,6 +20,7 @@ import { AppConfigService } from '../../core/app-config/app-config.service';
 const mockDatabaseService = {
   subscription: {
     findFirst: jest.fn(),
+    update: jest.fn(),
   },
   user: {
     findUniqueOrThrow: jest.fn(),
@@ -109,6 +110,8 @@ describe('SubscriptionsService', () => {
       error: false,
     });
 
+    mockDatabaseService.subscription.update.mockResolvedValue(true);
+
     const response = await service.cancelSubscription(testUserId);
 
     expect(response.message).toBeDefined();
@@ -187,8 +190,9 @@ describe('SubscriptionsService', () => {
       error: null,
     });
 
-    const res = await service.createPolarCheckout(userId, {
+    const res = await service.createCheckout(userId, {
       product_id: testProductId,
+      provider: 'polar',
     });
 
     expect(res.url).toEqual(checkoutUrl);
@@ -213,8 +217,9 @@ describe('SubscriptionsService', () => {
     });
 
     await expect(
-      service.createPolarCheckout(userId, {
+      service.createCheckout(userId, {
         product_id: testProductId,
+        provider: 'polar',
       }),
     ).rejects.toThrow(NotFoundException);
   });
@@ -232,8 +237,9 @@ describe('SubscriptionsService', () => {
     mockDatabaseService.subscription.findFirst.mockResolvedValue(true);
 
     await expect(
-      service.createPolarCheckout(userId, {
+      service.createCheckout(userId, {
         product_id: testProductId,
+        provider: 'polar',
       }),
     ).rejects.toThrow(BadRequestException);
   });
@@ -249,7 +255,7 @@ describe('SubscriptionsService', () => {
         items: [
           {
             id: 'test-value',
-            recurringInterval: 'day',
+            recurringInterval: 'month',
             prices,
             isRecurring: true,
           },
@@ -268,13 +274,14 @@ describe('SubscriptionsService', () => {
       data: {
         plan: 'test-plan',
         benefits: ['test-benefit'],
-        interval: 'day',
+        interval: 'MONTH',
       },
       error: null,
     });
 
-    const res = await service.getPolarPlans();
-    expect(res.data).toHaveLength(1);
-    expect(res.data[0].amount_in_dollars).toBe(0.2);
+    const res = await service.getPlans();
+    expect(res.data.month).toBeDefined();
+    expect(res.data.year).toBeDefined();
+    expect(res.data.month[0].plans[0].amount).toBe(0.2);
   });
 });
