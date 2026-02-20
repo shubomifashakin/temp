@@ -10,7 +10,7 @@ export class LinkDetailsDto {
     description: 'Created at',
   })
   @IsDate()
-  created_at: Date;
+  createdAt: Date;
 
   @ApiProperty({
     type: 'string',
@@ -18,7 +18,7 @@ export class LinkDetailsDto {
     description: 'Expires at',
   })
   @IsDate()
-  expires_at: Date | null;
+  expiresAt: Date | null;
 
   @ApiProperty({
     type: 'string',
@@ -32,7 +32,7 @@ export class LinkDetailsDto {
     description: 'Click count',
   })
   @IsNumber()
-  click_count: number;
+  clickCount: number;
 
   @ApiProperty({
     type: 'string',
@@ -40,21 +40,21 @@ export class LinkDetailsDto {
     description: 'Last accessed at',
   })
   @IsDate()
-  last_accessed_at: Date | null;
+  lastAccessedAt: Date | null;
 
   @ApiProperty({
     type: 'boolean',
     description: 'Password protected',
   })
   @IsBoolean()
-  password_protected: boolean;
+  passwordProtected: boolean;
 
   @ApiProperty({
     type: 'string',
     description: 'File creator',
   })
   @IsString({ message: 'File creator must be a string' })
-  file_creator: string;
+  fileCreator: string;
 
   @ApiProperty({
     type: 'string',
@@ -62,19 +62,19 @@ export class LinkDetailsDto {
     example: FileStatus.safe,
   })
   @IsEnum(FileStatus, { message: 'File status must be a valid enum value' })
-  file_status: FileStatus;
+  fileStatus: FileStatus;
 
   @ApiProperty({
     type: 'string',
     description: 'File description',
   })
   @IsString({ message: 'File description must be a string' })
-  file_description: string;
+  fileDescription: string;
 
   @ApiProperty({
     type: 'boolean',
     description: 'File deleted',
   })
   @IsBoolean()
-  file_deleted: boolean;
+  fileDeleted: boolean;
 }

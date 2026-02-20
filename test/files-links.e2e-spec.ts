@@ -23,6 +23,7 @@ import { SqsService } from '../src/core/sqs/sqs.service';
 import { DatabaseService } from '../src/core/database/database.service';
 import { PrismaClientKnownRequestFilterFilter } from '../src/common/filters/prisma-client-known-request.filter';
 import { PrismaClientUnknownRequestFilterFilter } from '../src/common/filters/prisma-client-unknown-request.filter';
+import { RedisService } from '../src/core/redis/redis.service';
 
 const mockLogger = {
   error: jest.fn(),
@@ -58,6 +59,7 @@ describe('FilesLinksController (e2e)', () => {
   let app: INestApplication<App>;
 
   let databaseService: DatabaseService;
+  let redisService: RedisService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -105,9 +107,11 @@ describe('FilesLinksController (e2e)', () => {
     await app.init();
 
     databaseService = moduleFixture.get(DatabaseService);
+    redisService = moduleFixture.get(RedisService);
 
     jest.clearAllMocks();
 
+    await redisService.flushAll();
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
   });
@@ -119,6 +123,7 @@ describe('FilesLinksController (e2e)', () => {
   describe('GET links/:linkId', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
+      await redisService.flushAll();
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
       await databaseService.file.deleteMany();
@@ -146,18 +151,18 @@ describe('FilesLinksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           name: 'Test file',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const link = await databaseService.link.create({
         data: {
           id: 'test-link-id',
-          file_id: file.id,
+          fileId: file.id,
           description: 'Test link',
         },
       });
@@ -168,13 +173,14 @@ describe('FilesLinksController (e2e)', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('description', 'Test link');
-      expect(response.body).toHaveProperty('file_creator', 'Test User');
+      expect(response.body).toHaveProperty('fileCreator', 'Test User');
     });
   });
 
   describe('POST /links/:linkId', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
+      await redisService.flushAll();
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
       await databaseService.file.deleteMany();
@@ -202,18 +208,18 @@ describe('FilesLinksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           name: 'Test file',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const link = await databaseService.link.create({
         data: {
           id: 'test-link-id',
-          file_id: file.id,
+          fileId: file.id,
           password: 'hashed-password',
           description: 'Test link',
         },
@@ -239,18 +245,18 @@ describe('FilesLinksController (e2e)', () => {
         data: {
           id: 'test-file-id',
           name: 'Test file',
-          user_id: user.id,
-          s3_key: 'test-key',
+          userId: user.id,
+          s3Key: 'test-key',
           size: 100,
           description: 'Test file',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
       const link = await databaseService.link.create({
         data: {
           id: 'test-link-id',
-          file_id: file.id,
+          fileId: file.id,
           description: 'Test link',
         },
       });

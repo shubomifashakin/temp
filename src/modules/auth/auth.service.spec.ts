@@ -195,9 +195,9 @@ describe('AuthService', () => {
 
     expect(mockDatabase.refreshToken.create).toHaveBeenCalledWith({
       data: {
-        token_id: expect.any(String),
-        user_id: 'test-user-id',
-        expires_at: expect.any(Date),
+        tokenId: expect.any(String),
+        userId: 'test-user-id',
+        expiresAt: expect.any(Date),
       },
     });
 

@@ -23,14 +23,14 @@ export class SubscriptionPlanInterceptor implements NestInterceptor {
     if (userId) {
       const subscription = await this.databaseService.subscription.findFirst({
         where: {
-          user_id: userId,
+          userId: userId,
           status: 'ACTIVE',
         },
         select: {
           plan: true,
         },
         orderBy: {
-          last_event_at: 'desc',
+          lastEventAt: 'desc',
         },
       });
 

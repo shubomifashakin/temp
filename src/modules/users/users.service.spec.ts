@@ -129,8 +129,8 @@ describe('UsersService', () => {
         name: true,
         email: true,
         picture: true,
-        updated_at: true,
-        created_at: true,
+        updatedAt: true,
+        createdAt: true,
       },
     });
 

@@ -31,19 +31,19 @@ export class LinksService {
     const link = await this.databaseService.link.findUniqueOrThrow({
       where: {
         id: linkId,
-        revoked_at: null,
+        revokedAt: null,
       },
       select: {
         password: true,
-        expires_at: true,
-        created_at: true,
-        click_count: true,
+        expiresAt: true,
+        createdAt: true,
+        clickCount: true,
         description: true,
-        last_accessed_at: true,
+        lastAccessedAt: true,
         file: {
           select: {
             status: true,
-            deleted_at: true,
+            deletedAt: true,
             description: true,
             user: {
               select: { name: true },
@@ -54,17 +54,17 @@ export class LinksService {
     });
 
     return {
-      created_at: link.created_at,
-      expires_at: link.expires_at,
+      createdAt: link.createdAt,
+      expiresAt: link.expiresAt,
       description: link.description,
-      click_count: link.click_count,
-      last_accessed_at: link.last_accessed_at,
-      password_protected: link.password !== null,
+      clickCount: link.clickCount,
+      lastAccessedAt: link.lastAccessedAt,
+      passwordProtected: link.password !== null,
 
-      file_creator: link.file.user.name,
-      file_status: link.file.status,
-      file_description: link.file.description,
-      file_deleted: link.file.deleted_at !== null,
+      fileCreator: link.file.user.name,
+      fileStatus: link.file.status,
+      fileDescription: link.file.description,
+      fileDeleted: link.file.deletedAt !== null,
     };
   }
 
@@ -72,30 +72,30 @@ export class LinksService {
     const linkFound = await this.databaseService.link.findUniqueOrThrow({
       where: {
         id: linkId,
-        revoked_at: null,
+        revokedAt: null,
       },
       include: {
         file: {
           select: {
-            s3_key: true,
-            deleted_at: true,
-            expires_at: true,
+            s3Key: true,
+            deletedAt: true,
+            expiresAt: true,
           },
         },
       },
     });
 
-    if (linkFound.expires_at && new Date() > linkFound.expires_at) {
+    if (linkFound.expiresAt && new Date() > linkFound.expiresAt) {
       throw new BadRequestException('This link has expired');
     }
 
-    if (linkFound.revoked_at) {
+    if (linkFound.revokedAt) {
       throw new BadRequestException('This link has been revoked');
     }
 
     if (
-      linkFound.file.deleted_at ||
-      (linkFound.file.expires_at && new Date() > linkFound.file.expires_at)
+      linkFound.file.deletedAt ||
+      (linkFound.file.expiresAt && new Date() > linkFound.file.expiresAt)
     ) {
       throw new BadRequestException('This file no longer exists');
     }
@@ -139,8 +139,8 @@ export class LinksService {
       await this.databaseService.link.update({
         where: { id: linkId },
         data: {
-          last_accessed_at: new Date(),
-          click_count: { increment: 1 },
+          lastAccessedAt: new Date(),
+          clickCount: { increment: 1 },
         },
       });
 
@@ -151,7 +151,7 @@ export class LinksService {
     const { success, data, error } =
       await this.s3Service.generatePresignedGetUrl({
         ttl,
-        key: linkFound.file.s3_key,
+        key: linkFound.file.s3Key,
         bucket: this.configService.S3BucketName.data!,
       });
 
@@ -181,8 +181,8 @@ export class LinksService {
         id: linkId,
       },
       data: {
-        last_accessed_at: new Date(),
-        click_count: { increment: 1 },
+        lastAccessedAt: new Date(),
+        clickCount: { increment: 1 },
       },
     });
 

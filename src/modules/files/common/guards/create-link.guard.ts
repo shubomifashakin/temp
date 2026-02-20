@@ -39,7 +39,7 @@ export class CreateLinkGuard {
     const usersSubscription = await this.databaseService.subscription.findFirst(
       {
         where: {
-          user_id: userId,
+          userId: userId,
           status: 'ACTIVE',
           NOT: {
             plan: 'FREE',
@@ -54,18 +54,18 @@ export class CreateLinkGuard {
 
     const numberOfActiveLinks = await this.databaseService.link.count({
       where: {
-        file_id: typeof fileId === 'string' ? fileId : fileId[0],
+        fileId: typeof fileId === 'string' ? fileId : fileId[0],
         OR: [
           {
-            expires_at: {
+            expiresAt: {
               gt: new Date(),
             },
           },
           {
-            expires_at: null,
+            expiresAt: null,
           },
         ],
-        revoked_at: {
+        revokedAt: {
           equals: null,
         },
       },

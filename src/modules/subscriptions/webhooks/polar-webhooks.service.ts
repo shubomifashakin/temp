@@ -79,10 +79,10 @@ export class PolarWebhooksService {
     try {
       const lastEvent = await this.databaseService.subscription.findUnique({
         where: {
-          provider_subscription_id: subscriptionId,
+          providerSubscriptionId: subscriptionId,
         },
         select: {
-          last_event_at: true,
+          lastEventAt: true,
         },
       });
 
@@ -93,7 +93,7 @@ export class PolarWebhooksService {
       return {
         error: null,
         success: true,
-        data: lastEvent.last_event_at > timestamp,
+        data: lastEvent.lastEventAt > timestamp,
       };
     } catch (error) {
       return { success: false, data: null, error: makeError(error) };
@@ -147,38 +147,36 @@ export class PolarWebhooksService {
 
     await this.databaseService.subscription.upsert({
       where: {
-        provider_subscription_id: data.id,
+        providerSubscriptionId: data.id,
       },
       create: {
-        user_id: data.metadata.userId as string,
+        userId: data.metadata.userId as string,
         provider: 'POLAR',
         plan: details.plan,
         amount: data.amount,
         currency: data.currency,
         interval: details.interval,
-        product_id: data.productId,
-        provider_subscription_id: data.id,
-        provider_customer_id: data.customerId,
-        interval_count: data.recurringIntervalCount,
+        productId: data.productId,
+        providerSubscriptionId: data.id,
+        providerCustomerId: data.customerId,
+        intervalCount: data.recurringIntervalCount,
         status: data.status === 'active' ? 'ACTIVE' : 'INACTIVE',
-        started_at: data.startedAt || new Date(),
-        current_period_start: data.currentPeriodStart,
-        current_period_end: data.currentPeriodEnd
-          ? new Date(data.currentPeriodEnd)
-          : null,
-        cancel_at_period_end: data.cancelAtPeriodEnd || true,
-        cancelled_at: data.canceledAt || new Date(),
-        last_event_at: timestamp,
+        startedAt: data.startedAt || new Date(),
+        currentPeriodStart: data.currentPeriodStart,
+        currentPeriodEnd: data.currentPeriodEnd!,
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd || true,
+        cancelledAt: data.canceledAt || new Date(),
+        lastEventAt: timestamp,
       },
       update: {
         provider: 'POLAR',
         plan: details.plan,
-        product_id: data.productId,
-        provider_subscription_id: data.id,
-        provider_customer_id: data.customerId,
-        cancelled_at: data.canceledAt || new Date(),
-        cancel_at_period_end: true,
-        last_event_at: timestamp,
+        productId: data.productId,
+        providerSubscriptionId: data.id,
+        providerCustomerId: data.customerId,
+        cancelledAt: data.canceledAt || new Date(),
+        cancelAtPeriodEnd: true,
+        lastEventAt: timestamp,
       },
     });
   }
@@ -227,35 +225,33 @@ export class PolarWebhooksService {
 
     await this.databaseService.subscription.upsert({
       where: {
-        provider_subscription_id: data.id,
+        providerSubscriptionId: data.id,
       },
       create: {
-        user_id: data.metadata.userId as string,
+        userId: data.metadata.userId as string,
         provider: 'POLAR',
         plan: details.plan,
         status: 'INACTIVE',
         amount: data.amount,
         currency: data.currency,
         interval: details.interval,
-        product_id: data.productId,
-        provider_subscription_id: data.id,
-        provider_customer_id: data.customerId,
-        interval_count: data.recurringIntervalCount,
-        started_at: data.startedAt || new Date(),
-        current_period_start: data.currentPeriodStart,
-        current_period_end: data.currentPeriodEnd
-          ? new Date(data.currentPeriodEnd)
-          : null,
-        cancel_at_period_end: data.cancelAtPeriodEnd || false,
-        ended_at: data.endedAt || new Date(),
-        last_event_at: timestamp,
+        productId: data.productId,
+        providerSubscriptionId: data.id,
+        providerCustomerId: data.customerId,
+        intervalCount: data.recurringIntervalCount,
+        startedAt: data.startedAt || new Date(),
+        currentPeriodStart: data.currentPeriodStart,
+        currentPeriodEnd: data.currentPeriodEnd!,
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd || false,
+        endedAt: data.endedAt || new Date(),
+        lastEventAt: timestamp,
       },
       update: {
         status: 'INACTIVE',
         provider: 'POLAR',
-        product_id: data.productId,
-        ended_at: data.endedAt,
-        last_event_at: timestamp,
+        productId: data.productId,
+        endedAt: data.endedAt,
+        lastEventAt: timestamp,
       },
     });
   }
@@ -300,7 +296,7 @@ export class PolarWebhooksService {
 
     await this.databaseService.subscription.upsert({
       where: {
-        provider_subscription_id: data.id,
+        providerSubscriptionId: data.id,
       },
       create: {
         status: 'ACTIVE',
@@ -308,19 +304,17 @@ export class PolarWebhooksService {
         plan: details.plan,
         amount: data.amount,
         currency: data.currency,
-        product_id: data.productId,
+        productId: data.productId,
         interval: details.interval,
-        provider_subscription_id: data.id,
-        provider_customer_id: data.customerId,
-        user_id: data.metadata.userId as string,
-        started_at: data.startedAt || new Date(),
-        interval_count: data.recurringIntervalCount,
-        current_period_start: data.currentPeriodStart,
-        current_period_end: data.currentPeriodEnd
-          ? new Date(data.currentPeriodEnd)
-          : null,
-        cancel_at_period_end: data.cancelAtPeriodEnd || false,
-        last_event_at: timestamp,
+        providerSubscriptionId: data.id,
+        providerCustomerId: data.customerId,
+        userId: data.metadata.userId as string,
+        startedAt: data.startedAt || new Date(),
+        intervalCount: data.recurringIntervalCount,
+        currentPeriodStart: data.currentPeriodStart,
+        currentPeriodEnd: data.currentPeriodEnd!,
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd || false,
+        lastEventAt: timestamp,
       },
       update: {
         status: 'ACTIVE',
@@ -328,13 +322,13 @@ export class PolarWebhooksService {
         plan: details.plan,
         amount: data.amount,
         currency: data.currency,
-        product_id: data.productId,
+        productId: data.productId,
         interval: details.interval,
-        current_period_end: data.currentPeriodEnd,
-        interval_count: data.recurringIntervalCount,
-        cancel_at_period_end: data.cancelAtPeriodEnd,
-        current_period_start: data.currentPeriodStart,
-        last_event_at: timestamp,
+        currentPeriodEnd: data.currentPeriodEnd!,
+        intervalCount: data.recurringIntervalCount,
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd,
+        currentPeriodStart: data.currentPeriodStart,
+        lastEventAt: timestamp,
       },
     });
   }
@@ -382,7 +376,7 @@ export class PolarWebhooksService {
 
     await this.databaseService.subscription.upsert({
       where: {
-        provider_subscription_id: data.id,
+        providerSubscriptionId: data.id,
       },
       create: {
         status: 'ACTIVE',
@@ -391,25 +385,23 @@ export class PolarWebhooksService {
         amount: data.amount,
         currency: data.currency,
         interval: details.interval,
-        product_id: data.productId,
-        provider_subscription_id: data.id,
-        provider_customer_id: data.customerId,
-        user_id: data.metadata.userId as string,
-        interval_count: data.recurringIntervalCount,
-        started_at: data.startedAt || new Date(),
-        current_period_start: data.currentPeriodStart,
-        current_period_end: data.currentPeriodEnd
-          ? new Date(data.currentPeriodEnd)
-          : null,
-        cancel_at_period_end: data.cancelAtPeriodEnd || false,
-        last_event_at: timestamp,
+        productId: data.productId,
+        providerSubscriptionId: data.id,
+        providerCustomerId: data.customerId,
+        userId: data.metadata.userId as string,
+        intervalCount: data.recurringIntervalCount,
+        startedAt: data.startedAt || new Date(),
+        currentPeriodStart: data.currentPeriodStart,
+        currentPeriodEnd: data.currentPeriodEnd!,
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd || false,
+        lastEventAt: timestamp,
       },
       update: {
-        ended_at: null,
+        endedAt: null,
         status: 'ACTIVE',
-        cancelled_at: null,
-        cancel_at_period_end: false,
-        last_event_at: timestamp,
+        cancelledAt: null,
+        cancelAtPeriodEnd: false,
+        lastEventAt: timestamp,
       },
     });
   }
@@ -476,24 +468,22 @@ export class PolarWebhooksService {
 
     await this.databaseService.subscription.update({
       where: {
-        provider_subscription_id: data.subscription.id,
+        providerSubscriptionId: data.subscription.id,
       },
       data: {
         status: 'ACTIVE',
         plan: details.plan,
         interval: details.interval,
         currency: data.currency || undefined,
-        product_id: data.subscription.productId,
-        interval_count: data.subscription.recurringIntervalCount,
-        cancel_at_period_end: data.subscription.cancelAtPeriodEnd || false,
+        productId: data.subscription.productId,
+        intervalCount: data.subscription.recurringIntervalCount,
+        cancelAtPeriodEnd: data.subscription.cancelAtPeriodEnd || false,
         amount: data.subscription.amount || data.totalAmount,
-        current_period_start: data.subscription.currentPeriodStart
+        currentPeriodStart: data.subscription.currentPeriodStart
           ? new Date(data.subscription.currentPeriodStart)
           : new Date(),
-        current_period_end: data.subscription.currentPeriodEnd
-          ? new Date(data.subscription.currentPeriodEnd)
-          : null,
-        last_event_at: timestamp,
+        currentPeriodEnd: data.subscription.currentPeriodEnd!,
+        lastEventAt: timestamp,
       },
     });
 

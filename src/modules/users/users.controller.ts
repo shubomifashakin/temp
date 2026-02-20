@@ -22,7 +22,7 @@ import {
 
 import { UsersService } from './users.service';
 
-import { CachedUserInfo } from './dtos/user.dto';
+import { UserInfo } from './dtos/user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 
 import { TOKEN } from '../../common/constants';
@@ -41,10 +41,10 @@ export class UsersController {
   ) {}
 
   @ApiOperation({ summary: 'Get logged in users info' })
-  @ApiResponse({ status: 200, description: 'Success', type: CachedUserInfo })
+  @ApiResponse({ status: 200, description: 'Success', type: UserInfo })
   @ApiResponse({ status: 404, description: 'User does not exist' })
   @Get('me')
-  async getMyInfo(@Req() req: Request): Promise<CachedUserInfo> {
+  async getMyInfo(@Req() req: Request): Promise<UserInfo> {
     return this.UsersService.getMyInfo(req.user.id);
   }
 

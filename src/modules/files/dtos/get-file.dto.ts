@@ -28,21 +28,21 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
     description: 'The date the file was uploaded',
   })
   @IsDate()
-  created_at: Date;
+  createdAt: Date;
 
   @ApiProperty({
     example: new Date().toISOString(),
     description: 'The date the file expires',
   })
   @IsDate()
-  expires_at: Date;
+  expiresAt: Date;
 
   @ApiProperty({
     example: new Date().toISOString(),
     description: 'The date the file was updated last',
   })
   @IsDate()
-  updated_at: Date;
+  updatedAt: Date;
 
   @ApiProperty({
     required: false,
@@ -51,7 +51,7 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   })
   @IsOptional()
   @IsDate()
-  deleted_at: Date | null;
+  deletedAt: Date | null;
 
   @ApiProperty({ description: 'The status of the file' })
   @IsEnum(FileStatus, { message: 'Invalid file status' })
@@ -59,5 +59,5 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
 
   @ApiProperty({ description: 'The id of the user that owns the file' })
   @IsString({ message: 'Invalid userId' })
-  user_id: string;
+  userId: string;
 }

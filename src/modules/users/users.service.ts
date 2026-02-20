@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { CachedUserInfo } from './dtos/user.dto';
+import { UserInfo } from './dtos/user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 
 import { RedisService } from '../../core/redis/redis.service';
@@ -18,9 +18,10 @@ export class UsersService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async getMyInfo(userId: string): Promise<CachedUserInfo> {
-    const { success, error, data } =
-      await this.redisService.get<CachedUserInfo>(makeUserKey(userId));
+  async getMyInfo(userId: string): Promise<UserInfo> {
+    const { success, error, data } = await this.redisService.get<UserInfo>(
+      makeUserKey(userId),
+    );
 
     if (!success) {
       this.logger.error({
@@ -41,28 +42,28 @@ export class UsersService {
         name: true,
         email: true,
         picture: true,
-        updated_at: true,
-        created_at: true,
+        updatedAt: true,
+        createdAt: true,
       },
-    })) satisfies Omit<CachedUserInfo, 'subscription'>;
+    })) satisfies Omit<UserInfo, 'subscription'>;
 
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
-        user_id: userId,
+        userId: userId,
         status: 'ACTIVE',
       },
       select: {
         plan: true,
-        current_period_end: true,
-        current_period_start: true,
-        cancel_at_period_end: true,
+        currentPeriodEnd: true,
+        currentPeriodStart: true,
+        cancelAtPeriodEnd: true,
       },
       orderBy: {
-        last_event_at: 'desc',
+        lastEventAt: 'desc',
       },
     });
 
-    const info = { ...user, subscription } satisfies CachedUserInfo;
+    const info = { ...user, subscription } satisfies UserInfo;
 
     const cached = await this.redisService.set(makeUserKey(userId), info, {
       expiration: { type: 'EX', value: MINUTES_10 },
@@ -90,8 +91,8 @@ export class UsersService {
         name: true,
         email: true,
         picture: true,
-        updated_at: true,
-        created_at: true,
+        updatedAt: true,
+        createdAt: true,
       },
     });
 

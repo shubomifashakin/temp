@@ -25,22 +25,22 @@ class UserSubscription {
     description: 'When the subscription ends',
   })
   @IsDate()
-  current_period_end: Date | null;
+  currentPeriodEnd: Date | null;
 
   @ApiProperty({ description: 'When the subscription started', type: Date })
   @IsDate()
-  current_period_start: Date;
+  currentPeriodStart: Date;
 
   @ApiProperty({
     description: 'If the subscription is going to be renewed or not',
   })
   @IsBoolean()
-  cancel_at_period_end: boolean;
+  cancelAtPeriodEnd: boolean;
 }
 
-export class CachedUserInfo implements Pick<
+export class UserInfo implements Pick<
   UserCreateInput,
-  'name' | 'email' | 'picture' | 'created_at' | 'updated_at'
+  'name' | 'email' | 'picture' | 'createdAt' | 'updatedAt'
 > {
   @ApiProperty({
     description: 'The name of the user',
@@ -65,7 +65,7 @@ export class CachedUserInfo implements Pick<
     example: new Date().toISOString(),
   })
   @IsDate({ message: 'Invalid date' })
-  created_at: Date;
+  createdAt: Date;
 
   @ApiProperty({
     description: 'The picture of the user gotten from google, if any',
@@ -82,7 +82,7 @@ export class CachedUserInfo implements Pick<
     example: new Date().toISOString(),
   })
   @IsDate({ message: 'Invalid date' })
-  updated_at: Date;
+  updatedAt: Date;
 
   @ApiProperty({
     nullable: true,

@@ -35,8 +35,9 @@ export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @ApiOperation({
-    summary: 'Get a users active subscription',
-    description: 'Get a users active subscription, if any.',
+    summary: "Get the logged in user's currently active subscription",
+    description:
+      "Get the logged in user's currently active subscription, if any.",
   })
   @ApiResponse({
     description: 'Subscription retrieved',
@@ -51,11 +52,12 @@ export class SubscriptionsController {
   }
 
   @ApiOperation({
-    summary: 'Cancel a users active subscription once the period is over',
-    description: `Cancel a users active subscription once the period is over, it is idempotent. 
-      The users subscription would remain active until its expiry`,
+    summary:
+      'Cancel the logged in user`s active subscription once the period is over',
+    description: `Cancel the logged in user's active subscription once the period is over, it is idempotent. 
+      The user's subscription would remain active until its expiry`,
   })
-  @ApiResponse({ description: 'Subscription cancelled', status: 201 })
+  @ApiResponse({ description: 'Subscription cancelled', status: 200 })
   @Delete('current')
   async cancelSubscription(@Req() req: Request) {
     return this.subscriptionsService.cancelSubscription(req.user.id);

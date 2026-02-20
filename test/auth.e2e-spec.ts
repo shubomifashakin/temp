@@ -191,9 +191,9 @@ describe('AuthController (e2e)', () => {
 
       await databaseService.refreshToken.create({
         data: {
-          token_id: testRefreshTokenId,
-          user_id: 'test-user-id',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          tokenId: testRefreshTokenId,
+          userId: 'test-user-id',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
@@ -233,9 +233,9 @@ describe('AuthController (e2e)', () => {
 
       await databaseService.refreshToken.create({
         data: {
-          token_id: testRefreshTokenId,
-          user_id: 'test-user-id',
-          expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          tokenId: testRefreshTokenId,
+          userId: 'test-user-id',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
@@ -268,9 +268,9 @@ describe('AuthController (e2e)', () => {
 
       await databaseService.refreshToken.create({
         data: {
-          token_id: testRefreshTokenId,
-          user_id: 'test-user-id',
-          expires_at: new Date(100),
+          tokenId: testRefreshTokenId,
+          userId: 'test-user-id',
+          expiresAt: new Date(100),
         },
       });
 
