@@ -312,7 +312,7 @@ describe('SubscriptionsController (e2e)', () => {
     });
   });
 
-  describe('POST /subscriptions/checkout/polar', () => {
+  describe('POST /subscriptions/checkout', () => {
     beforeEach(async () => {
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
@@ -344,8 +344,8 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/checkout/polar')
-        .send({ product_id: 'test-product-id' })
+        .post('/subscriptions/checkout')
+        .send({ product_id: 'test-product-id', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(302);
@@ -385,8 +385,8 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/checkout/polar')
-        .send({ product_id: 'test-product-id' })
+        .post('/subscriptions/checkout')
+        .send({ product_id: 'test-product-id', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(400);
@@ -413,8 +413,8 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/checkout/polar')
-        .send({ product_id: 'non-existent-product' })
+        .post('/subscriptions/checkout')
+        .send({ product_id: 'non-existent-product', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(404);
@@ -447,8 +447,8 @@ describe('SubscriptionsController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/checkout/polar')
-        .send({ product_id: 'test-product-id' })
+        .post('/subscriptions/checkout')
+        .send({ product_id: 'test-product-id', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
@@ -457,8 +457,8 @@ describe('SubscriptionsController (e2e)', () => {
 
     it('should not create checkout if not authenticated', async () => {
       const response = await request(app.getHttpServer())
-        .post('/subscriptions/checkout/polar')
-        .send({ product_id: 'test-product-id' });
+        .post('/subscriptions/checkout')
+        .send({ product_id: 'test-product-id', provider: 'polar' });
 
       expect(response.status).toBe(401);
     });

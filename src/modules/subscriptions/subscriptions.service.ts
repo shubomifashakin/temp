@@ -11,11 +11,14 @@ import {
   PlanInfo,
   GetPlansResponse,
 } from './common/dtos/get-plans-response.dto';
-import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
+import { CreateCheckoutDto } from './common/dtos/create-checkout.dto';
 
 import { PolarService } from '../../core/polar/polar.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { AppConfigService } from '../../core/app-config/app-config.service';
+
+import { FnResult } from '../../types/common.types';
+import { makeError } from '../../common/utils';
 
 @Injectable()
 export class SubscriptionsService {
@@ -26,6 +29,60 @@ export class SubscriptionsService {
     private readonly configService: AppConfigService,
     private readonly databaseService: DatabaseService,
   ) {}
+
+  private async checkoutWithPolar({
+    productId,
+    successUrl,
+    returnUrl,
+    user,
+  }: {
+    productId: string;
+    successUrl: string;
+    returnUrl: string;
+    user: { id: string; name: string; email: string };
+  }): Promise<FnResult<{ url: string } | null>> {
+    try {
+      const productExists = await this.polarService.getProduct({
+        productId,
+      });
+
+      if (!productExists.success) {
+        this.logger.error({
+          message: 'Failed to check if product exists',
+          error: productExists.error,
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      if (productExists.success && !productExists.data) {
+        this.logger.warn({
+          message: `Product with id: ${productId} does not exist`,
+        });
+
+        return {
+          data: null,
+          error: null,
+          success: true,
+        };
+      }
+
+      const result = await this.polarService.createCheckout({
+        productId,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+        successUrl,
+        returnUrl,
+      });
+
+      return result;
+    } catch (error) {
+      return { success: false, error: makeError(error), data: null };
+    }
+  }
 
   async cancelSubscription(userId: string) {
     const subscription = await this.databaseService.subscription.findFirst({
@@ -168,7 +225,7 @@ export class SubscriptionsService {
     };
   }
 
-  async createPolarCheckout(userId: string, dto: CreatePolarCheckoutDto) {
+  async createCheckout(userId: string, dto: CreateCheckoutDto) {
     const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id: userId },
     });
@@ -202,47 +259,38 @@ export class SubscriptionsService {
       throw new InternalServerErrorException();
     }
 
-    const productExists = await this.polarService.getProduct({
-      productId: dto.product_id,
-    });
+    let result: FnResult<{ url: string } | null> = {
+      success: false,
+      data: null,
+      error: new Error('Invalid provider'),
+    };
 
-    if (!productExists.success) {
+    if (dto.provider === 'polar') {
+      result = await this.checkoutWithPolar({
+        productId: dto.product_id,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+        successUrl,
+        returnUrl,
+      });
+    }
+
+    if (!result.success) {
       this.logger.error({
-        message: 'Failed to check if product exists',
-        error: productExists.error,
+        error: result.error,
+        message: `Failed to generate ${dto.provider} checkout session`,
       });
 
       throw new InternalServerErrorException();
     }
 
-    if (productExists.success && !productExists.data) {
-      this.logger.warn({
-        message: `Product with id: ${dto.product_id} does not exist`,
-      });
-
-      throw new NotFoundException('Product does not exist');
+    if (result.success && !result.data) {
+      throw new NotFoundException('product does not exist');
     }
 
-    const { success, data, error } = await this.polarService.createCheckout({
-      productId: dto.product_id,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
-      successUrl,
-      returnUrl,
-    });
-
-    if (!success || !data?.url) {
-      this.logger.error({
-        error,
-        message: 'Failed to generate checkout session',
-      });
-
-      throw new InternalServerErrorException();
-    }
-
-    return { url: data.url };
+    return { url: result.data!.url };
   }
 }

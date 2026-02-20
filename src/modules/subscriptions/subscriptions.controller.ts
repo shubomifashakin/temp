@@ -22,7 +22,7 @@ import {
 
 import { SubscriptionsService } from './subscriptions.service';
 
-import { CreatePolarCheckoutDto } from './common/dtos/create-polar-checkout.dto';
+import { CreateCheckoutDto } from './common/dtos/create-checkout.dto';
 import { GetPlansResponse } from './common/dtos/get-plans-response.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
@@ -57,22 +57,22 @@ export class SubscriptionsController {
     return this.subscriptionsService.getPlans();
   }
 
-  @ApiOperation({ summary: 'Create Polar checkout' })
-  @ApiBody({ type: CreatePolarCheckoutDto })
-  @ApiTemporaryRedirectResponse({ description: 'Redirects to Polar checkout' })
+  @ApiOperation({ summary: 'Create checkout' })
+  @ApiBody({ type: CreateCheckoutDto })
+  @ApiTemporaryRedirectResponse({ description: 'Redirects to checkout url' })
   @ApiBadRequestResponse({
     description: 'User already has an active subscription',
   })
   @ApiNotFoundResponse({
     description: 'The product that was being checked out does not exist.',
   })
-  @Post('checkout/polar')
-  async createPolarCheckout(
+  @Post('checkout')
+  async createCheckout(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() dto: CreatePolarCheckoutDto,
+    @Body() dto: CreateCheckoutDto,
   ) {
-    const result = await this.subscriptionsService.createPolarCheckout(
+    const result = await this.subscriptionsService.createCheckout(
       req.user.id,
       dto,
     );

@@ -187,8 +187,9 @@ describe('SubscriptionsService', () => {
       error: null,
     });
 
-    const res = await service.createPolarCheckout(userId, {
+    const res = await service.createCheckout(userId, {
       product_id: testProductId,
+      provider: 'polar',
     });
 
     expect(res.url).toEqual(checkoutUrl);
@@ -213,8 +214,9 @@ describe('SubscriptionsService', () => {
     });
 
     await expect(
-      service.createPolarCheckout(userId, {
+      service.createCheckout(userId, {
         product_id: testProductId,
+        provider: 'polar',
       }),
     ).rejects.toThrow(NotFoundException);
   });
@@ -232,8 +234,9 @@ describe('SubscriptionsService', () => {
     mockDatabaseService.subscription.findFirst.mockResolvedValue(true);
 
     await expect(
-      service.createPolarCheckout(userId, {
+      service.createCheckout(userId, {
         product_id: testProductId,
+        provider: 'polar',
       }),
     ).rejects.toThrow(BadRequestException);
   });
