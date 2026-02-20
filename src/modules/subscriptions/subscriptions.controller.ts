@@ -5,14 +5,12 @@ import {
   ApiResponse,
   ApiOperation,
   ApiCookieAuth,
-  ApiTemporaryRedirectResponse,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import {
   Get,
   Req,
-  Res,
   Body,
   Post,
   Delete,
@@ -27,6 +25,7 @@ import { GetPlansResponse } from './common/dtos/get-plans-response.dto';
 
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
+import { CreateCheckoutResponse } from './common/dtos/create-checkout-response.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
@@ -78,7 +77,11 @@ export class SubscriptionsController {
 
   @ApiOperation({ summary: 'Create checkout' })
   @ApiBody({ type: CreateCheckoutDto })
-  @ApiTemporaryRedirectResponse({ description: 'Redirects to checkout url' })
+  @ApiResponse({
+    description: 'Checkout created',
+    status: 200,
+    type: CreateCheckoutResponse,
+  })
   @ApiBadRequestResponse({
     description: 'User already has an active subscription',
   })
@@ -88,14 +91,8 @@ export class SubscriptionsController {
   @Post('checkout')
   async createCheckout(
     @Req() req: Request,
-    @Res() res: Response,
     @Body() dto: CreateCheckoutDto,
-  ) {
-    const result = await this.subscriptionsService.createCheckout(
-      req.user.id,
-      dto,
-    );
-
-    return res.redirect(302, result.url);
+  ): Promise<CreateCheckoutResponse> {
+    return await this.subscriptionsService.createCheckout(req.user.id, dto);
   }
 }

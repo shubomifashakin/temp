@@ -20,6 +20,7 @@ import { AppConfigService } from '../../core/app-config/app-config.service';
 import { FnResult } from '../../types/common.types';
 import { makeError } from '../../common/utils';
 import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
+import { CreateCheckoutResponse } from './common/dtos/create-checkout-response.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -265,7 +266,10 @@ export class SubscriptionsService {
     };
   }
 
-  async createCheckout(userId: string, dto: CreateCheckoutDto) {
+  async createCheckout(
+    userId: string,
+    dto: CreateCheckoutDto,
+  ): Promise<CreateCheckoutResponse> {
     const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id: userId },
     });

@@ -356,10 +356,8 @@ describe('SubscriptionsController (e2e)', () => {
         .send({ productId: 'test-product-id', provider: 'POLAR' })
         .set('Cookie', ['access_token=test-token']);
 
-      expect(response.status).toBe(302);
-      expect(response.headers.location).toBe(
-        'https://checkout.polar.test/session',
-      );
+      expect(response.status).toBe(201);
+      expect(response.body.url).toBe('https://checkout.polar.test/session');
     });
 
     it('should not create checkout if user has active subscription', async () => {
