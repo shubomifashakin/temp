@@ -57,7 +57,7 @@ export class SubscriptionsController {
     description: `Cancel the logged in user's active subscription once the period is over, it is idempotent. 
       The user's subscription would remain active until its expiry`,
   })
-  @ApiResponse({ description: 'Subscription cancelled', status: 201 })
+  @ApiResponse({ description: 'Subscription cancelled', status: 200 })
   @Delete('current')
   async cancelSubscription(@Req() req: Request) {
     return this.subscriptionsService.cancelSubscription(req.user.id);

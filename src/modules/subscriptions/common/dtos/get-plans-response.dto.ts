@@ -58,11 +58,10 @@ export class PlanInfo {
   @ApiProperty({
     description: 'The payment provider for the plan',
     example: SubscriptionProvider.POLAR,
+    enum: SubscriptionProvider,
   })
-  @IsString({
-    message: 'provider should be a string',
-  })
-  provider: string;
+  @IsEnum(SubscriptionProvider, { message: 'Invalid subscription provider' })
+  provider: SubscriptionProvider;
 
   @ApiProperty({ description: 'The available plans', type: [Plan] })
   @Type(() => Plan)

@@ -250,9 +250,9 @@ export class SubscriptionsService {
     const polarPlanCycles = transformedPolarPlans.reduce(
       (acc, plan) => {
         if (plan.interval === 'MONTH') {
-          acc.month.push({ plans: [plan], currency: 'usd', provider: 'polar' });
+          acc.month.push({ plans: [plan], currency: 'usd', provider: 'POLAR' });
         } else {
-          acc.year.push({ plans: [plan], currency: 'usd', provider: 'polar' });
+          acc.year.push({ plans: [plan], currency: 'usd', provider: 'POLAR' });
         }
         return acc;
       },
@@ -304,7 +304,7 @@ export class SubscriptionsService {
       error: new Error('Invalid provider'),
     };
 
-    if (dto.provider === 'polar') {
+    if (dto.provider === 'POLAR') {
       result = await this.checkoutWithPolar({
         productId: dto.productId,
         user: {

@@ -353,7 +353,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'test-product-id', provider: 'polar' })
+        .send({ productId: 'test-product-id', provider: 'POLAR' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(302);
@@ -394,7 +394,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'test-product-id', provider: 'polar' })
+        .send({ productId: 'test-product-id', provider: 'POLAR' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(400);
@@ -422,7 +422,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'non-existent-product', provider: 'polar' })
+        .send({ productId: 'non-existent-product', provider: 'POLAR' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(404);
@@ -456,7 +456,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'test-product-id', provider: 'polar' })
+        .send({ productId: 'test-product-id', provider: 'POLAR' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
