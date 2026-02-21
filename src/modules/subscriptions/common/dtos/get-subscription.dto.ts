@@ -33,7 +33,7 @@ class SubscriptionDetails {
   @ApiProperty({
     description: 'The current status of the subscription',
     enum: SubscriptionStatus,
-    example: SubscriptionStatus.ACTIVE,
+    example: SubscriptionStatus.active,
   })
   @IsEnum(SubscriptionStatus, { message: 'Invalid subscription status' })
   status: SubscriptionStatus;
@@ -56,7 +56,7 @@ class SubscriptionDetails {
   @ApiProperty({
     description: 'The plan for the subscription',
     enum: Plan,
-    example: Plan.FREE,
+    example: Plan.free,
   })
   @IsEnum(Plan, { message: 'Invalid plan' })
   plan: Plan;
@@ -64,7 +64,7 @@ class SubscriptionDetails {
   @ApiProperty({
     description: 'The payment provider handling the subscription',
     enum: SubscriptionProvider,
-    example: SubscriptionProvider.POLAR,
+    example: SubscriptionProvider.polar,
   })
   @IsEnum(SubscriptionProvider, { message: 'Invalid subscription provider' })
   provider: SubscriptionProvider;

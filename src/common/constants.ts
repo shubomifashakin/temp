@@ -44,21 +44,21 @@ export const MESSAGES = {
 export const DEFAULT_JWT_ALG: Algorithm = 'RS256';
 
 export const mappedPolarIntervals = {
-  [SubscriptionRecurringInterval.Day]: BillingInterval.DAY,
-  [SubscriptionRecurringInterval.Year]: BillingInterval.YEAR,
-  [SubscriptionRecurringInterval.Week]: BillingInterval.WEEK,
-  [SubscriptionRecurringInterval.Month]: BillingInterval.MONTH,
+  [SubscriptionRecurringInterval.Day]: BillingInterval.day,
+  [SubscriptionRecurringInterval.Year]: BillingInterval.year,
+  [SubscriptionRecurringInterval.Week]: BillingInterval.week,
+  [SubscriptionRecurringInterval.Month]: BillingInterval.month,
 };
 
 export const benefits = {
-  [Plan.FREE]: [
+  [Plan.free]: [
     'Max file size of 25mb',
     '7 day retention',
     '1 link per file',
     'Virus Scanning',
     'Click Tracking',
   ],
-  [Plan.PRO]: [
+  [Plan.pro]: [
     'Everything in free',
     '14 & 31 day retention',
     'Unlimited links',

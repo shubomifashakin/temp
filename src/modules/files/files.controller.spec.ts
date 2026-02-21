@@ -71,7 +71,7 @@ const testUserId = 'test-user-id';
 const mockRequest = {
   user: {
     id: testUserId,
-    plan: 'FREE',
+    plan: 'free',
   },
 } as jest.Mocked<Request>;
 

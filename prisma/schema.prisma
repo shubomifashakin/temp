@@ -124,10 +124,10 @@ model Subscription {
   amount   Int
   currency String
 
-  interval      BillingInterval @default(MONTH)
+  interval      BillingInterval @default(month)
   intervalCount Int             @default(1) @map("interval_count")
 
-  status SubscriptionStatus @default(ACTIVE)
+  status SubscriptionStatus @default(active)
 
   startedAt          DateTime @map("started_at")
   currentPeriodStart DateTime @map("current_period_start")
@@ -155,22 +155,22 @@ model Subscription {
 }
 
 enum SubscriptionProvider {
-  POLAR
+  polar
 }
 
 enum SubscriptionStatus {
-  ACTIVE
-  INACTIVE
+  active
+  inactive
 }
 
 enum Plan {
-  FREE
-  PRO
+  free
+  pro
 }
 
 enum BillingInterval {
-  DAY
-  WEEK
-  MONTH
-  YEAR
+  day
+  week
+  month
+  year
 }

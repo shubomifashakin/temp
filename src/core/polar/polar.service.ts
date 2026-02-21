@@ -217,8 +217,8 @@ export class PolarService {
 
     const plans = {
       [polarProId!]: {
-        plan: Plan.PRO,
-        benefits: benefits[Plan.PRO],
+        plan: Plan.pro,
+        benefits: benefits[Plan.pro],
         interval: mappedPolarIntervals[interval],
       },
     };

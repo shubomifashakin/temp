@@ -23,7 +23,7 @@ class Plan {
 
   @ApiProperty({
     description: 'The name of the subscription',
-    example: DbPlan.PRO,
+    example: DbPlan.pro,
   })
   @IsString({ message: 'name should be a string' })
   name: string;
@@ -44,7 +44,7 @@ class Plan {
   @ApiProperty({
     enum: BillingInterval,
     description: 'Subscription interval',
-    example: BillingInterval.MONTH,
+    example: BillingInterval.month,
   })
   @IsEnum(BillingInterval, { message: 'Invalid billing interval' })
   interval: BillingInterval;
@@ -57,7 +57,7 @@ export class PlanInfo {
 
   @ApiProperty({
     description: 'The payment provider for the plan',
-    example: SubscriptionProvider.POLAR,
+    example: SubscriptionProvider.polar,
     enum: SubscriptionProvider,
   })
   @IsEnum(SubscriptionProvider, { message: 'Invalid subscription provider' })

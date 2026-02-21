@@ -13,7 +13,7 @@ export class CreateCheckoutDto {
   @ApiProperty({
     description: 'The provider to checkout with',
     enum: SubscriptionProvider,
-    default: SubscriptionProvider.POLAR,
+    default: SubscriptionProvider.polar,
   })
   @IsEnum(SubscriptionProvider, { message: 'unknown subscription provider' })
   provider: SubscriptionProvider;

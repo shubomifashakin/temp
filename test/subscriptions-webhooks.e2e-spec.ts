@@ -121,9 +121,9 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
     mockPolarService.polarProductIdToPlan.mockReturnValue({
       success: true,
       data: {
-        plan: Plan.PRO,
+        plan: Plan.pro,
         benefits: ['test-benefit'],
-        interval: BillingInterval.MONTH,
+        interval: BillingInterval.month,
       },
       error: null,
     });
@@ -200,7 +200,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.status).toBe('ACTIVE');
+        expect(subscription?.status).toBe('active');
       });
 
       it('should not process the polar subscription.active event because its old ', async () => {
@@ -211,16 +211,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: false,
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -295,16 +295,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: false,
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -348,16 +348,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: false,
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -408,17 +408,17 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: true,
                 cancelledAt: new Date(),
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -478,17 +478,17 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: true,
                 cancelledAt: new Date(),
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -555,16 +555,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: false,
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -613,7 +613,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.status).toBe('ACTIVE');
+        expect(subscription?.status).toBe('active');
       });
 
       it('should process the polar subscription.revoked event', async () => {
@@ -624,16 +624,16 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: false,
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -682,7 +682,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.status).toBe('INACTIVE');
+        expect(subscription?.status).toBe('inactive');
       });
     });
 
@@ -723,17 +723,17 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: new Date(),
                 currentPeriodStart: new Date(),
                 cancelAtPeriodEnd: true,
                 cancelledAt: new Date(),
-                status: 'ACTIVE',
+                status: 'active',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -774,7 +774,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.status).toBe('ACTIVE');
+        expect(subscription?.status).toBe('active');
       });
 
       it('should process the polar order.created event ', async () => {
@@ -787,17 +787,17 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
             name: 'Test User',
             subscriptions: {
               create: {
-                plan: 'PRO',
+                plan: 'pro',
                 currentPeriodEnd: currentPeriodEnd,
                 currentPeriodStart: currentPeriodStart,
                 cancelAtPeriodEnd: true,
                 cancelledAt: new Date(),
-                status: 'INACTIVE',
+                status: 'inactive',
                 startedAt: new Date(),
                 providerCustomerId: 'test-customer-id',
                 amount: 2,
                 providerSubscriptionId: testSubscriptionId,
-                provider: 'POLAR',
+                provider: 'polar',
                 productId: 'test-product-id',
                 currency: 'usd',
                 lastEventAt: lastEventAt,
@@ -843,7 +843,7 @@ describe('SubscriptionsWebhooksController (e2e)', () => {
         });
 
         expect(subscription).toBeDefined();
-        expect(subscription?.status).toEqual('ACTIVE');
+        expect(subscription?.status).toEqual('active');
       });
     });
   });

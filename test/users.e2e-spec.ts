@@ -140,16 +140,16 @@ describe('UsersController (e2e)', () => {
           name: 'Test User',
           subscriptions: {
             create: {
-              plan: 'PRO',
+              plan: 'pro',
               currentPeriodEnd: new Date(),
               currentPeriodStart: new Date(),
               cancelAtPeriodEnd: false,
-              status: 'ACTIVE',
+              status: 'active',
               startedAt: new Date(),
               providerCustomerId: 'test-customer-id',
               amount: 2,
               providerSubscriptionId: 'test-subscription-id',
-              provider: 'POLAR',
+              provider: 'polar',
               productId: 'test-product-id',
               currency: 'usd',
               lastEventAt: new Date(),
@@ -175,7 +175,7 @@ describe('UsersController (e2e)', () => {
       expect(response.body).toHaveProperty('updatedAt');
       expect(response.body).toHaveProperty('subscription');
       expect(response.body.subscription).toHaveProperty('plan');
-      expect(response.body.subscription.plan).toBe('PRO');
+      expect(response.body.subscription.plan).toBe('pro');
 
       await redisService.delete(makeUserKey(userId.id));
     });

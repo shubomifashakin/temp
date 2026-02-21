@@ -24,7 +24,7 @@ export class SubscriptionPlanInterceptor implements NestInterceptor {
       const subscription = await this.databaseService.subscription.findFirst({
         where: {
           userId: userId,
-          status: 'ACTIVE',
+          status: 'active',
         },
         select: {
           plan: true,
@@ -34,10 +34,10 @@ export class SubscriptionPlanInterceptor implements NestInterceptor {
         },
       });
 
-      request.user.plan = subscription?.plan || 'FREE';
+      request.user.plan = subscription?.plan || 'free';
     } else {
       request.user = request.user || {};
-      request.user.plan = 'FREE';
+      request.user.plan = 'free';
     }
 
     return next.handle();

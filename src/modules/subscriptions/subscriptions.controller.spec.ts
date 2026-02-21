@@ -103,14 +103,14 @@ describe('SubscriptionsController', () => {
     const productId = 'test-product-id';
     const response = await controller.createCheckout(mockRequest, {
       productId: productId,
-      provider: 'POLAR',
+      provider: 'polar',
     });
 
     expect(response.url).toBeDefined();
     expect(response.url).toBe('test-url');
     expect(mockSubscriptionService.createCheckout).toHaveBeenCalledWith(
       testUserId,
-      { productId: productId, provider: 'POLAR' },
+      { productId: productId, provider: 'polar' },
     );
   });
 });

@@ -40,9 +40,9 @@ export class CreateLinkGuard {
       {
         where: {
           userId: userId,
-          status: 'ACTIVE',
+          status: 'active',
           NOT: {
-            plan: 'FREE',
+            plan: 'free',
           },
         },
       },
