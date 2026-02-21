@@ -27,6 +27,13 @@ class File {
   expiresAt: Date;
 
   @ApiProperty({
+    description: 'Date and time when the file was created',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  @IsDate({ message: 'createdAt must be a date' })
+  createdAt: Date;
+
+  @ApiProperty({
     description: 'Size of the file in bytes',
     example: 1024,
   })
