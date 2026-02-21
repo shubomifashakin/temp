@@ -110,6 +110,7 @@ export class FilesService {
         name: dto.name,
         userId: userId,
         size: file.size,
+        contentType: file.mimetype,
         description: dto.description,
         expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
       },
@@ -138,6 +139,7 @@ export class FilesService {
         size: true,
         status: true,
         expiresAt: true,
+        contentType: true,
         description: true,
         name: true,
       },
@@ -194,6 +196,7 @@ export class FilesService {
         description: true,
         createdAt: true,
         updatedAt: true,
+        contentType: true,
         expiresAt: true,
         name: true,
       },
@@ -294,6 +297,7 @@ export class FilesService {
         createdAt: true,
         updatedAt: true,
         expiresAt: true,
+        contentType: true,
       },
     });
 

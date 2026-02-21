@@ -396,6 +396,7 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           userId: userId.id,
           name: `Test File ${i}`,
+          contentType: 'text/plain',
         })),
       });
 
@@ -467,6 +468,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'pending',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -552,6 +554,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'pending',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -632,6 +635,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'pending',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -685,6 +689,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'pending',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -768,6 +773,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'safe',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -810,6 +816,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'safe',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -878,6 +885,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'safe',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -927,6 +935,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'pending',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -970,6 +979,7 @@ describe('FilesController (e2e)', () => {
           status: 'safe',
           deletedAt: new Date(),
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -1012,6 +1022,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           status: 'safe',
           name: 'Test File',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -1091,6 +1102,7 @@ describe('FilesController (e2e)', () => {
           userId: userId.id,
           name: 'Test File',
           status: 'safe',
+          contentType: 'text/plain',
         },
         select: {
           id: true,
@@ -1190,6 +1202,7 @@ describe('FilesController (e2e)', () => {
           description: 'Test file',
           expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
           name: 'Test file',
+          contentType: 'text/plain',
         },
       });
 
@@ -1270,6 +1283,7 @@ describe('FilesController (e2e)', () => {
           size: 100,
           description: 'Test file',
           name: 'Test file',
+          contentType: 'text/plain',
           expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });

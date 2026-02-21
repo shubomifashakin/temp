@@ -40,6 +40,10 @@ class File {
   @IsEnum(FileStatus, { message: 'status must be a valid file status' })
   status: FileStatus;
 
+  @ApiProperty({ description: 'the content type of the file' })
+  @IsString({ message: 'contentType must be a string' })
+  contentType: string;
+
   @ApiProperty({
     description: 'the name of the file',
     example: 'My file name',

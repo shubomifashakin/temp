@@ -44,6 +44,10 @@ export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
   @IsDate()
   updatedAt: Date;
 
+  @ApiProperty({ description: 'the content type of the file' })
+  @IsString()
+  contentType: string;
+
   @ApiProperty({
     required: false,
     example: new Date().toISOString(),
