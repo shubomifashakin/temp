@@ -37,6 +37,11 @@ export class CreateLinkDto {
   })
   password?: string;
 
+  @ApiProperty({
+    description:
+      'the date the link should expire. It would no longer be accessible once this is reached',
+    required: false,
+  })
   @IsOptional()
   @IsDate({ message: 'Invalid date' })
   expiresAt?: Date;
