@@ -41,6 +41,21 @@ class File {
   @IsEnum(FileStatus, { message: 'status must be a valid file status' })
   status: FileStatus;
 
+  @ApiProperty({
+    description:
+      'the total number of links that have been generated for the file',
+    example: 1,
+  })
+  @IsNumber({}, { message: 'linkCount must be a number' })
+  totalLinks: number;
+
+  @ApiProperty({
+    description: 'the total number of clicks across all links for the file',
+    example: 1,
+  })
+  @IsNumber({}, { message: 'clickCount must be a number' })
+  totalClicks: number;
+
   @ApiProperty({ description: 'the content type of the file' })
   @IsString({ message: 'contentType must be a string' })
   contentType: string;
