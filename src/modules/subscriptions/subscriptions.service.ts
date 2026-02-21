@@ -20,6 +20,7 @@ import { AppConfigService } from '../../core/app-config/app-config.service';
 import { FnResult } from '../../types/common.types';
 import { makeError } from '../../common/utils';
 import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
+import { CreateCheckoutResponse } from './common/dtos/create-checkout-response.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -91,7 +92,7 @@ export class SubscriptionsService {
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
         userId: userId,
-        status: 'ACTIVE',
+        status: 'active',
       },
       select: {
         id: true,
@@ -100,6 +101,7 @@ export class SubscriptionsService {
         amount: true,
         currency: true,
         provider: true,
+        productId: true,
         cancelledAt: true,
         currentPeriodEnd: true,
         currentPeriodStart: true,
@@ -118,7 +120,7 @@ export class SubscriptionsService {
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
         userId: userId,
-        status: 'ACTIVE',
+        status: 'active',
       },
       select: {
         id: true,
@@ -135,13 +137,13 @@ export class SubscriptionsService {
 
     if (
       !subscription ||
-      subscription.status !== 'ACTIVE' ||
+      subscription.status !== 'active' ||
       subscription.cancelAtPeriodEnd
     ) {
       return { message: 'success' };
     }
 
-    if (subscription.provider === 'POLAR') {
+    if (subscription.provider === 'polar') {
       const { success, error } = await this.polarService.cancelSubscription({
         cancel: true,
         id: subscription.providerSubscriptionId,
@@ -250,10 +252,10 @@ export class SubscriptionsService {
 
     const polarPlanCycles = transformedPolarPlans.reduce(
       (acc, plan) => {
-        if (plan.interval === 'MONTH') {
-          acc.month.push({ plans: [plan], currency: 'usd', provider: 'POLAR' });
+        if (plan.interval === 'month') {
+          acc.month.push({ plans: [plan], currency: 'usd', provider: 'polar' });
         } else {
-          acc.year.push({ plans: [plan], currency: 'usd', provider: 'POLAR' });
+          acc.year.push({ plans: [plan], currency: 'usd', provider: 'polar' });
         }
         return acc;
       },
@@ -265,7 +267,10 @@ export class SubscriptionsService {
     };
   }
 
-  async createCheckout(userId: string, dto: CreateCheckoutDto) {
+  async createCheckout(
+    userId: string,
+    dto: CreateCheckoutDto,
+  ): Promise<CreateCheckoutResponse> {
     const user = await this.databaseService.user.findUniqueOrThrow({
       where: { id: userId },
     });
@@ -273,7 +278,7 @@ export class SubscriptionsService {
     const hasActiveSubscription =
       await this.databaseService.subscription.findFirst({
         where: {
-          status: 'ACTIVE',
+          status: 'active',
           userId: userId,
         },
         orderBy: {
@@ -305,7 +310,7 @@ export class SubscriptionsService {
       error: new Error('Invalid provider'),
     };
 
-    if (dto.provider === 'POLAR') {
+    if (dto.provider === 'polar') {
       result = await this.checkoutWithPolar({
         productId: dto.productId,
         user: {

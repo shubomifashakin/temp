@@ -47,7 +47,7 @@ export const ALLOWED_LIFETIMES: Record<Lifetime, number> = {
 };
 
 export const PLAN_INFO = {
-  [Plan.PRO]: {
+  [Plan.pro]: {
     MAX_FILE_SIZE_BYTES: MAX_FILE_SIZE_BYTES,
     MAX_FILE_SIZE_MB: MAX_FILE_SIZE_BYTES / (1024 * 1024),
     ALLOWED_LIFETIMES: [
@@ -56,7 +56,7 @@ export const PLAN_INFO = {
       LIFETIMES.MEDIUM,
     ] as Lifetime[],
   },
-  [Plan.FREE]: {
+  [Plan.free]: {
     MAX_FILE_SIZE_MB: 25,
     MAX_FILE_SIZE_BYTES: 25 * 1024 * 1024,
     ALLOWED_LIFETIMES: [LIFETIMES.SHORT] as Lifetime[],

@@ -50,7 +50,7 @@ export class UsersService {
     const subscription = await this.databaseService.subscription.findFirst({
       where: {
         userId: userId,
-        status: 'ACTIVE',
+        status: 'active',
       },
       select: {
         plan: true,

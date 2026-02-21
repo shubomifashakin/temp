@@ -211,9 +211,9 @@ describe('PolarWebhooksService', () => {
       },
       create: {
         userId: 'test-user-id',
-        provider: 'POLAR',
+        provider: 'polar',
         plan: testPlan,
-        status: 'INACTIVE',
+        status: 'inactive',
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
         interval: testInterval,
@@ -231,8 +231,8 @@ describe('PolarWebhooksService', () => {
         lastEventAt: timestamp,
       },
       update: {
-        status: 'INACTIVE',
-        provider: 'POLAR',
+        status: 'inactive',
+        provider: 'polar',
         productId: mockSubscription.productId,
         endedAt: mockSubscription.endedAt,
         lastEventAt: timestamp,
@@ -317,8 +317,8 @@ describe('PolarWebhooksService', () => {
         providerSubscriptionId: mockSubscription.id,
       },
       create: {
-        status: 'ACTIVE',
-        provider: 'POLAR',
+        status: 'active',
+        provider: 'polar',
         plan: testPlan,
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
@@ -337,8 +337,8 @@ describe('PolarWebhooksService', () => {
         lastEventAt: timestamp,
       },
       update: {
-        status: 'ACTIVE',
-        provider: 'POLAR',
+        status: 'active',
+        provider: 'polar',
         plan: testPlan,
         amount: mockSubscription.amount,
         currency: mockSubscription.currency,
@@ -488,7 +488,7 @@ describe('PolarWebhooksService', () => {
         providerSubscriptionId: mockSubscription.subscription!.id,
       },
       data: {
-        status: 'ACTIVE',
+        status: 'active',
         plan: testPlan,
         interval: testInterval,
         currency: mockSubscription.currency,

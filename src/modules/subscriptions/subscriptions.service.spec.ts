@@ -98,8 +98,8 @@ describe('SubscriptionsService', () => {
     const subId = 'test-sub-id';
 
     mockDatabaseService.subscription.findFirst.mockResolvedValue({
-      status: SubscriptionStatus.ACTIVE,
-      provider: SubscriptionProvider.POLAR,
+      status: SubscriptionStatus.active,
+      provider: SubscriptionProvider.polar,
       provider_subscription_id: subId,
       cancelled_at: null,
       cancel_at_period_end: false,
@@ -133,8 +133,8 @@ describe('SubscriptionsService', () => {
     const subId = 'test-sub-id';
 
     mockDatabaseService.subscription.findFirst.mockResolvedValue({
-      status: SubscriptionStatus.INACTIVE,
-      provider: SubscriptionProvider.POLAR,
+      status: SubscriptionStatus.inactive,
+      provider: SubscriptionProvider.polar,
       provider_subscription_id: subId,
     });
 
@@ -149,8 +149,8 @@ describe('SubscriptionsService', () => {
     const subId = 'test-sub-id';
 
     mockDatabaseService.subscription.findFirst.mockResolvedValue({
-      status: SubscriptionStatus.ACTIVE,
-      provider: SubscriptionProvider.POLAR,
+      status: SubscriptionStatus.active,
+      provider: SubscriptionProvider.polar,
       provider_subscription_id: subId,
     });
 
@@ -192,7 +192,7 @@ describe('SubscriptionsService', () => {
 
     const res = await service.createCheckout(userId, {
       productId: testProductId,
-      provider: 'POLAR',
+      provider: 'polar',
     });
 
     expect(res.url).toEqual(checkoutUrl);
@@ -219,7 +219,7 @@ describe('SubscriptionsService', () => {
     await expect(
       service.createCheckout(userId, {
         productId: testProductId,
-        provider: 'POLAR',
+        provider: 'polar',
       }),
     ).rejects.toThrow(NotFoundException);
   });
@@ -239,7 +239,7 @@ describe('SubscriptionsService', () => {
     await expect(
       service.createCheckout(userId, {
         productId: testProductId,
-        provider: 'POLAR',
+        provider: 'polar',
       }),
     ).rejects.toThrow(BadRequestException);
   });
@@ -274,7 +274,7 @@ describe('SubscriptionsService', () => {
       data: {
         plan: 'test-plan',
         benefits: ['test-benefit'],
-        interval: 'MONTH',
+        interval: 'month',
       },
       error: null,
     });

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -28,10 +28,6 @@ const mockRequest = {
     id: testUserId,
   },
 } as Request;
-
-const mockResponse = {
-  redirect: jest.fn(),
-} as unknown as jest.Mocked<Response>;
 
 const mockAppConfigService = {
   RedisUrl: {
@@ -105,13 +101,13 @@ describe('SubscriptionsController', () => {
     });
 
     const productId = 'test-product-id';
-    await controller.createCheckout(mockRequest, mockResponse, {
+    const response = await controller.createCheckout(mockRequest, {
       productId: productId,
       provider: 'polar',
     });
 
-    expect(mockResponse.redirect).toHaveBeenCalled();
-    expect(mockResponse.redirect).toHaveBeenCalledTimes(1);
+    expect(response.url).toBeDefined();
+    expect(response.url).toBe('test-url');
     expect(mockSubscriptionService.createCheckout).toHaveBeenCalledWith(
       testUserId,
       { productId: productId, provider: 'polar' },

@@ -107,9 +107,9 @@ describe('SubscriptionsController (e2e)', () => {
     mockPolarService.polarProductIdToPlan.mockReturnValue({
       success: true,
       data: {
-        plan: Plan.PRO,
+        plan: Plan.pro,
         benefits: ['test-benefit'],
-        interval: BillingInterval.MONTH,
+        interval: BillingInterval.month,
       },
       error: null,
     });
@@ -132,16 +132,16 @@ describe('SubscriptionsController (e2e)', () => {
           name: 'Test User',
           subscriptions: {
             create: {
-              plan: 'PRO',
+              plan: 'pro',
               currentPeriodEnd: new Date(),
               currentPeriodStart: new Date(),
               cancelAtPeriodEnd: false,
-              status: 'ACTIVE',
+              status: 'active',
               startedAt: new Date(),
               providerCustomerId: 'test-customer-id',
               amount: 2,
               providerSubscriptionId: 'test-subscription-id',
-              provider: 'POLAR',
+              provider: 'polar',
               productId: 'test-product-id',
               currency: 'usd',
               lastEventAt: new Date(),
@@ -191,16 +191,16 @@ describe('SubscriptionsController (e2e)', () => {
           name: 'Test User',
           subscriptions: {
             create: {
-              plan: 'PRO',
+              plan: 'pro',
               currentPeriodEnd: new Date(),
               currentPeriodStart: new Date(),
               cancelAtPeriodEnd: false,
-              status: 'ACTIVE',
+              status: 'active',
               startedAt: new Date(),
               providerCustomerId: 'test-customer-id',
               amount: 2,
               providerSubscriptionId: 'test-subscription-id',
-              provider: 'POLAR',
+              provider: 'polar',
               productId: 'test-product-id',
               currency: 'usd',
               lastEventAt: new Date(),
@@ -353,13 +353,11 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'test-product-id', provider: 'POLAR' })
+        .send({ productId: 'test-product-id', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
-      expect(response.status).toBe(302);
-      expect(response.headers.location).toBe(
-        'https://checkout.polar.test/session',
-      );
+      expect(response.status).toBe(201);
+      expect(response.body.url).toBe('https://checkout.polar.test/session');
     });
 
     it('should not create checkout if user has active subscription', async () => {
@@ -369,16 +367,16 @@ describe('SubscriptionsController (e2e)', () => {
           name: 'Test User',
           subscriptions: {
             create: {
-              plan: 'PRO',
+              plan: 'pro',
               currentPeriodEnd: new Date(),
               currentPeriodStart: new Date(),
               cancelAtPeriodEnd: false,
-              status: 'ACTIVE',
+              status: 'active',
               startedAt: new Date(),
               providerCustomerId: 'test-customer-id',
               amount: 2,
               providerSubscriptionId: 'test-subscription-id',
-              provider: 'POLAR',
+              provider: 'polar',
               productId: 'test-product-id',
               currency: 'usd',
               lastEventAt: new Date(),
@@ -394,7 +392,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'test-product-id', provider: 'POLAR' })
+        .send({ productId: 'test-product-id', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(400);
@@ -422,7 +420,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'non-existent-product', provider: 'POLAR' })
+        .send({ productId: 'non-existent-product', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(404);
@@ -456,7 +454,7 @@ describe('SubscriptionsController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/subscriptions/checkout')
-        .send({ productId: 'test-product-id', provider: 'POLAR' })
+        .send({ productId: 'test-product-id', provider: 'polar' })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
