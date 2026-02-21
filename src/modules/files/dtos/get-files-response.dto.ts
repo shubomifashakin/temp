@@ -35,6 +35,7 @@ class File {
 
   @ApiProperty({
     example: FileStatus.safe,
+    enum: FileStatus,
     description: 'the status of the file',
   })
   @IsEnum(FileStatus, { message: 'status must be a valid file status' })

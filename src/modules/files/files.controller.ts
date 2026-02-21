@@ -117,13 +117,13 @@ export class FilesController {
 
     if (!PLAN_INFO[req.user.plan].ALLOWED_LIFETIMES.includes(body.lifetime)) {
       throw new BadRequestException(
-        `${req.user.plan} users cannot upload files with ${body.lifetime} lifetime`,
+        'This lifetime option requires a higher plan. Please upgrade your plan.',
       );
     }
 
     if (file.size > PLAN_INFO[req.user.plan].MAX_FILE_SIZE_BYTES) {
       throw new PayloadTooLargeException(
-        `${req.user.plan} users cannot upload files larger than ${PLAN_INFO[req.user.plan].MAX_FILE_SIZE_MB}MB`,
+        'File size exceeds your plan limit. Please upgrade your plan.',
       );
     }
 

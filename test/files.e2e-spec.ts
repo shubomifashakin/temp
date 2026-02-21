@@ -219,11 +219,9 @@ describe('FilesController (e2e)', () => {
           .field('name', 'Test File')
           .set('Cookie', ['access_token=test-token']);
 
-        console.log(response.body, '545p');
-
         expect(response.status).toBe(413);
         expect(response.body).toHaveProperty('message');
-        expect(response.body.message).toContain('large');
+        expect(response.body.message).toContain('plan');
       },
       100 * 1000,
     );
