@@ -20,18 +20,26 @@ class File {
   description: string;
 
   @ApiProperty({
-    description: 'Date and time when the file expires',
+    description: 'Date and time the file expires',
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'expiresAt must be a date' })
   expiresAt: Date;
 
   @ApiProperty({
-    description: 'Date and time when the file was created',
+    description: 'Date and time the file was created',
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'createdAt must be a date' })
   createdAt: Date;
+
+  @ApiProperty({
+    description: 'Date and time the file was deleted',
+    example: '2025-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  @IsDate({ message: 'deletedAt must be a date' })
+  deletedAt: Date | null;
 
   @ApiProperty({
     description: 'Size of the file in bytes',

@@ -139,6 +139,7 @@ export class FilesService {
         size: true,
         status: true,
         expiresAt: true,
+        deletedAt: true,
         createdAt: true,
         contentType: true,
         description: true,
@@ -178,6 +179,7 @@ export class FilesService {
       description: file.description,
       createdAt: file.createdAt,
       name: file.name,
+      deletedAt: file.deletedAt,
       totalLinks: file._count.links,
       totalClicks: file.links.reduce((sum, link) => sum + link.clickCount, 0),
     }));
