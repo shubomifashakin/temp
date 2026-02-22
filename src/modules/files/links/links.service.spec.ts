@@ -206,7 +206,7 @@ describe('LinksService', () => {
     });
 
     expect(res).toEqual({
-      fileUrl: testPresignedUrl,
+      url: testPresignedUrl,
     });
   });
 
@@ -244,7 +244,7 @@ describe('LinksService', () => {
     });
 
     expect(res).toEqual({
-      fileUrl: testPresignedUrl,
+      url: testPresignedUrl,
     });
     expect(mockRedisService.get).toHaveBeenCalledWith(
       makePresignedUrlCacheKey(testLinkId),

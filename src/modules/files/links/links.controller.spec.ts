@@ -1,5 +1,3 @@
-import { Response } from 'express';
-
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -14,10 +12,6 @@ import { HasherModule } from '../../../core/hasher/hasher.module';
 import { PrometheusModule } from '../../../core/prometheus/prometheus.module';
 import { AppConfigModule } from '../../../core/app-config/app-config.module';
 import { AppConfigService } from '../../../core/app-config/app-config.service';
-
-const mockResponse = {
-  redirect: jest.fn(),
-} as unknown as jest.Mocked<Response>;
 
 const mockLogger = {
   error: jest.fn(),
@@ -102,19 +96,17 @@ describe('LinksController', () => {
   it('should generate the presigned url for the file', async () => {
     const testPresignedUrl = 'test-presigned-url';
     mockLinksService.getLinkFile.mockResolvedValue({
-      fileUrl: testPresignedUrl,
+      url: testPresignedUrl,
     });
 
     const testLinkId = 'test-link-id';
-    await controller.getLinkFile(
-      mockResponse,
+    const response = await controller.getLinkFile(
       {
         password: undefined,
       },
       testLinkId,
     );
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(mockResponse.redirect).toHaveBeenCalledWith(302, testPresignedUrl);
+    expect(response.url).toEqual(testPresignedUrl);
   });
 });

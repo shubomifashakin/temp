@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import request from 'supertest';
 import { App } from 'supertest/types';
 
@@ -264,16 +265,19 @@ describe('FilesLinksController (e2e)', () => {
         },
       });
 
+      const presignedUrl = 'https://test-s3-url.com/file';
       mockS3Service.generatePresignedGetUrl.mockResolvedValue({
         success: true,
-        data: 'https://test-s3-url.com/file',
+        data: presignedUrl,
       });
 
       const response = await request(app.getHttpServer())
         .post(`/links/${link.id}`)
         .send({});
 
-      expect(response.status).toBe(302);
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty('url');
+      expect(response.body.url).toEqual(presignedUrl);
       expect(mockS3Service.generatePresignedGetUrl).toHaveBeenCalled();
     });
   });
