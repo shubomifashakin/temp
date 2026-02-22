@@ -22,7 +22,7 @@ export class LinkDetailsDto {
 
   @ApiProperty({
     type: 'string',
-    description: 'Description',
+    description: 'Description of the link',
   })
   @IsString({ message: 'Description must be a string' })
   description: string;
@@ -70,6 +70,13 @@ export class LinkDetailsDto {
   })
   @IsString({ message: 'File description must be a string' })
   fileDescription: string;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'File name',
+  })
+  @IsString({ message: 'fileName must be a string' })
+  fileName: string;
 
   @ApiProperty({
     type: 'boolean',

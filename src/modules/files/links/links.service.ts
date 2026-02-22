@@ -43,6 +43,7 @@ export class LinksService {
         lastAccessedAt: true,
         file: {
           select: {
+            name: true,
             status: true,
             deletedAt: true,
             description: true,
@@ -62,6 +63,7 @@ export class LinksService {
       lastAccessedAt: link.lastAccessedAt,
       passwordProtected: link.password !== null,
 
+      fileName: link.file.name,
       fileCreator: link.file.user.name,
       fileStatus: link.file.status,
       fileDescription: link.file.description,
