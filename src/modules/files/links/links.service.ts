@@ -48,6 +48,7 @@ export class LinksService {
             deletedAt: true,
             description: true,
             contentType: true,
+            expiresAt: true,
             user: {
               select: { name: true },
             },
@@ -70,6 +71,7 @@ export class LinksService {
       fileDescription: link.file.description,
       fileDeleted: link.file.deletedAt !== null,
       fileContentType: link.file.contentType,
+      fileExpired: new Date() > link.file.expiresAt,
     };
   }
 

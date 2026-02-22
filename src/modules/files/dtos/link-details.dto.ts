@@ -92,4 +92,11 @@ export class LinkDetailsDto {
   })
   @IsString()
   fileContentType: string;
+
+  @ApiProperty({
+    type: 'boolean',
+    description: 'If the file has expired or not',
+  })
+  @IsBoolean()
+  fileExpired: boolean;
 }
