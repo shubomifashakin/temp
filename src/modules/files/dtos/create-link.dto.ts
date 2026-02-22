@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsString,
@@ -43,6 +44,7 @@ export class CreateLinkDto {
     required: false,
   })
   @IsOptional()
+  @Type(() => Date)
   @IsDate({ message: 'Invalid date' })
-  expiresAt?: Date;
+  expiresAt?: Date | null;
 }
