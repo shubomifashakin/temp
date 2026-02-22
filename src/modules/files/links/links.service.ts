@@ -50,6 +50,7 @@ export class LinksService {
             contentType: true,
             expiresAt: true,
             size: true,
+            createdAt: true,
             user: {
               select: { name: true, picture: true },
             },
@@ -69,6 +70,7 @@ export class LinksService {
       fileName: link.file.name,
       fileCreator: link.file.user.name,
       fileStatus: link.file.status,
+      fileUploadedAt: link.file.createdAt,
       fileSize: link.file.size,
       fileDescription: link.file.description,
       fileCreatorPicture: link.file.user.picture,

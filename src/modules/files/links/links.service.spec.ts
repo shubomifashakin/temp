@@ -145,6 +145,7 @@ describe('LinksService', () => {
         contentType: 'application/json',
         expiresAt: new Date(),
         size: 1999,
+        createdAt: new Date(),
         user: {
           name: 'Test Name',
           picture: 'https://image.com',
@@ -172,6 +173,7 @@ describe('LinksService', () => {
       fileCreatorPicture: resolvedValue.file.user.picture,
       fileDeleted: resolvedValue.file.deletedAt !== null,
       fileContentType: resolvedValue.file.contentType,
+      fileUploadedAt: resolvedValue.file.createdAt,
       fileExpired: new Date() > resolvedValue.file.expiresAt,
     });
   });
