@@ -47,6 +47,7 @@ export class LinksService {
             status: true,
             deletedAt: true,
             description: true,
+            contentType: true,
             user: {
               select: { name: true },
             },
@@ -68,6 +69,7 @@ export class LinksService {
       fileStatus: link.file.status,
       fileDescription: link.file.description,
       fileDeleted: link.file.deletedAt !== null,
+      fileContentType: link.file.contentType,
     };
   }
 

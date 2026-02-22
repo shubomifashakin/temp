@@ -84,4 +84,12 @@ export class LinkDetailsDto {
   })
   @IsBoolean()
   fileDeleted: boolean;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'application/pdf',
+    description: 'File content type',
+  })
+  @IsString()
+  fileContentType: string;
 }
