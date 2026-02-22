@@ -58,11 +58,28 @@ export class LinkDetailsDto {
 
   @ApiProperty({
     type: 'string',
+    description: 'File creator picture url',
+    nullable: true,
+    example: 'https://example.com/picture.jpg',
+  })
+  @IsString({ message: 'File creator picture must be a string' })
+  fileCreatorPicture: string | null;
+
+  @ApiProperty({
+    type: 'string',
     description: 'File status',
     example: FileStatus.safe,
   })
   @IsEnum(FileStatus, { message: 'File status must be a valid enum value' })
   fileStatus: FileStatus;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'File size in bytes',
+    example: '1024',
+  })
+  @IsNumber({}, { message: 'File size must be a number' })
+  fileSize: number;
 
   @ApiProperty({
     type: 'string',
