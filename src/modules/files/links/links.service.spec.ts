@@ -130,20 +130,25 @@ describe('LinksService', () => {
 
   it('should get link details', async () => {
     const resolvedValue = {
-      createdAt: new Date(),
-      expiresAt: new Date(),
-      description: 'test description',
-      clickCount: 1,
-      lastAccessedAt: new Date(),
       password: 'test-password',
+      expiresAt: new Date(),
+      createdAt: new Date(),
+      clickCount: 1,
+      description: 'test description',
+      lastAccessedAt: new Date(),
 
       file: {
+        name: 'file name',
+        status: 'file status',
+        deletedAt: new Date(),
+        description: 'test description',
+        contentType: 'application/json',
+        expiresAt: new Date(),
+        size: 1999,
         user: {
           name: 'Test Name',
+          picture: 'https://image.com',
         },
-        status: 'safe',
-        description: 'Test file description',
-        deletedAt: null,
       },
     };
 
@@ -159,10 +164,15 @@ describe('LinksService', () => {
       lastAccessedAt: resolvedValue.lastAccessedAt,
       passwordProtected: resolvedValue.password !== null,
 
+      fileName: resolvedValue.file.name,
       fileCreator: resolvedValue.file.user.name,
       fileStatus: resolvedValue.file.status,
+      fileSize: resolvedValue.file.size,
       fileDescription: resolvedValue.file.description,
+      fileCreatorPicture: resolvedValue.file.user.picture,
       fileDeleted: resolvedValue.file.deletedAt !== null,
+      fileContentType: resolvedValue.file.contentType,
+      fileExpired: new Date() > resolvedValue.file.expiresAt,
     });
   });
 
