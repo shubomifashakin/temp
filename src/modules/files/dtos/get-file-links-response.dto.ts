@@ -24,8 +24,8 @@ class Link {
   passwordProtected: boolean;
 
   @ApiProperty({
-    description: 'Whether the link has been revoked',
-    example: false,
+    description: 'When the link was revoked',
+    example: new Date(),
     nullable: true,
   })
   @IsDate({ message: 'revokedAt must be a date' })
