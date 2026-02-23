@@ -20,6 +20,7 @@ import { AppConfigService } from '../../core/app-config/app-config.service';
 
 import { FnResult } from '../../types/common.types';
 import { makeError } from '../../common/utils';
+import { MINUTES_30 } from '../../common/constants';
 import { GetSubscriptionResponse } from './common/dtos/get-subscription.dto';
 import { CreateCheckoutResponse } from './common/dtos/create-checkout-response.dto';
 
@@ -291,7 +292,7 @@ export class SubscriptionsService {
       plansCacheKey,
       response,
       {
-        expiration: { type: 'EX', value: 1800 },
+        expiration: { type: 'EX', value: MINUTES_30 },
       },
     );
 
