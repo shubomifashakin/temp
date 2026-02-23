@@ -20,11 +20,26 @@ class File {
   description: string;
 
   @ApiProperty({
-    description: 'Date and time when the file expires',
+    description: 'Date and time the file expires',
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'expiresAt must be a date' })
   expiresAt: Date;
+
+  @ApiProperty({
+    description: 'Date and time the file was created',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  @IsDate({ message: 'createdAt must be a date' })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Date and time the file was deleted',
+    example: '2025-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  @IsDate({ message: 'deletedAt must be a date' })
+  deletedAt: Date | null;
 
   @ApiProperty({
     description: 'Size of the file in bytes',
@@ -40,6 +55,21 @@ class File {
   })
   @IsEnum(FileStatus, { message: 'status must be a valid file status' })
   status: FileStatus;
+
+  @ApiProperty({
+    description:
+      'the total number of links that have been generated for the file',
+    example: 1,
+  })
+  @IsNumber({}, { message: 'linkCount must be a number' })
+  totalLinks: number;
+
+  @ApiProperty({
+    description: 'the total number of clicks across all links for the file',
+    example: 1,
+  })
+  @IsNumber({}, { message: 'clickCount must be a number' })
+  totalClicks: number;
 
   @ApiProperty({ description: 'the content type of the file' })
   @IsString({ message: 'contentType must be a string' })

@@ -1,10 +1,10 @@
-import { type Response } from 'express';
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { LinksService } from './links.service';
 import { LinkDetailsDto } from '../dtos/link-details.dto';
 import { GetLinkFileDto } from '../dtos/get-link-file.dto';
+import { GetLinkFileResponse } from './dtos/get-link-file-response.dto';
 
 @Controller('links')
 export class LinksController {
@@ -22,19 +22,20 @@ export class LinksController {
 
   @ApiOperation({
     summary: 'Get linked file',
-    description: 'Redirects to the file URL',
+    description: 'Returns the file URL',
   })
   @ApiBody({ type: GetLinkFileDto })
-  @ApiResponse({ status: 302, description: 'Redirects to the file URL' })
+  @ApiResponse({ status: 200, type: GetLinkFileResponse })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
+  @ApiResponse({ status: 400, description: 'Link has been revoked' })
   @ApiResponse({ status: 404, description: 'Link does not exist' })
   @Post(':linkId')
   async getLinkFile(
-    @Res() res: Response,
     @Body() dto: GetLinkFileDto,
     @Param('linkId') linkId: string,
-  ) {
+  ): Promise<GetLinkFileResponse> {
     const url = await this.linksService.getLinkFile(linkId, dto);
 
-    res.redirect(302, url.fileUrl);
+    return url;
   }
 }

@@ -139,9 +139,21 @@ export class FilesService {
         size: true,
         status: true,
         expiresAt: true,
+        deletedAt: true,
+        createdAt: true,
         contentType: true,
         description: true,
         name: true,
+        _count: {
+          select: {
+            links: true,
+          },
+        },
+        links: {
+          select: {
+            clickCount: true,
+          },
+        },
       },
       ...(cursor && {
         cursor: {
@@ -156,7 +168,22 @@ export class FilesService {
     });
 
     const hasNextPage = files.length > limit;
-    const data = files.slice(0, limit);
+    const rawFiles = files.slice(0, limit);
+
+    const data = rawFiles.map((file) => ({
+      id: file.id,
+      size: file.size,
+      status: file.status,
+      expiresAt: file.expiresAt,
+      contentType: file.contentType,
+      description: file.description,
+      createdAt: file.createdAt,
+      name: file.name,
+      deletedAt: file.deletedAt,
+      totalLinks: file._count.links,
+      totalClicks: file.links.reduce((sum, link) => sum + link.clickCount, 0),
+    }));
+
     const nextCursor = hasNextPage ? data[data.length - 1].id : null;
 
     return {

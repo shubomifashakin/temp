@@ -14,6 +14,7 @@ import { LinkDetailsDto } from '../dtos/link-details.dto';
 import { GetLinkFileDto } from '../dtos/get-link-file.dto';
 import { makePresignedUrlCacheKey } from '../common/utils';
 import { AppConfigService } from '../../../core/app-config/app-config.service';
+import { GetLinkFileResponse } from '././dtos/get-link-file-response.dto';
 
 @Injectable()
 export class LinksService {
@@ -42,11 +43,16 @@ export class LinksService {
         lastAccessedAt: true,
         file: {
           select: {
+            name: true,
             status: true,
             deletedAt: true,
             description: true,
+            contentType: true,
+            expiresAt: true,
+            size: true,
+            createdAt: true,
             user: {
-              select: { name: true },
+              select: { name: true, picture: true },
             },
           },
         },
@@ -61,14 +67,23 @@ export class LinksService {
       lastAccessedAt: link.lastAccessedAt,
       passwordProtected: link.password !== null,
 
+      fileName: link.file.name,
       fileCreator: link.file.user.name,
       fileStatus: link.file.status,
+      fileUploadedAt: link.file.createdAt,
+      fileSize: link.file.size,
       fileDescription: link.file.description,
+      fileCreatorPicture: link.file.user.picture,
       fileDeleted: link.file.deletedAt !== null,
+      fileContentType: link.file.contentType,
+      fileExpired: new Date() > link.file.expiresAt,
     };
   }
 
-  async getLinkFile(linkId: string, dto: GetLinkFileDto) {
+  async getLinkFile(
+    linkId: string,
+    dto: GetLinkFileDto,
+  ): Promise<GetLinkFileResponse> {
     const linkFound = await this.databaseService.link.findUniqueOrThrow({
       where: {
         id: linkId,
@@ -144,7 +159,7 @@ export class LinksService {
         },
       });
 
-      return { fileUrl: existingUrlForFile.data };
+      return { url: existingUrlForFile.data };
     }
 
     const ttl = 3600 / 2;
@@ -187,7 +202,7 @@ export class LinksService {
     });
 
     return {
-      fileUrl: data,
+      url: data,
     };
   }
 }

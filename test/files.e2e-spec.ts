@@ -410,6 +410,8 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveLength(10);
+      expect(response.body.data[0]).toHaveProperty('totalLinks');
+      expect(response.body.data[0]).toHaveProperty('totalClicks');
       expect(response.body).toHaveProperty('cursor');
       expect(response.body).toHaveProperty('hasNextPage');
       expect(response.body?.hasNextPage).toBe(true);
