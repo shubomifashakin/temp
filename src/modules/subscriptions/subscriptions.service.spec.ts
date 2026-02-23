@@ -16,6 +16,7 @@ import {
   SubscriptionProvider,
 } from '../../../generated/prisma/enums';
 import { AppConfigService } from '../../core/app-config/app-config.service';
+import { RedisService } from '../../core/redis/redis.service';
 
 const mockDatabaseService = {
   subscription: {
@@ -25,6 +26,11 @@ const mockDatabaseService = {
   user: {
     findUniqueOrThrow: jest.fn(),
   },
+};
+
+const mockRedisService = {
+  get: jest.fn(),
+  set: jest.fn(),
 };
 
 const mockAppConfigService = {
@@ -78,6 +84,7 @@ describe('SubscriptionsService', () => {
         { useValue: mockConfigService, provide: ConfigService },
         { useValue: mockDatabaseService, provide: DatabaseService },
         { useValue: mockAppConfigService, provide: AppConfigService },
+        { useValue: mockRedisService, provide: RedisService },
       ],
       imports: [],
     }).compile();
@@ -263,6 +270,9 @@ describe('SubscriptionsService', () => {
       },
     };
 
+    mockRedisService.get.mockResolvedValue({ success: true, data: null });
+    mockRedisService.set.mockResolvedValue({ success: true, data: null });
+
     mockPolarService.getAvailableProducts.mockResolvedValue({
       success: true,
       data: result,
@@ -283,5 +293,31 @@ describe('SubscriptionsService', () => {
     expect(res.data.month).toBeDefined();
     expect(res.data.year).toBeDefined();
     expect(res.data.month[0].plans[0].amount).toBe(0.2);
+  });
+
+  it('should get the polar plans from cache', async () => {
+    const prices = [
+      { amountType: 'fixed', priceAmount: 20, priceCurrency: 'usd' },
+    ];
+
+    const result = {
+      result: {
+        pagination: { maxPagee: 1 },
+        items: [
+          {
+            id: 'test-value',
+            recurringInterval: 'month',
+            prices,
+            isRecurring: true,
+          },
+        ],
+      },
+    };
+
+    mockRedisService.get.mockResolvedValue({ success: true, data: result });
+
+    await service.getPlans();
+    expect(mockRedisService.get).toHaveBeenCalled();
+    expect(mockRedisService.set).not.toHaveBeenCalled();
   });
 });

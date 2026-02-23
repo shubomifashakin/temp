@@ -14,6 +14,7 @@ import {
 import { CreateCheckoutDto } from './common/dtos/create-checkout.dto';
 
 import { PolarService } from '../../core/polar/polar.service';
+import { RedisService } from '../../core/redis/redis.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { AppConfigService } from '../../core/app-config/app-config.service';
 
@@ -27,6 +28,7 @@ export class SubscriptionsService {
   private readonly logger = new Logger(SubscriptionsService.name);
 
   constructor(
+    private readonly redisService: RedisService,
     private readonly polarService: PolarService,
     private readonly configService: AppConfigService,
     private readonly databaseService: DatabaseService,
@@ -172,6 +174,25 @@ export class SubscriptionsService {
   }
 
   async getPlans(): Promise<GetPlansResponse> {
+    const plansCacheKey = 'plans:available';
+
+    const cachedPlans =
+      await this.redisService.get<GetPlansResponse>(plansCacheKey);
+
+    if (!cachedPlans.success) {
+      this.logger.error({
+        error: cachedPlans.error,
+        message: 'Failed to fetch plans from cache',
+      });
+    }
+
+    if (cachedPlans.success && cachedPlans.data) {
+      this.logger.debug({
+        message: 'Fetched plans from cache',
+      });
+      return cachedPlans.data;
+    }
+
     const limit = 10;
 
     const polarOrganizationId = this.configService.PolarOrganizationId;
@@ -262,9 +283,26 @@ export class SubscriptionsService {
       { month: [] as PlanInfo[], year: [] as PlanInfo[] },
     );
 
-    return {
+    const response = {
       data: { month: polarPlanCycles.month, year: polarPlanCycles.year },
-    };
+    } satisfies GetPlansResponse;
+
+    const setPlansInCache = await this.redisService.set(
+      plansCacheKey,
+      response,
+      {
+        expiration: { type: 'EX', value: 1800 },
+      },
+    );
+
+    if (!setPlansInCache.success) {
+      this.logger.error({
+        error: setPlansInCache.error,
+        message: 'Failed to set plans in cache',
+      });
+    }
+
+    return response;
   }
 
   async createCheckout(
