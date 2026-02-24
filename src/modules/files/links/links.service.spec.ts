@@ -131,7 +131,7 @@ describe('LinksService', () => {
   it('should get link details', async () => {
     const resolvedValue = {
       password: 'test-password',
-      expiresAt: new Date(100),
+      expiresAt: new Date(),
       createdAt: new Date(),
       clickCount: 1,
       description: 'test description',
@@ -143,7 +143,7 @@ describe('LinksService', () => {
         deletedAt: new Date(),
         description: 'test description',
         contentType: 'application/json',
-        expiresAt: new Date(),
+        expiresAt: new Date(100),
         size: 1999,
         createdAt: new Date(),
         user: {
