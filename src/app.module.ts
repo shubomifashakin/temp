@@ -137,6 +137,9 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
             Date.now().toString()
           );
         },
+        autoLogging: {
+          ignore: (req) => ['/health', '/metrics'].includes(req.url ?? ''),
+        },
       },
       exclude: [
         { path: '/health', method: RequestMethod.GET },
