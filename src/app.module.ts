@@ -63,9 +63,12 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
     LoggerModule.forRoot({
       pinoHttp: {
         messageKey: 'message',
+        mixin(_context, level, logger) {
+          return { level_label: logger.levels.labels[level] };
+        },
         errorKey: 'error',
         level: process.env.LOG_LEVEL! || 'info',
-        base: { service: process.env.SERVICE_NAME! },
+        base: null,
         timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
         transport: {
           targets:
@@ -77,18 +80,6 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
                     level: 'info',
                     options: {
                       file: './logs/combined.log',
-                      mkdir: true,
-                      size: '2m',
-                      frequency: 'daily',
-                      limit: { count: 1 },
-                      dateFormat: 'dd-MM-yyyy',
-                    },
-                  },
-                  {
-                    target: 'pino-roll',
-                    level: 'error',
-                    options: {
-                      file: './logs/errors.log',
                       mkdir: true,
                       size: '2m',
                       frequency: 'daily',
