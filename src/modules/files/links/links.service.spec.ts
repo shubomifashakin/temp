@@ -131,7 +131,7 @@ describe('LinksService', () => {
   it('should get link details', async () => {
     const resolvedValue = {
       password: 'test-password',
-      expiresAt: new Date(),
+      expiresAt: new Date(100),
       createdAt: new Date(),
       clickCount: 1,
       description: 'test description',
@@ -174,7 +174,7 @@ describe('LinksService', () => {
       fileDeleted: resolvedValue.file.deletedAt !== null,
       fileContentType: resolvedValue.file.contentType,
       fileUploadedAt: resolvedValue.file.createdAt,
-      fileExpired: new Date() > resolvedValue.file.expiresAt,
+      fileExpired: true,
     });
   });
 
