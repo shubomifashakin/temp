@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import { Module } from '@nestjs/common';
+import { Module, RequestMethod } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -138,6 +138,10 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
           );
         },
       },
+      exclude: [
+        { path: '/health', method: RequestMethod.GET },
+        { path: '/metrics', method: RequestMethod.GET },
+      ],
       assignResponse: false,
     }),
     ThrottlerModule.forRootAsync({
