@@ -45,7 +45,10 @@ export const MESSAGES = {
 
 export const DEFAULT_JWT_ALG: Algorithm = 'RS256';
 
-export const mappedPolarIntervals = {
+export const mappedPolarIntervals: Record<
+  SubscriptionRecurringInterval,
+  BillingInterval
+> = {
   [SubscriptionRecurringInterval.Day]: BillingInterval.day,
   [SubscriptionRecurringInterval.Year]: BillingInterval.year,
   [SubscriptionRecurringInterval.Week]: BillingInterval.week,
