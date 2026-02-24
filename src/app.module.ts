@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { v4 as uuid } from 'uuid';
 
 import { LoggerModule } from 'nestjs-pino';
 
@@ -125,7 +126,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
             req?.requestId ||
             req.headers['x-request-id'] ||
             req.headers['X-Request-Id'] ||
-            Date.now().toString()
+            uuid()
           );
         },
         autoLogging: {
