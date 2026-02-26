@@ -149,10 +149,9 @@ model Subscription {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique(name: "subscriptions_provider_id_user_id_unique", fields: [providerSubscriptionId, userId])
-  @@index(name: "subscriptions_user_id_idx", fields: [userId])
+  @@index(name: "subscriptions_user_id_status_idx", fields: [userId,status])
   @@index(name: "subscriptions_provider_subscription_id_idx", fields: [providerSubscriptionId])
   @@index(name: "subscriptions_provider_provider_customer_id_idx", fields: [provider, providerCustomerId])
-  @@index(name: "subscriptions_status_idx", fields: [status])
   @@map("subscriptions")
 }
 
