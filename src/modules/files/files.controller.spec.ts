@@ -25,7 +25,7 @@ const mockLogger = {
 };
 
 const mockFilesService = {
-  uploadFile: jest.fn(),
+  generateUploadUrl: jest.fn(),
   getFiles: jest.fn(),
   getSingleFile: jest.fn(),
   deleteSingleFile: jest.fn(),
@@ -107,28 +107,28 @@ describe('FilesController', () => {
   });
 
   it('should upload the file', async () => {
-    mockFilesService.uploadFile.mockResolvedValue({ id: '1' });
+    mockFilesService.generateUploadUrl.mockResolvedValue({ id: '1' });
 
-    const res = await controller.uploadFile(
-      mockRequest,
-      { description: 'test description', lifetime: 'short', name: 'test name' },
-      { size: 1024 } as Express.Multer.File,
-    );
+    const res = await controller.generateUploadUrl(mockRequest, {
+      description: 'test description',
+      lifetime: 'short',
+      name: 'test name',
+      fileSizeBytes: 1024,
+      contentType: 'test-content-type',
+    });
 
     expect(res).toEqual({ id: '1' });
   });
 
   it('should not allow free user to upload large file', async () => {
     await expect(
-      controller.uploadFile(
-        mockRequest,
-        {
-          description: 'test description',
-          lifetime: 'short',
-          name: 'test name',
-        },
-        { size: 1024 * 10000 * 1000 } as Express.Multer.File,
-      ),
+      controller.generateUploadUrl(mockRequest, {
+        description: 'test description',
+        lifetime: 'short',
+        name: 'test name',
+        fileSizeBytes: 900000000,
+        contentType: 'test-content-type',
+      }),
     ).rejects.toThrow(PayloadTooLargeException);
   });
 

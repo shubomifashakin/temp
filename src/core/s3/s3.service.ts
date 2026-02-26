@@ -1,11 +1,8 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import {
-  S3Client,
-  GetObjectCommand,
-  PutObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
@@ -33,37 +30,6 @@ export class S3Service implements OnModuleDestroy {
     });
   }
 
-  async uploadToS3({
-    body,
-    tags,
-    bucket,
-    key,
-    cacheControl,
-  }: {
-    body: Express.Multer.File;
-    tags: string;
-    bucket: string;
-    key: string;
-    cacheControl?: string;
-  }): Promise<FnResult<null>> {
-    try {
-      await this.s3Client.send(
-        new PutObjectCommand({
-          Key: key,
-          Tagging: tags,
-          Bucket: bucket,
-          Body: body.buffer,
-          ContentType: body.mimetype,
-          CacheControl: cacheControl,
-        }),
-      );
-
-      return { success: true, error: null, data: null };
-    } catch (error) {
-      return { success: false, error: makeError(error), data: null };
-    }
-  }
-
   async generatePresignedGetUrl({
     key,
     ttl,
@@ -81,6 +47,53 @@ export class S3Service implements OnModuleDestroy {
       });
 
       return { data: url, error: null, success: true };
+    } catch (error) {
+      return { error: makeError(error), data: null, success: false };
+    }
+  }
+
+  /**
+   *
+   * @param key : s3 key
+   * @param ttl : time to live in seconds
+   * @param tags : tags to be added to the s3 object
+   * @param bucket : s3 bucket name
+   * @param contentType : content type of the s3 object
+   * @param contentLength : content length of the s3 object
+   * @returns
+   */
+  async generatePresignedPostUrl({
+    key,
+    ttl,
+    tag,
+    bucket,
+    contentType,
+    contentLength,
+  }: {
+    key: string;
+    ttl: number;
+    bucket: string;
+    contentType: string;
+    contentLength: number;
+    tag: string;
+  }): Promise<FnResult<{ url: string; fields: Record<string, string> }>> {
+    try {
+      const { url, fields } = await createPresignedPost(this.s3Client, {
+        Key: key,
+        Bucket: bucket,
+        Fields: {
+          key,
+          'Content-Type': contentType,
+          Tagging: `<Tagging><TagSet><Tag><Key>lifetime</Key><Value>${tag}</Value></Tag></TagSet></Tagging>`,
+        },
+        Conditions: [
+          ['eq', '$Content-Type', contentType],
+          ['content-length-range', 1, contentLength],
+        ],
+        Expires: ttl,
+      });
+
+      return { data: { url, fields }, error: null, success: true };
     } catch (error) {
       return { error: makeError(error), data: null, success: false };
     }

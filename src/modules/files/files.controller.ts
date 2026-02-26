@@ -12,7 +12,6 @@ import {
   Logger,
   UseGuards,
   Controller,
-  UploadedFile,
   ParseUUIDPipe,
   BadRequestException,
   InternalServerErrorException,
@@ -25,7 +24,6 @@ import {
   ApiQuery,
   ApiResponse,
   ApiOperation,
-  ApiConsumes,
   ApiBadRequestResponse,
   ApiCookieAuth,
   ApiPayloadTooLargeResponse,
@@ -46,8 +44,8 @@ import { UpdateLinkDto } from './dtos/update-link.dto';
 import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
-import { UploadFile } from './common/decorators/upload-file.decorator';
 import { CreateLinkGuard } from './common/guards/create-link.guard';
+import { UploadFileResponseDto } from './dtos/upload-file-response.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
@@ -57,56 +55,26 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @UseInterceptors(SubscriptionPlanInterceptor)
-  @ApiOperation({ summary: 'Upload a file' })
-  @ApiResponse({ status: 201, description: 'File was successfully uploaded' })
+  @ApiOperation({ summary: 'Request a presigned url for upload' })
+  @ApiResponse({
+    status: 201,
+    description:
+      'File upload link was successfully generated. The link is valid for only 10 minutes.',
+    type: UploadFileResponseDto,
+  })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiPayloadTooLargeResponse({
     description: 'File too large',
   })
-  @ApiConsumes('multipart/form-data')
   @ApiBody({
+    type: UploadFileDto,
     description: 'File upload data with metadata',
-    type: 'multipart/form-data',
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'The file to upload',
-        },
-        description: {
-          type: 'string',
-          minLength: 5,
-          maxLength: 100,
-          description: 'The description of file that was uploaded',
-          example: 'My yearbook photo',
-        },
-        name: {
-          type: 'string',
-          minLength: 5,
-          maxLength: 50,
-          description: 'The name of the file',
-          example: 'Yearbook',
-          pattern: '^[a-zA-Z0-9\\s\\-_]+$',
-        },
-        lifetime: {
-          type: 'string',
-          enum: ['short', 'medium', 'long'],
-          description: 'How long the file should be stored',
-          example: 'long',
-        },
-      },
-      required: ['file', 'description', 'lifetime', 'name'],
-    },
   })
-  @UploadFile()
   @Post()
-  async uploadFile(
+  async generateUploadUrl(
     @Req() req: Request,
     @Body() body: UploadFileDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<UploadFileResponseDto> {
     if (!req.user.plan) {
       this.logger.error({
         message: 'User plan is undefined',
@@ -121,13 +89,13 @@ export class FilesController {
       );
     }
 
-    if (file.size > PLAN_INFO[req.user.plan].MAX_FILE_SIZE_BYTES) {
+    if (body.fileSizeBytes > PLAN_INFO[req.user.plan].MAX_FILE_SIZE_BYTES) {
       throw new PayloadTooLargeException(
         'File size exceeds your plan limit. Please upgrade your plan.',
       );
     }
 
-    return this.filesService.uploadFile(file, body, req.user.id);
+    return this.filesService.generateUploadUrl(body, req.user.id);
   }
 
   @ApiOperation({

@@ -1,17 +1,45 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDate,
   IsEnum,
   IsNumber,
   IsString,
   IsOptional,
+  MinLength,
+  MaxLength,
+  Matches,
 } from 'class-validator';
 
 import { FileStatus } from '../../../../generated/prisma/enums';
 
-import { UploadFileDto } from './upload-file.dto';
+export class GetFileDto {
+  @ApiProperty({
+    minLength: 5,
+    maxLength: 100,
+    example: 'My highschool yearbook photo',
+    description: 'The description of the file that was uploaded',
+  })
+  @IsString()
+  @MinLength(5, { message: 'File description is too short' })
+  @MaxLength(100, { message: 'File description is too long' })
+  description: string;
 
-export class GetFileDto extends OmitType(UploadFileDto, ['lifetime']) {
+  @ApiProperty({
+    description: 'The name of the file',
+    maxLength: 50,
+    minLength: 5,
+    example: 'Yearbook',
+    pattern: '^[a-zA-Z0-9\\s\\-_]+$',
+  })
+  @IsString()
+  @MinLength(5, { message: 'File name is too short' })
+  @MaxLength(50, { message: 'File name is too long' })
+  @Matches(/^[a-zA-Z0-9\s\-_]+$/, {
+    message:
+      'File name can only contain letters, numbers, spaces, hyphens, and underscores',
+  })
+  name: string;
+
   @ApiProperty({ description: 'The id of the file' })
   @IsString()
   id: string;

@@ -5,11 +5,17 @@ import {
   MaxLength,
   MinLength,
   Matches,
+  IsNumber,
+  IsIn,
 } from 'class-validator';
 
 import { File } from '../../../../generated/prisma/client';
 
-import { LIFETIMES, type Lifetime } from '../common/constants';
+import {
+  ALLOWED_MIME_TYPES,
+  LIFETIMES,
+  type Lifetime,
+} from '../common/constants';
 
 export class UploadFileDto implements Pick<File, 'description'> {
   @ApiProperty({
@@ -46,4 +52,18 @@ export class UploadFileDto implements Pick<File, 'description'> {
       'File name can only contain letters, numbers, spaces, hyphens, and underscores',
   })
   name: string;
+
+  @ApiProperty({
+    description: 'Size of the file in bytes',
+    example: 10485760,
+  })
+  @IsNumber()
+  fileSizeBytes: number;
+
+  @ApiProperty({
+    description: 'Content type of the file',
+    example: 'image/jpeg',
+  })
+  @IsIn(ALLOWED_MIME_TYPES, { message: 'Unsupported content type' })
+  contentType: string;
 }

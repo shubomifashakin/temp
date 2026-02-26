@@ -65,6 +65,7 @@ const mockRedisService = {
 
 const mockS3Service = {
   uploadToS3: jest.fn(),
+  generatePresignedPostUrl: jest.fn(),
   generatePresignedGetUrl: jest.fn(),
 };
 
@@ -138,36 +139,46 @@ describe('FilesService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should upload a file', async () => {
-    const file = { size: 200 } as Express.Multer.File;
+  it('should generate presigned url for upload', async () => {
     const testUserId = 'test-user-id';
 
     mockDatabaseService.file.findUnique.mockResolvedValue(null);
 
-    mockS3Service.uploadToS3.mockResolvedValue({ success: true, error: null });
+    mockS3Service.generatePresignedPostUrl.mockResolvedValue({
+      success: true,
+      error: null,
+      data: {
+        url: 'test-url',
+        fields: {},
+      },
+    });
 
     mockDatabaseService.file.create.mockResolvedValue({
       id: '1',
     });
 
-    const res = await service.uploadFile(
-      file,
-      { description: 'Test file', lifetime: 'short', name: 'Test file' },
+    const res = await service.generateUploadUrl(
+      {
+        description: 'Test file',
+        lifetime: 'short',
+        name: 'Test file',
+        contentType: 'image/png',
+        fileSizeBytes: 200,
+      },
       testUserId,
     );
 
-    expect(res).toEqual({ id: '1' });
+    expect(res).toEqual({ url: 'test-url', fields: {} });
     expect(mockIncrement).toHaveBeenCalledWith({ lifetime: 'short' }, 1);
     expect(mockObserve).toHaveBeenCalledWith({ lifetime: 'short' }, 200);
   });
 
-  it('should fail to upload a file because s3 failed', async () => {
-    const file = {} as Express.Multer.File;
+  it('should fail to generate a presigned url for upload because s3 failed', async () => {
     const testUserId = 'test-user-id';
 
     mockDatabaseService.file.findUnique.mockResolvedValue(null);
 
-    mockS3Service.uploadToS3.mockResolvedValue({
+    mockS3Service.generatePresignedPostUrl.mockResolvedValue({
       success: false,
       error: new Error('test error'),
     });
@@ -177,24 +188,33 @@ describe('FilesService', () => {
     });
 
     await expect(
-      service.uploadFile(
-        file,
-        { description: 'Test file', lifetime: 'short', name: 'Test file' },
+      service.generateUploadUrl(
+        {
+          description: 'Test file',
+          lifetime: 'short',
+          name: 'Test file',
+          contentType: 'image/png',
+          fileSizeBytes: 200,
+        },
         testUserId,
       ),
     ).rejects.toThrow(InternalServerErrorException);
   });
 
-  it('should fail to upload file because a file with that name already exists for user', async () => {
-    const file = {} as Express.Multer.File;
+  it('should fail to generate presigned url for upload because a file with that name already exists for user', async () => {
     const testUserId = 'test-user-id';
 
     mockDatabaseService.file.findUnique.mockResolvedValue(true);
 
     await expect(
-      service.uploadFile(
-        file,
-        { description: 'Test file', lifetime: 'short', name: 'Test file' },
+      service.generateUploadUrl(
+        {
+          description: 'Test file',
+          lifetime: 'short',
+          name: 'Test file',
+          contentType: 'image/png',
+          fileSizeBytes: 200,
+        },
         testUserId,
       ),
     ).rejects.toThrow(BadRequestException);
