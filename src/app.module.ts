@@ -149,6 +149,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
               ttl: 15,
               limit: 30,
               name: 'default',
+              blockDuration: 60,
             },
           ],
           errorMessage: 'Too many requests',
