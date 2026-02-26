@@ -98,7 +98,7 @@ export class FilesService {
         ttl: MINUTES_30,
         bucket: s3Bucket.data,
         contentType: dto.contentType,
-        tags: `lifetime=${dto.lifetime}`,
+        tag: dto.lifetime,
         contentLength: dto.fileSizeBytes,
       });
 

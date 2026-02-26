@@ -65,7 +65,7 @@ export class S3Service implements OnModuleDestroy {
   async generatePresignedPostUrl({
     key,
     ttl,
-    tags,
+    tag,
     bucket,
     contentType,
     contentLength,
@@ -75,7 +75,7 @@ export class S3Service implements OnModuleDestroy {
     bucket: string;
     contentType: string;
     contentLength: number;
-    tags: string;
+    tag: string;
   }): Promise<FnResult<{ url: string; fields: Record<string, string> }>> {
     try {
       const { url, fields } = await createPresignedPost(this.s3Client, {
@@ -83,8 +83,8 @@ export class S3Service implements OnModuleDestroy {
         Bucket: bucket,
         Fields: {
           key,
-          Tagging: tags,
           'Content-Type': contentType,
+          Tagging: `<Tagging><TagSet><Tag><Key>lifetime</Key><Value>${tag}</Value></Tag></TagSet></Tagging>`,
         },
         Conditions: [
           ['eq', '$Content-Type', contentType],
