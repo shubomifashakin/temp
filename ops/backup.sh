@@ -2,9 +2,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/.env"
+
 POSTGRES_CONTAINER="temp_postgres"
-POSTGRES_USER="postgres"
-POSTGRES_DB="postgres"
 S3_BUCKET="545plea-projects"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILENAME="postgres_backup_${TIMESTAMP}.dump"

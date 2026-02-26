@@ -143,7 +143,7 @@ describe('LinksService', () => {
         deletedAt: new Date(),
         description: 'test description',
         contentType: 'application/json',
-        expiresAt: new Date(),
+        expiresAt: new Date(100),
         size: 1999,
         createdAt: new Date(),
         user: {
@@ -174,7 +174,7 @@ describe('LinksService', () => {
       fileDeleted: resolvedValue.file.deletedAt !== null,
       fileContentType: resolvedValue.file.contentType,
       fileUploadedAt: resolvedValue.file.createdAt,
-      fileExpired: new Date() > resolvedValue.file.expiresAt,
+      fileExpired: true,
     });
   });
 

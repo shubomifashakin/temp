@@ -1,10 +1,11 @@
 import { Request } from 'express';
 
-import { Module } from '@nestjs/common';
+import { Module, RequestMethod } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { v4 as uuid } from 'uuid';
 
 import { LoggerModule } from 'nestjs-pino';
 
@@ -63,9 +64,12 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
     LoggerModule.forRoot({
       pinoHttp: {
         messageKey: 'message',
+        mixin(_context, level, logger) {
+          return { level_label: logger.levels.labels[level] };
+        },
         errorKey: 'error',
         level: process.env.LOG_LEVEL! || 'info',
-        base: { service: process.env.SERVICE_NAME! },
+        base: null,
         timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
         transport: {
           targets:
@@ -84,36 +88,16 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
                       dateFormat: 'dd-MM-yyyy',
                     },
                   },
-                  {
-                    target: 'pino-roll',
-                    level: 'error',
-                    options: {
-                      file: './logs/errors.log',
-                      mkdir: true,
-                      size: '2m',
-                      frequency: 'daily',
-                      limit: { count: 1 },
-                      dateFormat: 'dd-MM-yyyy',
-                    },
-                  },
                 ],
         },
         redact: {
           paths: [
-            'req.headers',
-            'req.header',
-            'res.headers',
-            'res.header',
-            'header',
+            'req.headers.authorization',
+            'req.headers.cookie',
             'req.query.token',
-            'req.query',
-            'req.params',
-            'req.params.*',
             'req.cookies',
             'req.cookies.*',
             'req.body',
-            'res.body',
-            'res.data',
             'password',
             '*.*.password',
             '*.password',
@@ -134,10 +118,17 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
             req?.requestId ||
             req.headers['x-request-id'] ||
             req.headers['X-Request-Id'] ||
-            Date.now().toString()
+            uuid()
           );
         },
+        autoLogging: {
+          ignore: (req) => ['/health', '/metrics'].includes(req.url ?? ''),
+        },
       },
+      exclude: [
+        { path: '/health', method: RequestMethod.GET },
+        { path: '/metrics', method: RequestMethod.GET },
+      ],
       assignResponse: false,
     }),
     ThrottlerModule.forRootAsync({
@@ -150,6 +141,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
               ttl: 15,
               limit: 30,
               name: 'default',
+              blockDuration: 60,
             },
           ],
           errorMessage: 'Too many requests',

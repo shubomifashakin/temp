@@ -86,9 +86,13 @@ const mockHasherService = {
 };
 
 const mockIncrement = jest.fn();
+const mockObserve = jest.fn();
 const mockPrometheusService = {
   createCounter: jest.fn().mockReturnValue({
     inc: mockIncrement,
+  }),
+  createHistogram: jest.fn().mockReturnValue({
+    observe: mockObserve,
   }),
 };
 
@@ -153,10 +157,8 @@ describe('FilesService', () => {
     );
 
     expect(res).toEqual({ id: '1' });
-    expect(mockIncrement).toHaveBeenCalledWith(
-      { lifetime: 'short', size: '200' },
-      1,
-    );
+    expect(mockIncrement).toHaveBeenCalledWith({ lifetime: 'short' }, 1);
+    expect(mockObserve).toHaveBeenCalledWith({ lifetime: 'short' }, 200);
   });
 
   it('should fail to upload a file because s3 failed', async () => {

@@ -12,7 +12,6 @@ import {
 import { Logger } from 'nestjs-pino';
 
 import cookieParser from 'cookie-parser';
-import { ValidationError } from 'class-validator';
 
 import { AppModule } from './app.module';
 import { PrismaClientKnownRequestFilterFilter } from './common/filters/prisma-client-known-request.filter';
@@ -62,7 +61,7 @@ async function bootstrap() {
       transform: true,
       stopAtFirstError: true,
       forbidNonWhitelisted: true,
-      exceptionFactory: (errors: ValidationError[] = []) => {
+      exceptionFactory: (errors) => {
         const firstError = errors[0];
 
         let message = 'Invalid Payload';

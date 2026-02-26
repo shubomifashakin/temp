@@ -21,6 +21,7 @@ import { ValidationError } from 'class-validator';
 
 import { DatabaseService } from '../src/core/database/database.service';
 import { PolarService } from '../src/core/polar/polar.service';
+import { RedisService } from '../src/core/redis/redis.service';
 import { BillingInterval, Plan } from '../generated/prisma/enums';
 
 const mockLogger = {
@@ -58,6 +59,7 @@ describe('SubscriptionsController (e2e)', () => {
   let app: INestApplication<App>;
 
   let databaseService: DatabaseService;
+  let redisService: RedisService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -98,11 +100,13 @@ describe('SubscriptionsController (e2e)', () => {
     await app.init();
 
     databaseService = moduleFixture.get(DatabaseService);
+    redisService = moduleFixture.get(RedisService);
 
     jest.clearAllMocks();
 
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
+    await redisService.flushAll();
 
     mockPolarService.polarProductIdToPlan.mockReturnValue({
       success: true,
@@ -123,6 +127,7 @@ describe('SubscriptionsController (e2e)', () => {
     beforeEach(async () => {
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
+      await redisService.flushAll();
     });
 
     it('should cancel the users active subscription', async () => {
@@ -232,6 +237,7 @@ describe('SubscriptionsController (e2e)', () => {
     beforeEach(async () => {
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
+      await redisService.flushAll();
     });
 
     it('should get plans successfully', async () => {
@@ -324,6 +330,7 @@ describe('SubscriptionsController (e2e)', () => {
     beforeEach(async () => {
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
+      await redisService.flushAll();
     });
 
     it('should create polar checkout successfully', async () => {

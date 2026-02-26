@@ -38,11 +38,13 @@ export class S3Service implements OnModuleDestroy {
     tags,
     bucket,
     key,
+    cacheControl,
   }: {
     body: Express.Multer.File;
     tags: string;
     bucket: string;
     key: string;
+    cacheControl?: string;
   }): Promise<FnResult<null>> {
     try {
       await this.s3Client.send(
@@ -52,6 +54,7 @@ export class S3Service implements OnModuleDestroy {
           Bucket: bucket,
           Body: body.buffer,
           ContentType: body.mimetype,
+          CacheControl: cacheControl,
         }),
       );
 

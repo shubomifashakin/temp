@@ -78,7 +78,7 @@ export class CreateLinkGuard {
       });
 
       throw new BadRequestException(
-        'You have reached the maximum number of active links for this file, please upgrade your plan to create more links',
+        'You have reached the maximum number of active links for this file, please upgrade your plan to create more links or revoke existing ones.',
       );
     }
 

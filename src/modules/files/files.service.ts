@@ -7,9 +7,9 @@ import {
 } from '@nestjs/common';
 
 import { v4 as uuid } from 'uuid';
-import { Counter } from 'prom-client';
+import { Counter, Histogram } from 'prom-client';
 
-import { ALLOWED_LIFETIMES } from './common/constants';
+import { ALLOWED_LIFETIMES_MS } from './common/constants';
 import { makeFileCacheKey, makePresignedUrlCacheKey } from './common/utils';
 
 import { GetFileDto } from './dtos/get-file.dto';
@@ -36,6 +36,7 @@ export class FilesService {
 
   private readonly filesUploaderCounter: Counter;
   private readonly linksCreatedCounter: Counter;
+  private readonly fileSizeHistogram: Histogram;
 
   constructor(
     private readonly s3Service: S3Service,
@@ -49,7 +50,14 @@ export class FilesService {
     this.filesUploaderCounter = this.prometheusService.createCounter(
       'files_uploaded_total',
       'Total number of files uploaded',
-      ['lifetime', 'size'],
+      ['lifetime'],
+    );
+
+    this.fileSizeHistogram = this.prometheusService.createHistogram(
+      'file_size_bytes',
+      'Size of files uploaded',
+      ['lifetime'],
+      [1024, 1024 * 1024, 1024 * 1024 * 1024],
     );
 
     this.linksCreatedCounter = this.prometheusService.createCounter(
@@ -88,11 +96,13 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
+    const maxAge = ALLOWED_LIFETIMES_MS[dto.lifetime] / 1000;
     const { success, error } = await this.s3Service.uploadToS3({
       key: key,
       body: file,
       tags: `lifetime=${dto.lifetime}`,
       bucket: s3Bucket.data,
+      cacheControl: `public, max-age=${maxAge}`,
     });
 
     if (!success) {
@@ -112,14 +122,12 @@ export class FilesService {
         size: file.size,
         contentType: file.mimetype,
         description: dto.description,
-        expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
+        expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES_MS[dto.lifetime]),
       },
     });
 
-    this.filesUploaderCounter.inc(
-      { lifetime: dto.lifetime, size: file.size.toString() },
-      1,
-    );
+    this.filesUploaderCounter.inc({ lifetime: dto.lifetime }, 1);
+    this.fileSizeHistogram.observe({ lifetime: dto.lifetime }, file.size);
 
     return { id: response.id };
   }

@@ -40,7 +40,7 @@ export const LIFETIMES = {
 
 export type Lifetime = (typeof LIFETIMES)[keyof typeof LIFETIMES];
 
-export const ALLOWED_LIFETIMES: Record<Lifetime, number> = {
+export const ALLOWED_LIFETIMES_MS: Record<Lifetime, number> = {
   [LIFETIMES.SHORT]: 7 * 24 * 60 * 60 * 1000,
   [LIFETIMES.MEDIUM]: 14 * 24 * 60 * 60 * 1000,
   [LIFETIMES.LONG]: 31 * 24 * 60 * 60 * 1000,

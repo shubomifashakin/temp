@@ -9,6 +9,8 @@ export const DAYS_7 = 60 * 60 * 24 * 7;
 export const DAYS_7_MS = DAYS_7 * 1000;
 export const DAYS_14 = 14 * 24 * 60 * 60;
 export const DAYS_14_MS = DAYS_14 * 1000;
+export const MINUTES_30 = 30 * 60;
+export const MINUTES_30_MS = MINUTES_30 * 1000;
 export const MINUTES_10 = 10 * 60;
 export const MINUTES_10_MS = MINUTES_10 * 1000;
 export const MINUTES_5 = 5 * 60;
@@ -43,7 +45,10 @@ export const MESSAGES = {
 
 export const DEFAULT_JWT_ALG: Algorithm = 'RS256';
 
-export const mappedPolarIntervals = {
+export const mappedPolarIntervals: Record<
+  SubscriptionRecurringInterval,
+  BillingInterval
+> = {
   [SubscriptionRecurringInterval.Day]: BillingInterval.day,
   [SubscriptionRecurringInterval.Year]: BillingInterval.year,
   [SubscriptionRecurringInterval.Week]: BillingInterval.week,
