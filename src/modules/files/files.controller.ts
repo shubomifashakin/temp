@@ -60,8 +60,7 @@ export class FilesController {
   @ApiOperation({ summary: 'Request a presigned url for upload' })
   @ApiResponse({
     status: 201,
-    description:
-      'File upload link was successfully generated. The link is valid for only 10 minutes.',
+    description: 'File upload link was successfully generated.',
     type: UploadFileResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
