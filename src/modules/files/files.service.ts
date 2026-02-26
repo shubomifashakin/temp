@@ -21,7 +21,7 @@ import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 
-import { MINUTES_10 } from '../../common/constants';
+import { MINUTES_10, MINUTES_30 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
 import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisService } from '../../core/redis/redis.service';
@@ -66,12 +66,8 @@ export class FilesService {
     );
   }
 
-  async uploadFile(
-    file: Express.Multer.File,
-    dto: UploadFileDto,
-    userId: string,
-  ) {
-    const key = uuid();
+  async generateUploadUrl(dto: UploadFileDto, userId: string) {
+    const key = `${userId}/${uuid()}`;
 
     const fileWithNameeExist = await this.databaseService.file.findUnique({
       where: {
@@ -96,40 +92,44 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    const maxAge = ALLOWED_LIFETIMES_MS[dto.lifetime] / 1000;
-    const { success, error } = await this.s3Service.uploadToS3({
-      key: key,
-      body: file,
-      tags: `lifetime=${dto.lifetime}`,
-      bucket: s3Bucket.data,
-      cacheControl: `public, max-age=${maxAge}`,
-    });
+    const { success, error, data } =
+      await this.s3Service.generatePresignedPostUrl({
+        key: key,
+        ttl: MINUTES_30,
+        bucket: s3Bucket.data,
+        contentType: dto.contentType,
+        tags: `lifetime=${dto.lifetime}`,
+        contentLength: dto.fileSizeBytes,
+      });
 
     if (!success) {
       this.logger.error({
         error,
-        message: 'Failed to upload file to s3',
+        message: 'Failed to generate presigned url for upload',
       });
 
       throw new InternalServerErrorException();
     }
 
-    const response = await this.databaseService.file.create({
+    await this.databaseService.file.create({
       data: {
         s3Key: key,
         name: dto.name,
         userId: userId,
-        size: file.size,
-        contentType: file.mimetype,
+        size: dto.fileSizeBytes,
+        contentType: dto.contentType,
         description: dto.description,
         expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES_MS[dto.lifetime]),
       },
     });
 
     this.filesUploaderCounter.inc({ lifetime: dto.lifetime }, 1);
-    this.fileSizeHistogram.observe({ lifetime: dto.lifetime }, file.size);
+    this.fileSizeHistogram.observe(
+      { lifetime: dto.lifetime },
+      dto.fileSizeBytes,
+    );
 
-    return { id: response.id };
+    return data;
   }
 
   async getFiles(

@@ -36,7 +36,7 @@ const mockLogger = {
 };
 
 const mockS3Service = {
-  uploadToS3: jest.fn(),
+  generatePresignedPostUrl: jest.fn(),
   generatePresignedGetUrl: jest.fn(),
 };
 
@@ -138,9 +138,13 @@ describe('FilesController (e2e)', () => {
         },
       });
 
-      const response = await request(app.getHttpServer())
-        .post('/files')
-        .attach('file', Buffer.from('test file content'), 'test.txt');
+      const response = await request(app.getHttpServer()).post('/files').send({
+        lifetime: 'short',
+        name: 'test name',
+        description: 'test description',
+        fileSizeBytes: 10485760,
+        contentType: 'image/png',
+      });
 
       expect(response.status).toBe(401);
     });
@@ -160,71 +164,46 @@ describe('FilesController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', Buffer.from('test file content'), 'test.exe')
+        .send({
+          lifetime: 'short',
+          name: 'test name',
+          description: 'test description',
+          fileSizeBytes: 10485760,
+          contentType: 'application/octet-streams',
+        })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(400);
     });
 
-    it(
-      'should not upload a very large file, larger than max',
-      async () => {
-        await databaseService.user.create({
-          data: {
-            email: testEmail,
-            name: 'Test User',
-          },
-        });
+    it('should not allow a free user to upload a file larger than their limit', async () => {
+      await databaseService.user.create({
+        data: {
+          email: testEmail,
+          name: 'Test User',
+        },
+      });
 
-        mockJwtService.verifyAsync.mockResolvedValue({
-          jti: 'test-jti',
-          userId: 'test-user-id',
-        });
+      mockJwtService.verifyAsync.mockResolvedValue({
+        jti: 'test-jti',
+        userId: 'test-user-id',
+      });
 
-        const response = await request(app.getHttpServer())
-          .post('/files')
-          .attach('file', Buffer.alloc(160 * 1024 * 1024, 'x'), 'test.png')
-          .field('lifetime', 'short')
-          .field('description', 'This is a test file')
-          .field('name', 'Test File')
-          .set('Cookie', ['access_token=test-token']);
+      const response = await request(app.getHttpServer())
+        .post('/files')
+        .send({
+          lifetime: 'short',
+          name: 'test name',
+          description: 'test description',
+          fileSizeBytes: 1048570060,
+          contentType: 'image/png',
+        })
+        .set('Cookie', ['access_token=test-token']);
 
-        expect(response.status).toBe(413);
-        expect(response.body).toHaveProperty('message');
-        expect(response.body.message).toContain('large');
-      },
-      100 * 1000,
-    );
-
-    it(
-      'should not allow a free user to  upload a file larger than their limit',
-      async () => {
-        await databaseService.user.create({
-          data: {
-            email: testEmail,
-            name: 'Test User',
-          },
-        });
-
-        mockJwtService.verifyAsync.mockResolvedValue({
-          jti: 'test-jti',
-          userId: 'test-user-id',
-        });
-
-        const response = await request(app.getHttpServer())
-          .post('/files')
-          .attach('file', Buffer.alloc(50 * 1024 * 1024, 'x'), 'test.png')
-          .field('lifetime', 'short')
-          .field('description', 'This is a test file')
-          .field('name', 'Test File')
-          .set('Cookie', ['access_token=test-token']);
-
-        expect(response.status).toBe(413);
-        expect(response.body).toHaveProperty('message');
-        expect(response.body.message).toContain('plan');
-      },
-      100 * 1000,
-    );
+      expect(response.status).toBe(413);
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('plan');
+    });
 
     it('should not upload the file if there is no description', async () => {
       await databaseService.user.create({
@@ -241,8 +220,12 @@ describe('FilesController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', Buffer.from('test file content'), 'test.png')
-        .field('lifetime', 'long')
+        .send({
+          lifetime: 'long',
+          name: 'test name',
+          fileSizeBytes: 10485760,
+          contentType: 'image/png',
+        })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(400);
@@ -266,15 +249,19 @@ describe('FilesController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', Buffer.from('test file content'), 'test.png')
-        .field('lifetime', 'long')
-        .field('description', 'This is a test file')
+        .send({
+          lifetime: 'long',
+          description: 'test description',
+          name: 'test name',
+          fileSizeBytes: 10485760,
+          contentType: 'image/png',
+        })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(400);
     });
 
-    it('should upload the file successfully', async () => {
+    it('should upload the file successfully for free user', async () => {
       const userId = await databaseService.user.create({
         data: {
           email: testEmail,
@@ -290,21 +277,30 @@ describe('FilesController (e2e)', () => {
         userId: userId.id,
       });
 
-      mockS3Service.uploadToS3.mockResolvedValue({
+      mockS3Service.generatePresignedPostUrl.mockResolvedValue({
         success: true,
         error: 'fake',
+        data: {
+          url: 'test-presigned-url',
+          fields: {},
+        },
       });
 
       const response = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', Buffer.alloc(20 * 1024 * 1024, 'x'), 'test.png')
-        .field('lifetime', 'short')
-        .field('description', 'This is a test file')
-        .field('name', 'Test File')
+        .send({
+          lifetime: 'short',
+          name: 'test name',
+          description: 'test description',
+          fileSizeBytes: 10485760,
+          contentType: 'image/png',
+        })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('url');
+      expect(response.body.url).toEqual('test-presigned-url');
+      expect(response.body).toHaveProperty('fields');
     });
 
     it('should not upload the file if s3 failed', async () => {
@@ -323,17 +319,20 @@ describe('FilesController (e2e)', () => {
         userId: userId.id,
       });
 
-      mockS3Service.uploadToS3.mockResolvedValue({
+      mockS3Service.generatePresignedPostUrl.mockResolvedValue({
         success: false,
         error: new Error('failed to upload to s3'),
       });
 
       const response = await request(app.getHttpServer())
         .post('/files')
-        .attach('file', Buffer.from('test file content'), 'test.png')
-        .field('lifetime', 'short')
-        .field('description', 'This is a test file')
-        .field('name', 'Test File')
+        .send({
+          lifetime: 'short',
+          description: 'Test description',
+          name: 'test name',
+          fileSizeBytes: 10485760,
+          contentType: 'image/png',
+        })
         .set('Cookie', ['access_token=test-token']);
 
       expect(response.status).toBe(500);
