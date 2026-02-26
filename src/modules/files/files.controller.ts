@@ -24,10 +24,11 @@ import {
   ApiQuery,
   ApiResponse,
   ApiOperation,
-  ApiBadRequestResponse,
   ApiCookieAuth,
+  ApiBadRequestResponse,
   ApiPayloadTooLargeResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { FilesService } from './files.service';
 
@@ -54,6 +55,7 @@ export class FilesController {
   private readonly logger = new Logger(FilesController.name);
   constructor(private readonly filesService: FilesService) {}
 
+  @Throttle({ default: { limit: 10, ttl: 60 } })
   @UseInterceptors(SubscriptionPlanInterceptor)
   @ApiOperation({ summary: 'Request a presigned url for upload' })
   @ApiResponse({
