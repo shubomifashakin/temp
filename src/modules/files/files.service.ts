@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 
 import { v4 as uuid } from 'uuid';
-import { Counter } from 'prom-client';
+import { Counter, Histogram } from 'prom-client';
 
 import { ALLOWED_LIFETIMES_MS } from './common/constants';
 import { makeFileCacheKey, makePresignedUrlCacheKey } from './common/utils';
@@ -36,6 +36,7 @@ export class FilesService {
 
   private readonly filesUploaderCounter: Counter;
   private readonly linksCreatedCounter: Counter;
+  private readonly fileSizeHistogram: Histogram;
 
   constructor(
     private readonly s3Service: S3Service,
@@ -49,7 +50,14 @@ export class FilesService {
     this.filesUploaderCounter = this.prometheusService.createCounter(
       'files_uploaded_total',
       'Total number of files uploaded',
-      ['lifetime', 'size'],
+      ['lifetime'],
+    );
+
+    this.fileSizeHistogram = this.prometheusService.createHistogram(
+      'file_size_bytes',
+      'Size of files uploaded',
+      ['lifetime'],
+      [1024, 1024 * 1024, 1024 * 1024 * 1024],
     );
 
     this.linksCreatedCounter = this.prometheusService.createCounter(
@@ -118,10 +126,8 @@ export class FilesService {
       },
     });
 
-    this.filesUploaderCounter.inc(
-      { lifetime: dto.lifetime, size: file.size.toString() },
-      1,
-    );
+    this.filesUploaderCounter.inc({ lifetime: dto.lifetime }, 1);
+    this.fileSizeHistogram.observe({ lifetime: dto.lifetime }, file.size);
 
     return { id: response.id };
   }
