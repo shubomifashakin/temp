@@ -9,7 +9,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { Counter } from 'prom-client';
 
-import { ALLOWED_LIFETIMES } from './common/constants';
+import { ALLOWED_LIFETIMES_MS } from './common/constants';
 import { makeFileCacheKey, makePresignedUrlCacheKey } from './common/utils';
 
 import { GetFileDto } from './dtos/get-file.dto';
@@ -88,11 +88,13 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
+    const maxAge = ALLOWED_LIFETIMES_MS[dto.lifetime] / 1000;
     const { success, error } = await this.s3Service.uploadToS3({
       key: key,
       body: file,
       tags: `lifetime=${dto.lifetime}`,
       bucket: s3Bucket.data,
+      cacheControl: `public, max-age=${maxAge}`,
     });
 
     if (!success) {
@@ -112,7 +114,7 @@ export class FilesService {
         size: file.size,
         contentType: file.mimetype,
         description: dto.description,
-        expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES[dto.lifetime]),
+        expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES_MS[dto.lifetime]),
       },
     });
 
