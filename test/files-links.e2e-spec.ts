@@ -36,7 +36,7 @@ const mockLogger = {
 
 const mockS3Service = {
   uploadToS3: jest.fn(),
-  generatePresignedGetUrl: jest.fn(),
+  generateCloudFrontSignedUrl: jest.fn(),
 };
 
 const mockSqsService = {
@@ -266,7 +266,7 @@ describe('FilesLinksController (e2e)', () => {
       });
 
       const presignedUrl = 'https://test-s3-url.com/file';
-      mockS3Service.generatePresignedGetUrl.mockResolvedValue({
+      mockS3Service.generateCloudFrontSignedUrl.mockReturnValue({
         success: true,
         data: presignedUrl,
       });
@@ -278,7 +278,7 @@ describe('FilesLinksController (e2e)', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('url');
       expect(response.body.url).toEqual(presignedUrl);
-      expect(mockS3Service.generatePresignedGetUrl).toHaveBeenCalled();
+      expect(mockS3Service.generateCloudFrontSignedUrl).toHaveBeenCalled();
     });
   });
 });

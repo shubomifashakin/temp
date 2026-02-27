@@ -1,6 +1,8 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
+import { getSignedUrl as getCloudFrontSignedUrl } from '@aws-sdk/cloudfront-signer';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
+
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
@@ -47,6 +49,35 @@ export class S3Service implements OnModuleDestroy {
       });
 
       return { data: url, error: null, success: true };
+    } catch (error) {
+      return { error: makeError(error), data: null, success: false };
+    }
+  }
+
+  generateCloudFrontSignedUrl({
+    key,
+    ttl,
+  }: {
+    key: string;
+    ttl: number;
+  }): FnResult<string> {
+    try {
+      if (
+        !this.configService.CloudfrontPublicKeyId.success ||
+        !this.configService.CloudfrontPrivateKey.success ||
+        !this.configService.CloudfrontDomainName.success
+      ) {
+        throw new Error('Cloudfront public key id or private key not found');
+      }
+
+      const signedUrl = getCloudFrontSignedUrl({
+        url: `${this.configService.CloudfrontDomainName.data}/${key}`,
+        keyPairId: this.configService.CloudfrontPublicKeyId.data,
+        privateKey: this.configService.CloudfrontPrivateKey.data,
+        dateLessThan: new Date(Date.now() + ttl * 1000).toISOString(),
+      });
+
+      return { data: signedUrl, error: null, success: true };
     } catch (error) {
       return { error: makeError(error), data: null, success: false };
     }
