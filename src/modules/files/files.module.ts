@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { TasksModule } from './tasks/tasks.module';
+import { LinksModule } from './links/links.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 
 import { FilesService } from './files.service';
@@ -27,6 +28,7 @@ import { PrometheusModule } from '../../core/prometheus/prometheus.module';
     WebhooksModule,
     PrometheusModule,
     TasksModule,
+    LinksModule,
   ],
 })
 export class FilesModule {}
