@@ -163,12 +163,22 @@ export class LinksService {
     }
 
     const ttl = 3600 / 2;
-    const { success, data, error } =
-      await this.s3Service.generatePresignedGetUrl({
-        ttl,
+
+    const { success, data, error } = this.s3Service.generateCloudFrontSignedUrl(
+      {
         key: linkFound.file.s3Key,
-        bucket: this.configService.S3BucketName.data!,
+        ttl,
+      },
+    );
+
+    if (!success || !data) {
+      this.logger.error({
+        error,
+        message: 'Failed to generate cloudfront signed url',
       });
+
+      throw new InternalServerErrorException();
+    }
 
     const { success: cacheSuccess, error: cacheError } =
       await this.redisService.set(urlCacheKey, data, {
@@ -180,15 +190,6 @@ export class LinksService {
         error: cacheError,
         message: 'Failed to cache url for file',
       });
-    }
-
-    if (!success) {
-      this.logger.error({
-        error,
-        message: 'Failed to generate presigned get url',
-      });
-
-      throw new InternalServerErrorException();
     }
 
     await this.databaseService.link.update({

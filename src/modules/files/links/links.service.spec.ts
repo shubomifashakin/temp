@@ -74,7 +74,7 @@ const mockConfigService = {
 
 const mockS3Service = {
   uploadToS3: jest.fn(),
-  generatePresignedGetUrl: jest.fn(),
+  generateCloudFrontSignedUrl: jest.fn(),
 };
 
 const mockLogger = {
@@ -199,7 +199,7 @@ describe('LinksService', () => {
     });
 
     const testPresignedUrl = 'test-presigned-url';
-    mockS3Service.generatePresignedGetUrl.mockResolvedValue({
+    mockS3Service.generateCloudFrontSignedUrl.mockReturnValue({
       success: true,
       error: null,
       data: testPresignedUrl,
@@ -261,7 +261,7 @@ describe('LinksService', () => {
     expect(mockRedisService.get).toHaveBeenCalledWith(
       makePresignedUrlCacheKey(testLinkId),
     );
-    expect(mockS3Service.generatePresignedGetUrl).not.toHaveBeenCalled();
+    expect(mockS3Service.generateCloudFrontSignedUrl).not.toHaveBeenCalled();
   });
 
   it('should not generate the presigned url for the file since link has expired', async () => {

@@ -98,6 +98,20 @@ class EnvConfig {
 
   @IsUrl()
   SQS_QUEUE_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsUrl()
+  CLOUDFRONT_DISTRIBUTION_DOMAIN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  CLOUDFRONT_PUBLIC_KEY_ID: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }: { value: string }) => value.replace(/\n/g, ''))
+  CLOUDFRONT_PRIVATE_KEY: string;
 }
 
 export function validateConfig(config: Record<string, string>) {

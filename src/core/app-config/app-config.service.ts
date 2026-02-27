@@ -27,6 +27,42 @@ export class AppConfigService {
     }
   }
 
+  get CloudfrontPublicKeyId(): FnResult<string> {
+    try {
+      const id = this.configService.getOrThrow<string>(
+        'CLOUDFRONT_PUBLIC_KEY_ID',
+      );
+
+      return { success: true, data: id, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  get CloudfrontPrivateKey(): FnResult<string> {
+    try {
+      const key = this.configService.getOrThrow<string>(
+        'CLOUDFRONT_PRIVATE_KEY',
+      );
+
+      return { success: true, data: key, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  get CloudfrontDomainName(): FnResult<string> {
+    try {
+      const domain = this.configService.getOrThrow<string>(
+        'CLOUDFRONT_DISTRIBUTION_DOMAIN',
+      );
+
+      return { success: true, data: domain, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
   get NodeEnv(): FnResult<string> {
     try {
       const env = this.configService.get<string>('NODE_ENV', 'development');
