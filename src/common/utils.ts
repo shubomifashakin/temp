@@ -1,5 +1,12 @@
-import { Transform } from 'class-transformer';
-import { IsString, IsUrl, IsNotEmpty, validateSync } from 'class-validator';
+import { plainToInstance, Transform } from 'class-transformer';
+import {
+  IsString,
+  IsUrl,
+  IsNotEmpty,
+  validateSync,
+  IsNumber,
+  Min,
+} from 'class-validator';
 
 class EnvConfig {
   @IsString()
@@ -112,17 +119,40 @@ class EnvConfig {
   @IsNotEmpty()
   @Transform(({ value }: { value: string }) => value.replace(/\n/g, ''))
   CLOUDFRONT_PRIVATE_KEY: string;
+
+  @IsNumber()
+  @Min(1)
+  @Transform(({ value }: { value: string }) => {
+    const parsed = parseInt(value);
+    if (isNaN(parsed)) throw new Error('Must be a valid number');
+    return parsed;
+  })
+  UPLOAD_PRESIGNED_POST_URL_TTL_SECONDS: number;
+
+  @IsNumber()
+  @Min(1)
+  @Transform(({ value }: { value: string }) => {
+    const parsed = parseInt(value);
+    if (isNaN(parsed)) throw new Error('Must be a valid number');
+    return parsed;
+  })
+  LINKS_PRESIGNED_GET_URL_TTL_SECONDS: number;
 }
 
 export function validateConfig(config: Record<string, string>) {
-  const envConfig = new EnvConfig();
-  Object.assign(envConfig, config);
+  const envConfig = plainToInstance(EnvConfig, config, {
+    enableImplicitConversion: true,
+  });
 
-  const errors = validateSync(envConfig);
+  const errors = validateSync(envConfig, {
+    skipMissingProperties: false,
+  });
 
   if (errors.length > 0) {
     throw new Error(errors.map((error) => error.toString()).join(', '));
   }
+
+  return envConfig;
 }
 
 export function makeError(error: unknown): Error {

@@ -9,7 +9,7 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
-
+import { Type } from 'class-transformer';
 import { FileStatus } from '../../../../generated/prisma/enums';
 
 export class GetFileDto {
@@ -56,6 +56,7 @@ export class GetFileDto {
     description: 'The date the file was uploaded',
   })
   @IsDate()
+  @Type(() => Date)
   createdAt: Date;
 
   @ApiProperty({
@@ -63,6 +64,7 @@ export class GetFileDto {
     description: 'The date the file expires',
   })
   @IsDate()
+  @Type(() => Date)
   expiresAt: Date;
 
   @ApiProperty({
@@ -70,6 +72,7 @@ export class GetFileDto {
     description: 'The date the file was updated last',
   })
   @IsDate()
+  @Type(() => Date)
   updatedAt: Date;
 
   @ApiProperty({ description: 'the content type of the file' })
@@ -83,6 +86,7 @@ export class GetFileDto {
   })
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   deletedAt: Date | null;
 
   @ApiProperty({ description: 'The status of the file' })

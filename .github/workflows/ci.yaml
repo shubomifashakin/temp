@@ -132,6 +132,9 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_DOMAIN: https://dummy-cloudfront-distribution-domain.com
           CLOUDFRONT_PRIVATE_KEY: dummy-cloudfront-private-key
 
+          UPLOAD_PRESIGNED_POST_URL_TTL_SECONDS: 1800
+          LINKS_PRESIGNED_GET_URL_TTL_SECONDS: 1800
+
   notify:
     name: Notify Discord
     runs-on: ubuntu-latest

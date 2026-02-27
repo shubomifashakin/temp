@@ -27,8 +27,8 @@ export class FileDeletedEventPayload {
   keys: string[];
 
   @ApiProperty({ description: 'the date the file was deleted' })
-  @Type(() => Date)
   @IsDate({ message: 'deletedAt should be a valid date' })
+  @Type(() => Date)
   deletedAt: Date;
 }
 

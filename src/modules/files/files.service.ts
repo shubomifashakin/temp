@@ -21,7 +21,7 @@ import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 
-import { MINUTES_10, MINUTES_30 } from '../../common/constants';
+import { MINUTES_10 } from '../../common/constants';
 import { S3Service } from '../../core/s3/s3.service';
 import { SqsService } from '../../core/sqs/sqs.service';
 import { RedisService } from '../../core/redis/redis.service';
@@ -97,10 +97,19 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
+    const uploadTtl = this.configService.UploadPresignedPostUrlTtlSeconds.data;
+    if (!uploadTtl) {
+      this.logger.error({
+        message: 'Upload presigned post url ttl not set in env',
+      });
+
+      throw new InternalServerErrorException();
+    }
+
     const { success, error, data } =
       await this.s3Service.generatePresignedPostUrl({
         key: key,
-        ttl: MINUTES_30,
+        ttl: uploadTtl,
         bucket: s3Bucket.data,
         contentType: dto.contentType,
         tag: dto.lifetime,

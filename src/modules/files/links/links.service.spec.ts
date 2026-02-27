@@ -70,6 +70,11 @@ const mockConfigService = {
     success: true,
     error: null,
   },
+  LinksPresignedGetUrlTtlSeconds: {
+    data: 3600,
+    success: true,
+    error: null,
+  },
 };
 
 const mockS3Service = {

@@ -162,7 +162,14 @@ export class LinksService {
       return { url: existingUrlForFile.data };
     }
 
-    const ttl = 3600 / 2;
+    const ttl = this.configService.LinksPresignedGetUrlTtlSeconds.data;
+    if (!ttl) {
+      this.logger.error({
+        message: 'Failed to get links presigned get url ttl seconds',
+      });
+
+      throw new InternalServerErrorException();
+    }
 
     const { success, data, error } = this.s3Service.generateCloudFrontSignedUrl(
       {

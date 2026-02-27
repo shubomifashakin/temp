@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsString, IsNumber, IsBoolean, IsEnum } from 'class-validator';
+import {
+  IsDate,
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 import { FileStatus } from '../../../../generated/prisma/enums';
 
@@ -10,6 +18,7 @@ export class LinkDetailsDto {
     description: 'Created at',
   })
   @IsDate()
+  @Type(() => Date)
   createdAt: Date;
 
   @ApiProperty({
@@ -17,7 +26,9 @@ export class LinkDetailsDto {
     format: 'date-time',
     description: 'Expires at',
   })
+  @IsOptional()
   @IsDate()
+  @Type(() => Date)
   expiresAt: Date | null;
 
   @ApiProperty({
@@ -39,7 +50,9 @@ export class LinkDetailsDto {
     format: 'date-time',
     description: 'Last accessed at',
   })
+  @IsOptional()
   @IsDate()
+  @Type(() => Date)
   lastAccessedAt: Date | null;
 
   @ApiProperty({

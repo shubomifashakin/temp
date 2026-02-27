@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsBoolean,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class Link {
   @ApiProperty({
@@ -28,8 +29,9 @@ class Link {
     example: new Date(),
     nullable: true,
   })
-  @IsDate({ message: 'revokedAt must be a date' })
   @IsOptional()
+  @IsDate({ message: 'revokedAt must be a date' })
+  @Type(() => Date)
   revokedAt: Date | null;
 
   @ApiProperty({
@@ -37,6 +39,7 @@ class Link {
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'createdAt must be a date' })
+  @Type(() => Date)
   createdAt: Date;
 
   @ApiProperty({
@@ -51,8 +54,9 @@ class Link {
     example: '2025-01-01T00:00:00.000Z',
     description: 'Date when the link expires',
   })
-  @IsDate({ message: 'expiresAt must be a date' })
   @IsOptional()
+  @IsDate({ message: 'expiresAt must be a date' })
+  @Type(() => Date)
   expiresAt: Date | null;
 
   @ApiProperty({
@@ -67,8 +71,9 @@ class Link {
     example: '2025-01-01T00:00:00.000Z',
     description: 'Date and time when the  link was last accessed',
   })
-  @IsDate({ message: 'lastAccessedAt must be a date' })
   @IsOptional()
+  @IsDate({ message: 'lastAccessedAt must be a date' })
+  @Type(() => Date)
   lastAccessedAt: Date | null;
 }
 
@@ -91,7 +96,7 @@ export class GetFileLinksResponseDto {
     nullable: true,
     description: 'Cursor for pagination to fetch next page',
   })
-  @IsString({ message: 'cursor must be a string' })
   @IsOptional()
+  @IsString({ message: 'cursor must be a string' })
   cursor: string | null;
 }
