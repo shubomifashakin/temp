@@ -55,6 +55,11 @@ const mockAppConfigService = {
     success: true,
     error: null,
   },
+  UploadPresignedPostUrlTtlSeconds: {
+    data: 3600,
+    success: true,
+    error: null,
+  },
 };
 
 const mockRedisService = {

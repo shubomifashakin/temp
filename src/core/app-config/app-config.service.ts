@@ -113,6 +113,30 @@ export class AppConfigService {
     }
   }
 
+  get UploadPresignedPostUrlTtlSeconds(): FnResult<number> {
+    try {
+      const ttl = this.configService.getOrThrow<number>(
+        'UPLOAD_PRESIGNED_POST_URL_TTL_SECONDS',
+      );
+
+      return { success: true, data: ttl, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  get LinksPresignedGetUrlTtlSeconds(): FnResult<number> {
+    try {
+      const ttl = this.configService.getOrThrow<number>(
+        'LINKS_PRESIGNED_GET_URL_TTL_SECONDS',
+      );
+
+      return { success: true, data: ttl, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
   get GoogleClientId(): FnResult<string> {
     try {
       const id = this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID');
