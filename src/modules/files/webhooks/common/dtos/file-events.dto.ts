@@ -56,6 +56,13 @@ export class FileEventsDto {
   type: FileEvents;
 
   @ApiProperty({
+    description: 'The timestamp of the event',
+  })
+  @IsDate({ message: 'timestamp should be a valid date' })
+  @Type(() => Date)
+  timestamp: Date;
+
+  @ApiProperty({
     description: 'The payload data for the event',
     oneOf: [
       { $ref: '#/components/schemas/FileDeletedEventPayload' },

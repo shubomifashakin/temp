@@ -3,19 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WebhooksService } from './webhooks.service';
 import { WebhooksController } from './webhooks.controller';
 
-import { RedisService } from '../../../core/redis/redis.service';
-import { DatabaseService } from '../../../core/database/database.service';
 import { AppConfigModule } from '../../../core/app-config/app-config.module';
 
-const mockDatabaseService = {
-  file: {
-    updateMany: jest.fn(),
-    update: jest.fn(),
-  },
-};
-
-const mockRedisService = {
-  delete: jest.fn(),
+const mockWebhooksService = {
+  handleFileEvents: jest.fn(),
 };
 
 describe('WebhooksController', () => {
@@ -26,14 +17,9 @@ describe('WebhooksController', () => {
       controllers: [WebhooksController],
       imports: [AppConfigModule],
       providers: [
-        WebhooksService,
         {
-          provide: DatabaseService,
-          useValue: mockDatabaseService,
-        },
-        {
-          provide: RedisService,
-          useValue: mockRedisService,
+          provide: WebhooksService,
+          useValue: mockWebhooksService,
         },
       ],
     }).compile();
@@ -46,33 +32,24 @@ describe('WebhooksController', () => {
   });
 
   it('should handle file:validated event', async () => {
-    mockRedisService.delete.mockResolvedValue({
-      success: true,
-      error: null,
-    });
-
-    mockDatabaseService.file.update.mockResolvedValue({
-      id: 'test-id',
-      s3Key: 'test-key',
-      status: 'safe',
+    mockWebhooksService.handleFileEvents.mockResolvedValue({
+      message: 'success',
     });
 
     await controller.handleEvent({
       data: { key: 'test-key', infected: true },
       type: 'file:validated',
+      timestamp: new Date(),
     });
 
-    expect(mockDatabaseService.file.update).toHaveBeenCalledWith({
-      where: {
-        s3Key: 'test-key',
-      },
-      data: {
-        status: 'unsafe',
-      },
-    });
+    expect(mockWebhooksService.handleFileEvents).toHaveBeenCalled();
   });
 
   it('should handle file:deleted event', async () => {
+    mockWebhooksService.handleFileEvents.mockResolvedValue({
+      message: 'success',
+    });
+
     const dto = {
       type: 'file:deleted',
       data: {
@@ -81,18 +58,12 @@ describe('WebhooksController', () => {
       },
     };
 
-    await controller.handleEvent({
+    const res = await controller.handleEvent({
       type: 'file:deleted',
       data: dto.data,
+      timestamp: new Date(),
     });
 
-    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
-      where: {
-        s3Key: { in: ['test-key-1', 'test-key-2'] },
-      },
-      data: {
-        deletedAt: dto.data.deletedAt,
-      },
-    });
+    expect(res).toEqual({ message: 'success' });
   });
 });

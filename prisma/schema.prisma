@@ -76,13 +76,16 @@ model File {
   size      Int
   status    FileStatus @default(pending)
 
+  lastEventAt DateTime? @map("last_event_at")
+
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   links Link[]
 
-  @@unique(name: "files_name_unique", [name, userId])
+  @@unique(name: "files_name_content_type_unique", [name, userId, contentType])
   @@index(name: "files_user_id_idx", fields: [userId])
+  @@index(name: "files_s3_key_idx", fields:[s3Key])
   @@map("files")
 }
 

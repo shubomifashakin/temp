@@ -133,54 +133,6 @@ describe('FilesWebhooksController (e2e)', () => {
       expect(response.status).toBe(401);
     });
 
-    it('should return 200 for validated file', async () => {
-      const user = await databaseService.user.create({
-        data: {
-          id: 'test-user-id',
-          email: testEmail,
-          name: 'Test User',
-        },
-      });
-
-      const file = await databaseService.file.create({
-        data: {
-          id: 'test-file-id',
-          userId: user.id,
-          contentType: 'text/plain',
-          name: 'Test file',
-          s3Key: 'test-key',
-          size: 100,
-          description: 'Test file',
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        },
-      });
-
-      const body = {
-        type: 'file:validated',
-        data: {
-          key: file.s3Key,
-          infected: false,
-        },
-      };
-
-      const response = await request(app.getHttpServer())
-        .post(`/webhooks/files`)
-        .send(body)
-        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
-
-      expect(response.status).toBe(201);
-
-      const updatedFile = await databaseService.file.findUnique({
-        where: {
-          id: file.id,
-        },
-      });
-
-      expect(file.status).toBe('pending');
-
-      expect(updatedFile?.status).toBe('safe');
-    });
-
     it('should return 400 for invalid event', async () => {
       const user = await databaseService.user.create({
         data: {
@@ -209,6 +161,7 @@ describe('FilesWebhooksController (e2e)', () => {
           key: file.s3Key,
           infected: false,
         },
+        timestamp: new Date(),
       };
 
       const response = await request(app.getHttpServer())
@@ -217,6 +170,103 @@ describe('FilesWebhooksController (e2e)', () => {
         .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
 
       expect(response.status).toBe(400);
+    });
+
+    it('should return 200 for validated file', async () => {
+      const user = await databaseService.user.create({
+        data: {
+          id: 'test-user-id',
+          email: testEmail,
+          name: 'Test User',
+        },
+      });
+
+      const file = await databaseService.file.create({
+        data: {
+          id: 'test-file-id',
+          userId: user.id,
+          contentType: 'text/plain',
+          name: 'Test file',
+          s3Key: 'test-key',
+          size: 100,
+          description: 'Test file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        },
+      });
+
+      const body = {
+        type: 'file:validated',
+        data: {
+          key: file.s3Key,
+          infected: false,
+        },
+        timestamp: new Date(),
+      };
+
+      const response = await request(app.getHttpServer())
+        .post(`/webhooks/files`)
+        .send(body)
+        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+
+      expect(response.status).toBe(201);
+
+      const updatedFile = await databaseService.file.findUnique({
+        where: {
+          id: file.id,
+        },
+      });
+
+      expect(file.status).toBe('pending');
+
+      expect(updatedFile?.status).toBe('safe');
+    });
+
+    it('should ignore an old event', async () => {
+      const user = await databaseService.user.create({
+        data: {
+          id: 'test-user-id',
+          email: testEmail,
+          name: 'Test User',
+        },
+      });
+
+      const file = await databaseService.file.create({
+        data: {
+          id: 'test-file-id',
+          userId: user.id,
+          contentType: 'text/plain',
+          name: 'Test file',
+          s3Key: 'test-key',
+          size: 100,
+          description: 'Test file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          lastEventAt: new Date(),
+        },
+      });
+
+      const body = {
+        type: 'file:validated',
+        data: {
+          key: file.s3Key,
+          infected: false,
+        },
+        timestamp: new Date(100),
+      };
+
+      const response = await request(app.getHttpServer())
+        .post(`/webhooks/files`)
+        .send(body)
+        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+
+      expect(response.status).toBe(201);
+
+      const updatedFile = await databaseService.file.findUnique({
+        where: {
+          id: file.id,
+        },
+      });
+
+      expect(updatedFile?.lastEventAt).toEqual(file.lastEventAt);
     });
 
     it('should return 200 for deleted file', async () => {
@@ -247,6 +297,7 @@ describe('FilesWebhooksController (e2e)', () => {
           keys: [file.s3Key],
           deletedAt: new Date(),
         },
+        timestamp: new Date(),
       };
 
       const response = await request(app.getHttpServer())
@@ -295,6 +346,7 @@ describe('FilesWebhooksController (e2e)', () => {
           invalid: [file.s3Key],
           deletedAt: new Date(),
         },
+        timestamp: new Date(),
       };
 
       const response = await request(app.getHttpServer())
