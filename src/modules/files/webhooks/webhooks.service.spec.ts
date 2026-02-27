@@ -8,6 +8,8 @@ const mockDatabaseService = {
   file: {
     updateMany: jest.fn(),
     update: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
   },
 };
 
@@ -34,6 +36,7 @@ describe('WebhooksService', () => {
     }).compile();
 
     service = module.get<WebhooksService>(WebhooksService);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -46,15 +49,19 @@ describe('WebhooksService', () => {
       error: null,
     });
 
+    mockDatabaseService.file.findFirst.mockResolvedValue({ lastEvent: null });
+
     mockDatabaseService.file.update.mockResolvedValue({
       id: 'test-id',
       s3Key: 'test-key',
       status: 'safe',
     });
 
+    const timestamp = new Date();
     await service.handleFileEvents({
       data: { key: 'test-key', infected: false },
       type: 'file:validated',
+      timestamp,
     });
 
     expect(mockDatabaseService.file.update).toHaveBeenCalledWith({
@@ -63,8 +70,59 @@ describe('WebhooksService', () => {
       },
       data: {
         status: 'safe',
+        lastEventAt: timestamp,
       },
     });
+  });
+
+  it('should not handle file:validated event if the file does not exist', async () => {
+    mockRedisService.delete.mockResolvedValue({
+      success: true,
+      error: null,
+    });
+
+    mockDatabaseService.file.findFirst.mockResolvedValue(null);
+
+    mockDatabaseService.file.update.mockResolvedValue({
+      id: 'test-id',
+      s3Key: 'test-key',
+      status: 'safe',
+    });
+
+    const timestamp = new Date();
+    await service.handleFileEvents({
+      data: { key: 'test-key', infected: false },
+      type: 'file:validated',
+      timestamp,
+    });
+
+    expect(mockDatabaseService.file.update).not.toHaveBeenCalled();
+  });
+
+  it('should not handle file:validated event if the event is old', async () => {
+    mockRedisService.delete.mockResolvedValue({
+      success: true,
+      error: null,
+    });
+
+    mockDatabaseService.file.findFirst.mockResolvedValue({
+      lastEventAt: new Date(),
+    });
+
+    mockDatabaseService.file.update.mockResolvedValue({
+      id: 'test-id',
+      s3Key: 'test-key',
+      status: 'safe',
+    });
+
+    const timestamp = new Date(100);
+    await service.handleFileEvents({
+      data: { key: 'test-key', infected: false },
+      type: 'file:validated',
+      timestamp,
+    });
+
+    expect(mockDatabaseService.file.update).not.toHaveBeenCalled();
   });
 
   it('should handle file:deleted event', async () => {
@@ -76,9 +134,13 @@ describe('WebhooksService', () => {
       },
     };
 
+    mockDatabaseService.file.findMany.mockResolvedValue([]);
+
+    const timestamp = new Date();
     await service.handleFileEvents({
       type: 'file:deleted',
       data: dto.data,
+      timestamp,
     });
 
     expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
@@ -87,6 +149,7 @@ describe('WebhooksService', () => {
       },
       data: {
         deletedAt: dto.data.deletedAt,
+        lastEventAt: timestamp,
       },
     });
   });

@@ -130,7 +130,7 @@ describe('FilesController (e2e)', () => {
       await databaseService.refreshToken.deleteMany();
     });
 
-    it('should not upload the file if the user is not signed in', async () => {
+    it('should not generate the presigned url if the user is not signed in', async () => {
       await databaseService.user.create({
         data: {
           email: testEmail,
@@ -149,7 +149,7 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(401);
     });
 
-    it('should not upload an unsupported file type', async () => {
+    it('should not generate a presigned url for an unsupported file type', async () => {
       await databaseService.user.create({
         data: {
           email: testEmail,
@@ -176,7 +176,7 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(400);
     });
 
-    it('should not allow a free user to upload a file larger than their limit', async () => {
+    it("should not generate a presigned url for a file larger than the user's limit", async () => {
       await databaseService.user.create({
         data: {
           email: testEmail,
@@ -205,7 +205,7 @@ describe('FilesController (e2e)', () => {
       expect(response.body.message).toContain('plan');
     });
 
-    it('should not upload the file if there is no description', async () => {
+    it('should not generate a presigned url if there is no description', async () => {
       await databaseService.user.create({
         data: {
           email: testEmail,
@@ -231,7 +231,7 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(400);
     });
 
-    it('should not allow a free user to upload with a long lifetime', async () => {
+    it('should not generate a presigned url for a free user with a long lifetime', async () => {
       const userId = await databaseService.user.create({
         data: {
           email: testEmail,
@@ -261,7 +261,7 @@ describe('FilesController (e2e)', () => {
       expect(response.status).toBe(400);
     });
 
-    it('should upload the file successfully for free user', async () => {
+    it('should generate a presigned url successfully for free user', async () => {
       const userId = await databaseService.user.create({
         data: {
           email: testEmail,
@@ -303,7 +303,55 @@ describe('FilesController (e2e)', () => {
       expect(response.body).toHaveProperty('fields');
     });
 
-    it('should not upload the file if s3 failed', async () => {
+    it('should not generate a presigned url if the user already has an existing validated file with that name', async () => {
+      const s3Key = 'test-s3-key';
+      const fileName = 'test-name';
+      const contentType = 'image/png';
+      const userId = await databaseService.user.create({
+        data: {
+          email: testEmail,
+          name: 'Test User',
+          files: {
+            create: {
+              name: fileName,
+              size: 10485760,
+              contentType: contentType,
+              description: 'test description',
+              expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+              s3Key: s3Key,
+              status: 'safe',
+            },
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      mockJwtService.verifyAsync.mockResolvedValue({
+        jti: 'test-jti',
+        userId: userId.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post('/files')
+        .send({
+          lifetime: 'short',
+          name: fileName,
+          description: 'test description',
+          fileSizeBytes: 10485760,
+          contentType: contentType,
+        })
+        .set('Cookie', ['access_token=test-token']);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toEqual(
+        'You already have a file with this name',
+      );
+    });
+
+    it('should not generate a presigned url if s3 failed', async () => {
       const userId = await databaseService.user.create({
         data: {
           email: testEmail,

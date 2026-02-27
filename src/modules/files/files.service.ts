@@ -67,19 +67,24 @@ export class FilesService {
   }
 
   async generateUploadUrl(dto: UploadFileDto, userId: string) {
-    const key = `${userId}/${uuid()}`;
+    let key = `${userId}/${uuid()}`;
 
     const fileWithNameeExist = await this.databaseService.file.findUnique({
       where: {
-        files_name_unique: {
+        files_name_content_type_unique: {
           userId: userId,
           name: dto.name,
+          contentType: dto.contentType,
         },
       },
     });
 
-    if (fileWithNameeExist) {
+    if (fileWithNameeExist && fileWithNameeExist.status !== 'pending') {
       throw new BadRequestException('You already have a file with this name');
+    }
+
+    if (fileWithNameeExist) {
+      key = fileWithNameeExist.s3Key;
     }
 
     const s3Bucket = this.configService.S3BucketName;
@@ -111,23 +116,25 @@ export class FilesService {
       throw new InternalServerErrorException();
     }
 
-    await this.databaseService.file.create({
-      data: {
-        s3Key: key,
-        name: dto.name,
-        userId: userId,
-        size: dto.fileSizeBytes,
-        contentType: dto.contentType,
-        description: dto.description,
-        expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES_MS[dto.lifetime]),
-      },
-    });
+    if (!fileWithNameeExist) {
+      await this.databaseService.file.create({
+        data: {
+          s3Key: key,
+          name: dto.name,
+          userId: userId,
+          size: dto.fileSizeBytes,
+          contentType: dto.contentType,
+          description: dto.description,
+          expiresAt: new Date(Date.now() + ALLOWED_LIFETIMES_MS[dto.lifetime]),
+        },
+      });
 
-    this.filesUploaderCounter.inc({ lifetime: dto.lifetime }, 1);
-    this.fileSizeHistogram.observe(
-      { lifetime: dto.lifetime },
-      dto.fileSizeBytes,
-    );
+      this.filesUploaderCounter.inc({ lifetime: dto.lifetime }, 1);
+      this.fileSizeHistogram.observe(
+        { lifetime: dto.lifetime },
+        dto.fileSizeBytes,
+      );
+    }
 
     return data;
   }

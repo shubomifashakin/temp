@@ -24,12 +24,38 @@ export class WebhooksService {
     if (dto.type === 'file:validated') {
       const validatedData = dto.data as FileValidatedEventPayload;
 
+      const isOld = await this.databaseService.file.findFirst({
+        where: {
+          s3Key: validatedData.key,
+        },
+        select: { lastEventAt: true },
+      });
+
+      if (!isOld) {
+        this.logger.warn({
+          message: 'Ignoring file validation event for non-existent file',
+          data: dto,
+        });
+
+        return { message: 'success' };
+      }
+
+      if (isOld?.lastEventAt && isOld.lastEventAt > new Date(dto.timestamp)) {
+        this.logger.warn({
+          message: 'Ignoring old file validation event',
+          data: dto,
+        });
+
+        return { message: 'success' };
+      }
+
       const data = await this.databaseService.file.update({
         where: {
           s3Key: validatedData.key,
         },
         data: {
           status: validatedData.infected ? 'unsafe' : 'safe',
+          lastEventAt: new Date(dto.timestamp),
         },
       });
 
@@ -48,12 +74,29 @@ export class WebhooksService {
     if (dto.type === 'file:deleted') {
       const deletedData = dto.data as FileDeletedEventPayload;
 
-      await this.databaseService.file.updateMany({
+      const oldFiles = await this.databaseService.file.findMany({
         where: {
           s3Key: { in: deletedData.keys },
         },
+        select: { lastEventAt: true, s3Key: true },
+      });
+
+      const keysToUpdate = deletedData.keys.filter((key) => {
+        const file = oldFiles.find((f) => f.s3Key === key);
+        return (
+          !file?.lastEventAt || file.lastEventAt <= new Date(dto.timestamp)
+        );
+      });
+
+      if (!keysToUpdate.length) return { message: 'success' };
+
+      await this.databaseService.file.updateMany({
+        where: {
+          s3Key: { in: keysToUpdate },
+        },
         data: {
           deletedAt: deletedData.deletedAt,
+          lastEventAt: new Date(dto.timestamp),
         },
       });
 

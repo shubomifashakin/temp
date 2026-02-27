@@ -201,10 +201,12 @@ describe('FilesService', () => {
     ).rejects.toThrow(InternalServerErrorException);
   });
 
-  it('should fail to generate presigned url for upload because a file with that name already exists for user', async () => {
+  it('should fail to generate presigned url for upload because a file that is not pending with that name already exists for user', async () => {
     const testUserId = 'test-user-id';
 
-    mockDatabaseService.file.findUnique.mockResolvedValue(true);
+    mockDatabaseService.file.findUnique.mockResolvedValue({
+      status: 'safe',
+    });
 
     await expect(
       service.generateUploadUrl(
@@ -218,6 +220,37 @@ describe('FilesService', () => {
         testUserId,
       ),
     ).rejects.toThrow(BadRequestException);
+  });
+
+  it('should generate presigned url for upload for an existing pending file', async () => {
+    const testUserId = 'test-user-id';
+
+    mockDatabaseService.file.findUnique.mockResolvedValue({
+      status: 'pending',
+    });
+
+    mockS3Service.generatePresignedPostUrl.mockResolvedValue({
+      success: true,
+      error: null,
+      data: {
+        url: 'test-url',
+        fields: {},
+      },
+    });
+
+    const res = await service.generateUploadUrl(
+      {
+        description: 'Test file',
+        lifetime: 'short',
+        name: 'Test file',
+        contentType: 'image/png',
+        fileSizeBytes: 200,
+      },
+      testUserId,
+    );
+
+    expect(mockDatabaseService.file.create).not.toHaveBeenCalled();
+    expect(res).toEqual({ url: 'test-url', fields: {} });
   });
 
   it('should get all files', async () => {
