@@ -28,6 +28,7 @@ import { AppConfigModule } from './core/app-config/app-config.module';
 
 import { validateConfig } from './common/utils';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -131,6 +132,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
       ],
       assignResponse: false,
     }),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
       imports: [RedisModule],
       inject: [RedisService],

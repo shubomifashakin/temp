@@ -12,6 +12,7 @@ import { RedisModule } from '../../core/redis/redis.module';
 import { HasherModule } from '../../core/hasher/hasher.module';
 import { DatabaseModule } from '../../core/database/database.module';
 import { PrometheusModule } from '../../core/prometheus/prometheus.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   providers: [FilesService, LinksService],
@@ -24,6 +25,7 @@ import { PrometheusModule } from '../../core/prometheus/prometheus.module';
     HasherModule,
     WebhooksModule,
     PrometheusModule,
+    TasksModule,
   ],
 })
 export class FilesModule {}
