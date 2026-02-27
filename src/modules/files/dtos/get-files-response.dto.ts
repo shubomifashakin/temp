@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Type } from 'class-transformer';
 import { IsString, IsNumber, IsDate, IsEnum } from 'class-validator';
 
 import { FileStatus } from '../../../../generated/prisma/enums';
@@ -24,6 +25,7 @@ class File {
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'expiresAt must be a date' })
+  @Type(() => Date)
   expiresAt: Date;
 
   @ApiProperty({
@@ -31,6 +33,7 @@ class File {
     example: '2025-01-01T00:00:00.000Z',
   })
   @IsDate({ message: 'createdAt must be a date' })
+  @Type(() => Date)
   createdAt: Date;
 
   @ApiProperty({
@@ -39,6 +42,7 @@ class File {
     nullable: true,
   })
   @IsDate({ message: 'deletedAt must be a date' })
+  @Type(() => Date)
   deletedAt: Date | null;
 
   @ApiProperty({

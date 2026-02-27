@@ -44,7 +44,7 @@ export class CreateLinkDto {
     required: false,
   })
   @IsOptional()
-  @Type(() => Date)
   @IsDate({ message: 'Invalid date' })
+  @Type(() => Date)
   expiresAt?: Date | null;
 }
