@@ -1,10 +1,12 @@
 import { Request } from 'express';
 
-import { Module, RequestMethod } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
+import { Module, RequestMethod } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+
 import { v4 as uuid } from 'uuid';
 
 import { LoggerModule } from 'nestjs-pino';
@@ -28,7 +30,6 @@ import { AppConfigModule } from './core/app-config/app-config.module';
 
 import { validateConfig } from './common/utils';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
-import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -70,7 +71,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         },
         errorKey: 'error',
         level: process.env.LOG_LEVEL! || 'info',
-        base: null,
+        base: { service: process.env.SERVICE_NAME! || 'temp-api' },
         timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
         transport: {
           targets:

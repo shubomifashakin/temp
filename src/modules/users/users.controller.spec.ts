@@ -35,6 +35,10 @@ const mockAppConfigService = {
     success: true,
     data: 'redis://localhost:6379',
   },
+  ServiceName: {
+    success: true,
+    data: 'test-service',
+  },
 };
 
 const mockUserService = {

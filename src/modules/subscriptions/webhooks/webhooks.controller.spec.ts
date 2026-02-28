@@ -51,6 +51,10 @@ const mockAppConfigService = {
     data: 'test-value',
     success: true,
   },
+  ServiceName: {
+    data: 'test-service',
+    success: true,
+  },
 };
 
 describe('WebhooksController', () => {

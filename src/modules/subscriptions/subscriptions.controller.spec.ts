@@ -37,6 +37,10 @@ const mockAppConfigService = {
     data: undefined,
     success: true,
   },
+  ServiceName: {
+    data: 'test-service',
+    success: true,
+  },
 };
 
 const mockSubscriptionService = {

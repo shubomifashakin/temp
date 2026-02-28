@@ -60,6 +60,11 @@ const mockAppConfigService = {
     success: true,
     error: null,
   },
+  ServiceName: {
+    data: 'test-service',
+    success: true,
+    error: null,
+  },
 };
 
 const mockRequest = {

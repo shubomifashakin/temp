@@ -23,7 +23,7 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
     }
 
     this.client = createClient({
-      name: 'Temp-Backend',
+      name: configService.ServiceName.data!,
       url: configService.RedisUrl.data,
     });
   }
