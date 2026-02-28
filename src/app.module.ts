@@ -71,7 +71,10 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
         },
         errorKey: 'error',
         level: process.env.LOG_LEVEL! || 'info',
-        base: { service: process.env.SERVICE_NAME! || 'temp-api' },
+        base: {
+          service: process.env.SERVICE_NAME! || 'temp-api',
+          environment: process.env.NODE_ENV,
+        },
         timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
         transport: {
           targets:
