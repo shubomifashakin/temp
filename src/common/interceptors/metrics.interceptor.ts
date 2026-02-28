@@ -19,20 +19,20 @@ export class MetricsInterceptor implements NestInterceptor {
     this.httpRequestTotal = this.prometheusService.createCounter(
       'http_requests_total',
       'Total number of HTTP requests',
-      ['method', 'route', 'status_code'],
+      ['method', 'path', 'status_code'],
     );
 
     this.httpRequestDuration = this.prometheusService.createHistogram(
       'http_request_duration_seconds',
       'HTTP request duration in seconds',
-      ['method', 'route', 'status_code'],
+      ['method', 'path', 'status_code'],
       [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10],
     );
 
     this.httpErrorsTotal = this.prometheusService.createCounter(
       'http_errors_total',
       'Total number of HTTP errors',
-      ['method', 'route', 'status_code', 'error_type'],
+      ['method', 'path', 'status_code', 'error_type'],
     );
   }
 
@@ -44,12 +44,10 @@ export class MetricsInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest<Request>();
     const startTime = Date.now();
     const method = request.method;
-    const route = this.getRoute(request);
+    const path = this.getPath(request);
 
     return next.handle().pipe(
       tap(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const path = request.route?.path;
         if (path === '/metrics' || path === '/health') return;
         const response = context.switchToHttp().getResponse<Response>();
         const statusCode = response.statusCode;
@@ -57,14 +55,14 @@ export class MetricsInterceptor implements NestInterceptor {
 
         this.httpRequestTotal.inc({
           method,
-          route,
+          path,
           status_code: statusCode.toString(),
         });
 
         this.httpRequestDuration.observe(
           {
             method,
-            route,
+            path,
             status_code: statusCode.toString(),
           },
           duration,
@@ -74,7 +72,7 @@ export class MetricsInterceptor implements NestInterceptor {
           const errorType = this.getErrorType(statusCode);
           this.httpErrorsTotal.inc({
             method,
-            route,
+            path,
             status_code: statusCode.toString(),
             error_type: errorType,
           });
@@ -83,20 +81,20 @@ export class MetricsInterceptor implements NestInterceptor {
       catchError((error: unknown) => {
         const statusCode: number =
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          (error as any).status || HttpStatus.INTERNAL_SERVER_ERROR;
+          (error as any)?.status || HttpStatus.INTERNAL_SERVER_ERROR;
 
         const duration = (Date.now() - startTime) / 1000;
 
         this.httpRequestTotal.inc({
           method,
-          route,
+          path,
           status_code: statusCode.toString(),
         });
 
         this.httpRequestDuration.observe(
           {
             method,
-            route,
+            path,
             status_code: statusCode.toString(),
           },
           duration,
@@ -105,7 +103,7 @@ export class MetricsInterceptor implements NestInterceptor {
         const errorType = this.getErrorType(statusCode);
         this.httpErrorsTotal.inc({
           method,
-          route,
+          path,
           status_code: statusCode.toString(),
           error_type: errorType,
         });
@@ -115,11 +113,12 @@ export class MetricsInterceptor implements NestInterceptor {
     );
   }
 
-  private getRoute(request: Request): string {
-    const route = request?.route;
+  private getPath(request: Request): string {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const path = request?.route?.path as string;
 
-    if (route && request.path) {
-      return request.path;
+    if (path) {
+      return path;
     }
 
     return 'unknown';
