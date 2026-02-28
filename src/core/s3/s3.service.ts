@@ -116,10 +116,12 @@ export class S3Service implements OnModuleDestroy {
           key,
           'Content-Type': contentType,
           Tagging: `<Tagging><TagSet><Tag><Key>lifetime</Key><Value>${tag}</Value></Tag></TagSet></Tagging>`,
+          'Cache-Control': `public, max-age=${ttl}, immutable`,
         },
         Conditions: [
           ['eq', '$Content-Type', contentType],
           ['content-length-range', 1, contentLength],
+          ['eq', '$Cache-Control', `public, max-age=${ttl}, immutable`],
         ],
         Expires: ttl,
       });
