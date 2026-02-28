@@ -1,0 +1,157 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup Node Js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run prisma generate
+        run: npx prisma generate
+
+      - name: Run unit tests
+        run: npm run test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup Node Js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Prisma generate
+        run: npx prisma generate
+
+      - name: Run lint
+        run: npm run lint
+
+  e2e:
+    services:
+      postgres:
+        image: postgres:18.1
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_123
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:8.4
+        ports:
+          - 6379:6379
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup Node Js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgres://postgres:postgres_123@localhost:5432/postgres
+
+      - name: Run prisma generate
+        run: npx prisma generate
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+        env:
+          DATABASE_URL: postgres://postgres:postgres_123@localhost:5432/postgres
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+
+          SERVICE_NAME: test-service
+          BASE_URL: http://localhost:3000
+          FRONTEND_URL: http://localhost:3001
+          LOG_LEVEL: info
+          DOMAIN: localhost
+
+          GOOGLE_CLIENT_ID: dummy-google-client-id
+          GOOGLE_CLIENT_SECRET: dummy-google-client-secret
+          JWT_PRIVATE_KEY: test-private-key
+          JWT_PUBLIC_KEY: test-public-key
+
+          AWS_REGION: us-east-1
+          S3_BUCKET_NAME: test-bucket
+          SQS_QUEUE_URL: http://amazonawsqueue.com/queue/test
+          AWS_SECRET_KEY: dummy-aws-secret-key
+          AWS_ACCESS_KEY: dummy-aws-access-key
+
+          METRICS_BEARER_TOKEN: dummy-metrics-token
+          FILES_WEBHOOKS_SECRET: dummy-files-webhook-secret
+
+          POLAR_WEBHOOK_SECRET: dummy-polar-webhook-secret
+          POLAR_PRODUCT_PRO: dummy-product-id
+          POLAR_ACCESS_TOKEN: dummy-polar-access-token
+          POLAR_ORGANIZATION_ID: dummy-org-id
+
+          CHECKOUT_RETURN_URL: http://localhost:3001/checkout/return
+          CHECKOUT_SUCCESS_URL: http://localhost:3001/checkout/success
+
+          CLOUDFRONT_PUBLIC_KEY_ID: dummy-cloudfront-public-key-id
+          CLOUDFRONT_DISTRIBUTION_DOMAIN: https://dummy-cloudfront-distribution-domain.com
+          CLOUDFRONT_PRIVATE_KEY: dummy-cloudfront-private-key
+
+          UPLOAD_PRESIGNED_POST_URL_TTL_SECONDS: 1800
+          LINKS_PRESIGNED_GET_URL_TTL_SECONDS: 1800
+
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+    needs: [unit, lint, e2e]
+    if: always()
+    steps:
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ needs.unit.result != 'failure' && needs.lint.result != 'failure' && needs.e2e.result != 'failure' && 'success' || 'failure' }}
+          title: 'CI Pipeline'
+          description: |
+            **Commit:** ${{ github.event.head_commit.message }}
+            **Triggered by:** ${{ github.actor }}
+            **Branch:** ${{ github.ref_name }}
+            **Repository:** ${{ github.repository }}
+          url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          username: GitHub Actions
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png

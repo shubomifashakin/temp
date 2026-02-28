@@ -1,0 +1,109 @@
+import { ApiProperty } from '@nestjs/swagger';
+
+import { Type } from 'class-transformer';
+import { IsString, IsNumber, IsDate, IsEnum } from 'class-validator';
+
+import { FileStatus } from '../../../../generated/prisma/enums';
+
+class File {
+  @ApiProperty({
+    description: 'Id of the file',
+    example: '12345678-1234-1234-1234-123456789012',
+  })
+  @IsString({ message: 'id must be a string' })
+  id: string;
+
+  @ApiProperty({
+    description: 'description of the file',
+    example: 'My file description',
+  })
+  @IsString({ message: 'description must be a string' })
+  description: string;
+
+  @ApiProperty({
+    description: 'Date and time the file expires',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  @IsDate({ message: 'expiresAt must be a date' })
+  @Type(() => Date)
+  expiresAt: Date;
+
+  @ApiProperty({
+    description: 'Date and time the file was created',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  @IsDate({ message: 'createdAt must be a date' })
+  @Type(() => Date)
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Date and time the file was deleted',
+    example: '2025-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  @IsDate({ message: 'deletedAt must be a date' })
+  @Type(() => Date)
+  deletedAt: Date | null;
+
+  @ApiProperty({
+    description: 'Size of the file in bytes',
+    example: 1024,
+  })
+  @IsNumber({}, { message: 'size must be a number' })
+  size: number;
+
+  @ApiProperty({
+    example: FileStatus.safe,
+    enum: FileStatus,
+    description: 'the status of the file',
+  })
+  @IsEnum(FileStatus, { message: 'status must be a valid file status' })
+  status: FileStatus;
+
+  @ApiProperty({
+    description:
+      'the total number of links that have been generated for the file',
+    example: 1,
+  })
+  @IsNumber({}, { message: 'linkCount must be a number' })
+  totalLinks: number;
+
+  @ApiProperty({
+    description: 'the total number of clicks across all links for the file',
+    example: 1,
+  })
+  @IsNumber({}, { message: 'clickCount must be a number' })
+  totalClicks: number;
+
+  @ApiProperty({ description: 'the content type of the file' })
+  @IsString({ message: 'contentType must be a string' })
+  contentType: string;
+
+  @ApiProperty({
+    description: 'the name of the file',
+    example: 'My file name',
+  })
+  @IsString({ message: 'name must be a string' })
+  name: string;
+}
+
+export class GetFilesResponseDto {
+  @ApiProperty({
+    type: [File],
+    description: 'List of files',
+  })
+  data: File[];
+
+  @ApiProperty({
+    example: false,
+    description: 'Whether there are more files to be fetched',
+  })
+  hasNextPage: boolean;
+
+  @ApiProperty({
+    example: null,
+    nullable: true,
+    description: 'Cursor for pagination',
+  })
+  cursor: string | null;
+}
