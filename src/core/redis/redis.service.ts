@@ -66,7 +66,7 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
     }
   }
 
-  async increment(
+  async ratelimit(
     key: string,
     ttl: number,
     limit: number,

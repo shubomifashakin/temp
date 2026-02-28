@@ -172,7 +172,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 
           storage: {
             async increment(key, ttl, limit, blockDuration) {
-              return await cache.increment(key, ttl, limit, blockDuration);
+              return await cache.ratelimit(key, ttl, limit, blockDuration);
             },
           },
         };
