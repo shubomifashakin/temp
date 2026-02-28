@@ -28,10 +28,10 @@ export class LinksService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async getLinkDetails(linkId: string): Promise<LinkDetailsDto> {
+  async getLinkDetails(shareId: string): Promise<LinkDetailsDto> {
     const link = await this.databaseService.link.findUniqueOrThrow({
       where: {
-        id: linkId,
+        shareId,
         revokedAt: null,
       },
       select: {
@@ -81,12 +81,12 @@ export class LinksService {
   }
 
   async getLinkFile(
-    linkId: string,
+    shareId: string,
     dto: GetLinkFileDto,
   ): Promise<GetLinkFileResponse> {
     const linkFound = await this.databaseService.link.findUniqueOrThrow({
       where: {
-        id: linkId,
+        shareId,
         revokedAt: null,
       },
       include: {
@@ -139,7 +139,7 @@ export class LinksService {
       }
     }
 
-    const urlCacheKey = makePresignedUrlCacheKey(linkId);
+    const urlCacheKey = makePresignedUrlCacheKey(shareId);
 
     const existingUrlForFile = await this.redisService.get<string>(urlCacheKey);
 
@@ -152,7 +152,7 @@ export class LinksService {
 
     if (existingUrlForFile.success && existingUrlForFile.data) {
       await this.databaseService.link.update({
-        where: { id: linkId },
+        where: { shareId },
         data: {
           lastAccessedAt: new Date(),
           clickCount: { increment: 1 },
@@ -201,7 +201,7 @@ export class LinksService {
 
     await this.databaseService.link.update({
       where: {
-        id: linkId,
+        shareId,
       },
       data: {
         lastAccessedAt: new Date(),

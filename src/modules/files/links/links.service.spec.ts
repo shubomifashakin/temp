@@ -217,8 +217,8 @@ describe('LinksService', () => {
 
     mockDatabaseService.link.update.mockResolvedValue(true);
 
-    const testLinkId = 'test-link-id';
-    const res = await service.getLinkFile(testLinkId, {
+    const testShareId = 'test-link-id';
+    const res = await service.getLinkFile(testShareId, {
       password: undefined,
     });
 
@@ -255,8 +255,8 @@ describe('LinksService', () => {
 
     mockDatabaseService.link.update.mockResolvedValue(true);
 
-    const testLinkId = 'test-link-id';
-    const res = await service.getLinkFile(testLinkId, {
+    const testShareId = 'test-link-id';
+    const res = await service.getLinkFile(testShareId, {
       password: undefined,
     });
 
@@ -264,7 +264,7 @@ describe('LinksService', () => {
       url: testPresignedUrl,
     });
     expect(mockRedisService.get).toHaveBeenCalledWith(
-      makePresignedUrlCacheKey(testLinkId),
+      makePresignedUrlCacheKey(testShareId),
     );
     expect(mockS3Service.generateCloudFrontSignedUrl).not.toHaveBeenCalled();
   });
@@ -283,9 +283,9 @@ describe('LinksService', () => {
 
     mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testLinkId = 'test-link-id';
+    const testShareId = 'test-link-id';
     await expect(
-      service.getLinkFile(testLinkId, {
+      service.getLinkFile(testShareId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -306,9 +306,9 @@ describe('LinksService', () => {
 
     mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testLinkId = 'test-link-id';
+    const testShareId = 'test-link-id';
     await expect(
-      service.getLinkFile(testLinkId, {
+      service.getLinkFile(testShareId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -328,9 +328,9 @@ describe('LinksService', () => {
 
     mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testLinkId = 'test-link-id';
+    const testShareId = 'test-link-id';
     await expect(
-      service.getLinkFile(testLinkId, {
+      service.getLinkFile(testShareId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -350,9 +350,9 @@ describe('LinksService', () => {
 
     mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
 
-    const testLinkId = 'test-link-id';
+    const testShareId = 'test-link-id';
     await expect(
-      service.getLinkFile(testLinkId, {
+      service.getLinkFile(testShareId, {
         password: undefined,
       }),
     ).rejects.toThrow(BadRequestException);
@@ -378,9 +378,9 @@ describe('LinksService', () => {
       error: null,
     });
 
-    const testLinkId = 'test-link-id';
+    const testShareId = 'test-link-id';
     await expect(
-      service.getLinkFile(testLinkId, {
+      service.getLinkFile(testShareId, {
         password: 'incorrect-password',
       }),
     ).rejects.toThrow(UnauthorizedException);

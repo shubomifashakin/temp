@@ -11,11 +11,20 @@ import { Type } from 'class-transformer';
 
 class Link {
   @ApiProperty({
-    description: 'Id of the  link',
+    description:
+      'Internal ID of the link. Revocations, updates and other actions done by the user are performed using this ID.',
     example: '12345678-1234-1234-1234-123456789012',
   })
   @IsString({ message: 'id must be a string' })
   id: string;
+
+  @ApiProperty({
+    description:
+      'Public-facing share ID used by external users to access the file. This ID is exposed in URLs and shared with users.',
+    example: 'abc123',
+  })
+  @IsString({ message: 'shareId must be a string' })
+  shareId: string;
 
   @ApiProperty({
     description: 'Whether the link is password protected',

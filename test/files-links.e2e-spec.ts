@@ -121,7 +121,7 @@ describe('FilesLinksController (e2e)', () => {
     await app.close();
   });
 
-  describe('GET links/:linkId', () => {
+  describe('GET links/:shareId', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       await redisService.flushAll();
@@ -167,10 +167,13 @@ describe('FilesLinksController (e2e)', () => {
           fileId: file.id,
           description: 'Test link',
         },
+        select: {
+          shareId: true,
+        },
       });
 
       const response = await request(app.getHttpServer()).get(
-        `/links/${link.id}`,
+        `/links/${link.shareId}`,
       );
 
       expect(response.status).toBe(200);
@@ -179,7 +182,7 @@ describe('FilesLinksController (e2e)', () => {
     });
   });
 
-  describe('POST /links/:linkId', () => {
+  describe('POST /links/:shareId', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       await redisService.flushAll();
@@ -226,10 +229,13 @@ describe('FilesLinksController (e2e)', () => {
           password: 'hashed-password',
           description: 'Test link',
         },
+        select: {
+          shareId: true,
+        },
       });
 
       const response = await request(app.getHttpServer())
-        .post(`/links/${link.id}`)
+        .post(`/links/${link.shareId}`)
         .send({});
 
       expect(response.status).toBe(401);
@@ -272,7 +278,7 @@ describe('FilesLinksController (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .post(`/links/${link.id}`)
+        .post(`/links/${link.shareId}`)
         .send({});
 
       expect(response.status).toBe(201);

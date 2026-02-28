@@ -99,12 +99,12 @@ describe('LinksController', () => {
       url: testPresignedUrl,
     });
 
-    const testLinkId = 'test-link-id';
+    const testShareId = 'test-share-id';
     const response = await controller.getLinkFile(
       {
         password: undefined,
       },
-      testLinkId,
+      testShareId,
     );
 
     expect(response.url).toEqual(testPresignedUrl);

@@ -448,6 +448,7 @@ export class FilesService {
         createdAt: true,
         clickCount: true,
         expiresAt: true,
+        shareId: true,
         description: true,
         lastAccessedAt: true,
       },

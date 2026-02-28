@@ -13,11 +13,11 @@ export class LinksController {
   @ApiOperation({ summary: 'Get link details' })
   @ApiResponse({ status: 200, type: LinkDetailsDto })
   @ApiResponse({ status: 404, description: 'Link does not exist' })
-  @Get(':linkId')
+  @Get(':shareId')
   async getLinkDetails(
-    @Param('linkId') linkId: string,
+    @Param('shareId') shareId: string,
   ): Promise<LinkDetailsDto> {
-    return this.linksService.getLinkDetails(linkId);
+    return this.linksService.getLinkDetails(shareId);
   }
 
   @ApiOperation({
@@ -29,12 +29,12 @@ export class LinksController {
   @ApiResponse({ status: 401, description: 'Invalid password' })
   @ApiResponse({ status: 400, description: 'Link has been revoked' })
   @ApiResponse({ status: 404, description: 'Link does not exist' })
-  @Post(':linkId')
+  @Post(':shareId')
   async getLinkFile(
     @Body() dto: GetLinkFileDto,
-    @Param('linkId') linkId: string,
+    @Param('shareId') shareId: string,
   ): Promise<GetLinkFileResponse> {
-    const url = await this.linksService.getLinkFile(linkId, dto);
+    const url = await this.linksService.getLinkFile(shareId, dto);
 
     return url;
   }

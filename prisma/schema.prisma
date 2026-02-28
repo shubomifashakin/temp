@@ -90,7 +90,9 @@ model File {
 }
 
 model Link {
-  id String @id @default(nanoid(13))
+  id String @id @default(uuid())
+
+  shareId String @default(nanoid(13)) @unique @map("share_id")
 
   clickCount Int @default(0) @map("click_count")
 
