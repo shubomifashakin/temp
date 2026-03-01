@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/.env"
 
 POSTGRES_CONTAINER="temp_postgres"
-S3_BUCKET="545plea-projects"
+S3_BACKUP_BUCKET="vpsinfrastack-vpsinfrabackupbucket1cf8043f-6qg3s3zt5y2r"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILENAME="postgres_backup_${TIMESTAMP}.dump"
 LOCAL_BACKUP_PATH="/tmp/${BACKUP_FILENAME}"
@@ -23,7 +23,7 @@ fi
 
 echo "Successfully dumped to ${LOCAL_BACKUP_PATH}, now attempting to upload to s3..."
 
-aws s3 cp "${LOCAL_BACKUP_PATH}" "s3://${S3_BUCKET}/backups/postgres/temp/${BACKUP_FILENAME}"
+aws s3 cp "${LOCAL_BACKUP_PATH}" "s3://${S3_BACKUP_BUCKET}/backups/postgres/temp/${BACKUP_FILENAME}"
 
 if [ $? -ne 0 ]; then
     echo "Failed to upload backup to s3"
@@ -31,4 +31,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Backup completed successfully at $(date)"
-echo "Backup location: s3://${S3_BUCKET}/backups/postgres/temp/${BACKUP_FILENAME}"
+echo "Backup location: s3://${S3_BACKUP_BUCKET}/backups/postgres/temp/${BACKUP_FILENAME}"
