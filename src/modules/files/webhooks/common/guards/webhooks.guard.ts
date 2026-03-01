@@ -1,5 +1,7 @@
 import { Request } from 'express';
 
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
 import {
   Logger,
   Injectable,
@@ -22,10 +24,24 @@ export class WebhooksGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const rawBody = request.rawBody;
 
-    const signature = request.headers['x-signature'];
+    const incomingSignature = Array.isArray(request.headers['x-signature'])
+      ? request.headers['x-signature']?.[0]
+      : request.headers['x-signature'];
 
-    if (!signature) throw new UnauthorizedException('Missing signature');
+    if (!incomingSignature) {
+      throw new UnauthorizedException('Missing signature');
+    }
+
+    if (!rawBody) {
+      this.logger.error({
+        message: 'Raw body not available',
+      });
+
+      throw new InternalServerErrorException();
+    }
 
     const secret = this.configService.FilesWebhooksSecret;
 
@@ -38,8 +54,17 @@ export class WebhooksGuard implements CanActivate {
       throw new InternalServerErrorException();
     }
 
-    if (secret.data !== signature) {
-      throw new UnauthorizedException('Invalid signature');
+    const expectedSignature = createHmac('sha256', secret.data)
+      .update(rawBody)
+      .digest('hex');
+
+    const isValid = timingSafeEqual(
+      Buffer.from(expectedSignature),
+      Buffer.from(incomingSignature),
+    );
+
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid webhook signature');
     }
 
     return true;
