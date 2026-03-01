@@ -16,7 +16,7 @@ import { makeBlacklistedKey, makeOauthStateKey } from '../../common/utils';
 import {
   DEFAULT_JWT_ALG,
   MESSAGES,
-  MINUTES_1,
+  MINUTES_5,
   TOKEN,
 } from '../../common/constants';
 import { makeError } from '../../common/utils';
@@ -128,7 +128,7 @@ export class AuthService {
     const result = await this.redisService.set(
       makeOauthStateKey(state),
       { timestamp: Date.now() },
-      { expiration: { type: 'EX', value: MINUTES_1 } },
+      { expiration: { type: 'EX', value: MINUTES_5 } },
     );
 
     if (!result.success) {
