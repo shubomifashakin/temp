@@ -1,19 +1,23 @@
 name: Deploy
 on:
-  workflow_run:
-    workflows: ['Continuous Integration']
-    types:
-      - completed
+  push:
     branches:
       - main
       - master
+    paths:
+      - 'src/**'
+      - 'prisma/**'
+      - 'prisma.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'Dockerfile'
+      - 'ops/**'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
@@ -86,7 +90,7 @@ jobs:
           status: ${{ needs.deploy.result != 'failure' && 'success' || 'failure' }}
           title: 'Production Deployment'
           description: |
-            **Commit:** ${{ github.event.workflow_run.head_commit.message }}
+            **Commit:** ${{ github.event.head_commit.message }}
             **Triggered by:** ${{ github.actor }}
             **Branch:** ${{ github.ref_name }}
             **Repository:** ${{ github.repository }}
