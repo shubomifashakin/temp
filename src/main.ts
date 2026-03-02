@@ -19,6 +19,7 @@ import { PrismaClientUnknownRequestFilterFilter } from './common/filters/prisma-
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
     bufferLogs: true,
   });
 

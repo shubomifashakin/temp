@@ -23,6 +23,7 @@ import { SqsService } from '../src/core/sqs/sqs.service';
 import { DatabaseService } from '../src/core/database/database.service';
 import { PrismaClientKnownRequestFilterFilter } from '../src/common/filters/prisma-client-known-request.filter';
 import { PrismaClientUnknownRequestFilterFilter } from '../src/common/filters/prisma-client-unknown-request.filter';
+import { createHmac } from 'node:crypto';
 
 const mockLogger = {
   error: jest.fn(),
@@ -73,7 +74,7 @@ describe('FilesWebhooksController (e2e)', () => {
       .useValue(mockSqsService)
       .compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication({ rawBody: true });
 
     app.useLogger(mockLogger);
     app.useGlobalPipes(
@@ -164,10 +165,14 @@ describe('FilesWebhooksController (e2e)', () => {
         timestamp: new Date(),
       };
 
+      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
+        .update(JSON.stringify(body))
+        .digest('hex');
+
       const response = await request(app.getHttpServer())
         .post(`/webhooks/files`)
         .send(body)
-        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+        .set('x-signature', signature);
 
       expect(response.status).toBe(400);
     });
@@ -203,10 +208,14 @@ describe('FilesWebhooksController (e2e)', () => {
         timestamp: new Date(),
       };
 
+      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
+        .update(JSON.stringify(body))
+        .digest('hex');
+
       const response = await request(app.getHttpServer())
         .post(`/webhooks/files`)
         .send(body)
-        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+        .set('x-signature', signature);
 
       expect(response.status).toBe(201);
 
@@ -253,10 +262,14 @@ describe('FilesWebhooksController (e2e)', () => {
         timestamp: new Date(100),
       };
 
+      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
+        .update(JSON.stringify(body))
+        .digest('hex');
+
       const response = await request(app.getHttpServer())
         .post(`/webhooks/files`)
         .send(body)
-        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+        .set('x-signature', signature);
 
       expect(response.status).toBe(201);
 
@@ -300,10 +313,14 @@ describe('FilesWebhooksController (e2e)', () => {
         timestamp: new Date(),
       };
 
+      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
+        .update(JSON.stringify(body))
+        .digest('hex');
+
       const response = await request(app.getHttpServer())
         .post(`/webhooks/files`)
         .send(body)
-        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+        .set('x-signature', signature);
 
       expect(response.status).toBe(201);
 
@@ -349,10 +366,14 @@ describe('FilesWebhooksController (e2e)', () => {
         timestamp: new Date(),
       };
 
+      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
+        .update(JSON.stringify(body))
+        .digest('hex');
+
       const response = await request(app.getHttpServer())
         .post(`/webhooks/files`)
         .send(body)
-        .set('x-signature', process.env.FILES_WEBHOOKS_SECRET!);
+        .set('x-signature', signature);
 
       expect(response.status).toBe(400);
     });
