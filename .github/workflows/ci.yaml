@@ -5,10 +5,12 @@ on:
     branches-ignore:
       - main
       - master
+      - dev
   pull_request:
     branches:
       - main
       - master
+      - dev
 
 jobs:
   unit:
