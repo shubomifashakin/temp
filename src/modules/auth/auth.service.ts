@@ -97,12 +97,13 @@ export class AuthService {
     const response_type = 'code';
 
     const clientId = this.configService.GoogleClientId;
-    this.logger.error({
-      message: 'Failed to get google client id',
-      error: clientId.error,
-    });
 
     if (!clientId.success) {
+      this.logger.error({
+        message: 'Failed to get google client id',
+        error: clientId.error,
+      });
+
       throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 
