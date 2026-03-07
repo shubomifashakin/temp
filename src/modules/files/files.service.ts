@@ -424,6 +424,7 @@ export class FilesService {
 
     return {
       id: link.id,
+      shareId: link.shareId,
     };
   }
 
