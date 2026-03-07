@@ -11,6 +11,9 @@ import { v4 as uuid } from 'uuid';
 
 import { MINUTES_10 } from '../../../common/constants';
 
+import { CliAuthInitResponse } from './dto/init-response.dto';
+import { CliGetTokenResponseDto } from './dto/get-token-response.dto';
+
 import { RedisService } from '../../../core/redis/redis.service';
 import { DatabaseService } from '../../../core/database/database.service';
 
@@ -27,7 +30,7 @@ export class CliService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async init(state: string) {
+  async init(state: string): Promise<CliAuthInitResponse> {
     const oauth_code = uuid();
 
     const { success, error } = await this.redisService.set(
@@ -106,7 +109,7 @@ export class CliService {
     return { message: 'success' };
   }
 
-  async getToken(code: string) {
+  async getToken(code: string): Promise<CliGetTokenResponseDto> {
     const { success, data, error } = await this.redisService.get<{
       userId: string;
       confirmed: boolean;
