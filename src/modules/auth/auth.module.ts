@@ -5,10 +5,11 @@ import { AuthService } from './auth.service';
 
 import { DatabaseModule } from '../../core/database/database.module';
 import { RedisModule } from '../../core/redis/redis.module';
+import { CliModule } from './cli/cli.module';
 
 @Module({
   providers: [AuthService],
   controllers: [AuthController],
-  imports: [DatabaseModule, RedisModule],
+  imports: [DatabaseModule, RedisModule, CliModule],
 })
 export class AuthModule {}

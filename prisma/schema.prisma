@@ -31,6 +31,7 @@ model User {
   accounts      Accounts[]
   refreshTokens RefreshToken[]
   subscriptions Subscription[]
+  personalAccessTokens PersonalAccessTokens[]
 
   @@map("users")
 }
@@ -157,6 +158,20 @@ model Subscription {
   @@index(name: "subscriptions_provider_subscription_id_idx", fields: [providerSubscriptionId])
   @@index(name: "subscriptions_provider_provider_customer_id_idx", fields: [provider, providerCustomerId])
   @@map("subscriptions")
+}
+
+model PersonalAccessTokens {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token String @unique @map("token")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("personal_access_tokens")
 }
 
 enum SubscriptionProvider {
