@@ -29,7 +29,10 @@ export class CliController {
 
   constructor(private readonly cliService: CliService) {}
 
-  @ApiOperation({ description: 'Initiate CLI authentication' })
+  @ApiOperation({
+    summary: 'Initiate CLI authentication',
+    description: 'Initiate CLI authentication',
+  })
   @ApiQuery({
     name: 'state',
     required: true,
@@ -75,7 +78,11 @@ export class CliController {
     return this.cliService.confirm(req.user.id, code, state);
   }
 
-  @ApiOperation({ description: 'Get CLI token' })
+  @ApiOperation({
+    description:
+      'Cli exchanges the code received for a long lived personal access token.',
+    summary: 'Get CLI token',
+  })
   @ApiQuery({
     name: 'code',
     required: true,
@@ -92,7 +99,10 @@ export class CliController {
     return this.cliService.getToken(code);
   }
 
-  @ApiOperation({ description: 'Logout from the CLI' })
+  @ApiOperation({
+    summary: 'Logout from the cli',
+    description: 'Logout from the CLI',
+  })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
