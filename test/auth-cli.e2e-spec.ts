@@ -22,6 +22,7 @@ import { ValidationError } from 'class-validator';
 import { RedisService } from '../src/core/redis/redis.service';
 import { DatabaseService } from '../src/core/database/database.service';
 import { createHash } from 'node:crypto';
+import { makeCliAuthCodeKey } from '../src/modules/auth/cli/common/utils';
 
 const mockLogger = {
   error: jest.fn(),
@@ -43,10 +44,6 @@ const mockJwtService = {
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
-
-function makeOauthCodeKey(code: string) {
-  return `oauth:code:${code}`;
-}
 
 describe('CliController (e2e)', () => {
   let app: INestApplication<App>;
@@ -144,7 +141,7 @@ describe('CliController (e2e)', () => {
         userId: userId.id,
       });
 
-      await redisService.set(makeOauthCodeKey(testCode), {
+      await redisService.set(makeCliAuthCodeKey(testCode), {
         confirmed: false,
         state: testState,
       });
@@ -172,7 +169,7 @@ describe('CliController (e2e)', () => {
         userId: userId.id,
       });
 
-      await redisService.set(makeOauthCodeKey(testCode), {
+      await redisService.set(makeCliAuthCodeKey(testCode), {
         confirmed: false,
         state: testState,
       });
@@ -232,7 +229,7 @@ describe('CliController (e2e)', () => {
         },
       });
 
-      await redisService.set(makeOauthCodeKey('test-code'), {
+      await redisService.set(makeCliAuthCodeKey('test-code'), {
         userId: userId.id,
         confirmed: true,
       });

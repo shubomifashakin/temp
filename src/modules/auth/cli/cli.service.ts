@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 
 import { v4 as uuid } from 'uuid';
 
+import { makeCliAuthCodeKey } from './common/utils';
 import { MINUTES_10 } from '../../../common/constants';
 
 import { CliAuthInitResponse } from './dto/init-response.dto';
@@ -16,10 +17,6 @@ import { CliGetTokenResponseDto } from './dto/get-token-response.dto';
 
 import { RedisService } from '../../../core/redis/redis.service';
 import { DatabaseService } from '../../../core/database/database.service';
-
-function makeOauthCodeKey(code: string) {
-  return `oauth:code:${code}`;
-}
 
 @Injectable()
 export class CliService {
@@ -31,10 +28,10 @@ export class CliService {
   ) {}
 
   async init(state: string): Promise<CliAuthInitResponse> {
-    const oauth_code = uuid();
+    const code = uuid();
 
     const { success, error } = await this.redisService.set(
-      makeOauthCodeKey(oauth_code),
+      makeCliAuthCodeKey(code),
       { confirmed: false, state },
       {
         expiration: { type: 'EX', value: MINUTES_10 },
@@ -43,25 +40,25 @@ export class CliService {
 
     if (!success) {
       this.logger.error({
-        message: 'Failed to set oauth code in cache',
+        message: 'Failed to set authentication code in cache',
         error,
       });
 
       throw new InternalServerErrorException();
     }
 
-    return { code: oauth_code };
+    return { code };
   }
 
   async confirm(userId: string, code: string, state: string) {
     const { success, data, error } = await this.redisService.get<{
       state: string;
       confirmed: boolean;
-    }>(makeOauthCodeKey(code));
+    }>(makeCliAuthCodeKey(code));
 
     if (!success) {
       this.logger.error({
-        message: 'Failed to get oauth code from cache',
+        message: 'Failed to get authentication code from cache',
         error,
       });
 
@@ -70,8 +67,8 @@ export class CliService {
 
     if (!data || data.state !== state) {
       const message = !data
-        ? 'OAuth code not found in cache'
-        : 'OAuth code state does not match';
+        ? 'Authentication code not found in cache'
+        : 'Authentication code state does not match';
 
       this.logger.warn({
         message,
@@ -82,7 +79,7 @@ export class CliService {
 
     if (data.confirmed) {
       this.logger.warn({
-        message: 'OAuth code already confirmed',
+        message: 'Authentication code already confirmed',
       });
 
       throw new UnauthorizedException('Unauthorized');
@@ -90,7 +87,7 @@ export class CliService {
 
     const { success: updateSuccess, error: updateError } =
       await this.redisService.set(
-        makeOauthCodeKey(code),
+        makeCliAuthCodeKey(code),
         { confirmed: true, userId, state },
         {
           expiration: { type: 'EX', value: MINUTES_10 },
@@ -99,7 +96,7 @@ export class CliService {
 
     if (!updateSuccess) {
       this.logger.error({
-        message: 'Failed to update oauth code in cache',
+        message: 'Failed to update authentication code in cache',
         error: updateError,
       });
 
@@ -113,11 +110,11 @@ export class CliService {
     const { success, data, error } = await this.redisService.get<{
       userId: string;
       confirmed: boolean;
-    }>(makeOauthCodeKey(code));
+    }>(makeCliAuthCodeKey(code));
 
     if (!success) {
       this.logger.error({
-        message: 'Failed to get oauth code from cache',
+        message: 'Failed to get authentication code from cache',
         error,
       });
 
@@ -126,7 +123,7 @@ export class CliService {
 
     if (!data) {
       this.logger.warn({
-        message: 'OAuth code not found in cache',
+        message: 'authentication code not found in cache',
       });
 
       throw new UnauthorizedException('Unauthorized');
@@ -151,11 +148,11 @@ export class CliService {
       },
     });
 
-    const deleted = await this.redisService.delete(makeOauthCodeKey(code));
+    const deleted = await this.redisService.delete(makeCliAuthCodeKey(code));
 
     if (!deleted.success) {
       this.logger.error({
-        message: 'Failed to delete oauth code from cache',
+        message: 'Failed to delete authentication code from cache',
         error: deleted.error,
       });
     }

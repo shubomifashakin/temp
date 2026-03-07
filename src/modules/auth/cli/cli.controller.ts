@@ -38,7 +38,7 @@ export class CliController {
   })
   @ApiResponse({
     status: 200,
-    description: 'The oauth code',
+    description: 'The authentication code',
     type: CliAuthInitResponse,
   })
   @Post('initiate')
@@ -46,7 +46,11 @@ export class CliController {
     return this.cliService.init(state);
   }
 
-  @ApiOperation({ description: 'Confirm CLI authentication' })
+  @ApiOperation({
+    summary: 'Confirm CLI authentication',
+    description: `Called by the browser after the user approves the CLI login request. Requires an active web session. 
+      Updates the authentication code status to confirmed so the CLI can exchange it for a PAT.`,
+  })
   @ApiQuery({
     name: 'code',
     required: true,
