@@ -202,7 +202,9 @@ describe('AuthService', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result).toEqual({
+    expect(result).toHaveProperty('tokens');
+    expect(result).toHaveProperty('next');
+    expect(result.tokens).toEqual({
       accessToken: 'test-access-token',
       refreshToken: 'test-refresh-token',
     });

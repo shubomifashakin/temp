@@ -109,8 +109,11 @@ describe('AuthController', () => {
 
     it('should handle the google callback', async () => {
       mockAuthService.callback.mockResolvedValue({
-        accessToken: 'test-access-token',
-        refreshToken: 'test-refresh-token',
+        tokens: {
+          accessToken: 'test-access-token',
+          refreshToken: 'test-refresh-token',
+        },
+        next: '/dashboard',
       });
 
       await controller.callback(mockResponse, 'test-state', 'test-code');
