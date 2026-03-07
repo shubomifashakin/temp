@@ -117,6 +117,7 @@ describe('FilesController (e2e)', () => {
 
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
+    await redisService.flushAll();
   });
 
   afterEach(async () => {

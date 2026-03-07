@@ -91,18 +91,16 @@ describe('CliController (e2e)', () => {
     redisService = moduleFixture.get(RedisService);
 
     databaseService = moduleFixture.get(DatabaseService);
-  });
 
-  beforeEach(async () => {
     jest.clearAllMocks();
 
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
+    await redisService.flushAll();
   });
 
   afterEach(async () => {
     await app.close();
-    await redisService.flushAll();
   });
 
   describe('POST /auth/cli/initiate', () => {

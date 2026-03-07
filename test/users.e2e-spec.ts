@@ -90,6 +90,7 @@ describe('UsersController (e2e)', () => {
 
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
+    await redisService.flushAll();
 
     jest.clearAllMocks();
   });
