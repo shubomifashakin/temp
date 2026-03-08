@@ -171,6 +171,8 @@ model PersonalAccessTokens {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index(name: "personal_access_tokens_user_id_idx", fields: [userId])
+
   @@map("personal_access_tokens")
 }
 
