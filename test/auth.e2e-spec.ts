@@ -90,9 +90,7 @@ describe('AuthController (e2e)', () => {
     redisService = moduleFixture.get(RedisService);
 
     databaseService = moduleFixture.get(DatabaseService);
-  });
 
-  beforeEach(async () => {
     jest.clearAllMocks();
 
     await databaseService.user.deleteMany();

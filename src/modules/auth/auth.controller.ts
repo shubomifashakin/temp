@@ -33,9 +33,14 @@ export class AuthController {
     description: 'Redirects to the authorization page',
   })
   @ApiResponse({ status: 302, description: 'Redirect to authorization page' })
+  @ApiQuery({
+    name: 'next',
+    required: false,
+    description: 'Next path to redirect to after authorization',
+  })
   @Get('google')
-  async authorize(@Res() res: Response) {
-    const url = await this.authService.authorize();
+  async authorize(@Res() res: Response, @Query('next') next?: string) {
+    const url = await this.authService.authorize(next);
 
     res.redirect(url);
   }
@@ -62,12 +67,12 @@ export class AuthController {
     @Query('state') state: string,
     @Query('code') code: string,
   ) {
-    const userInfo = await this.authService.callback(state, code);
+    const data = await this.authService.callback(state, code);
 
     const frontendUrl = this.configService.FrontendUrl.data!;
     const domain = this.configService.Domain.data!;
 
-    res.cookie(TOKEN.ACCESS.TYPE, userInfo.accessToken, {
+    res.cookie(TOKEN.ACCESS.TYPE, data.tokens.accessToken, {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
@@ -75,7 +80,7 @@ export class AuthController {
       domain: domain,
     });
 
-    res.cookie(TOKEN.REFRESH.TYPE, userInfo.refreshToken, {
+    res.cookie(TOKEN.REFRESH.TYPE, data.tokens.refreshToken, {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
@@ -83,7 +88,7 @@ export class AuthController {
       domain: domain,
     });
 
-    res.redirect(302, `${frontendUrl}/dashboard`);
+    res.redirect(302, `${frontendUrl}${data.next}`);
   }
 
   @ApiOperation({

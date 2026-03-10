@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { createHash } from 'node:crypto';
 import { JwtService } from '@nestjs/jwt';
 
 import {
@@ -13,6 +14,7 @@ import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 import { RedisService } from '../../core/redis/redis.service';
+import { DatabaseService } from '../../core/database/database.service';
 
 import { TOKEN } from '../constants';
 import { makeBlacklistedKey } from '../utils';
@@ -22,9 +24,10 @@ export class AuthGuard implements CanActivate {
   logger = new Logger(AuthGuard.name);
 
   constructor(
+    private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
-    private readonly reflector: Reflector,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   async canActivate(ctx: ExecutionContext) {
@@ -40,10 +43,41 @@ export class AuthGuard implements CanActivate {
     if (requestType === 'http') {
       try {
         const request = ctx.switchToHttp().getRequest<Request>();
+        const bearerToken = request.headers.authorization?.split(' ')[1];
         const accessToken = request.cookies[TOKEN.ACCESS.TYPE] as
           | string
           | undefined;
 
+        if (bearerToken) {
+          this.logger.debug({
+            message: 'Using bearer token for authentication',
+          });
+
+          const hashedToken = createHash('sha256')
+            .update(bearerToken)
+            .digest('hex');
+
+          const pat = await this.databaseService.personalAccessTokens.findFirst(
+            {
+              where: { token: hashedToken },
+              select: { userId: true },
+            },
+          );
+
+          if (!pat) {
+            throw new UnauthorizedException('Unauthorized');
+          }
+
+          request.user = { id: pat.userId };
+
+          return true;
+        }
+
+        this.logger.debug({
+          message: 'Using cookie token for authentication',
+        });
+
+        //carry on with cookie token if no bearer token
         if (!accessToken) {
           throw new UnauthorizedException('Unauthorized');
         }

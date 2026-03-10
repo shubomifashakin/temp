@@ -85,7 +85,7 @@ export class AuthService {
     }
   }
 
-  async authorize() {
+  async authorize(next?: string) {
     const state = uuid();
 
     const scopes = [
@@ -128,7 +128,7 @@ export class AuthService {
 
     const result = await this.redisService.set(
       makeOauthStateKey(state),
-      { timestamp: Date.now() },
+      { timestamp: Date.now(), next: next || '/dashboard' },
       { expiration: { type: 'EX', value: MINUTES_5 } },
     );
 
@@ -156,9 +156,10 @@ export class AuthService {
       throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 
-    const { success, data, error } = await this.redisService.get(
-      makeOauthStateKey(state),
-    );
+    const { success, data, error } = await this.redisService.get<{
+      timestamp: number;
+      next: string;
+    }>(makeOauthStateKey(state));
 
     if (!success) {
       this.logger.error({
@@ -310,7 +311,7 @@ export class AuthService {
       throw new InternalServerErrorException(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 
-    return tokens;
+    return { tokens, next: data.next };
   }
 
   async logout(accessToken: string, refreshToken: string) {
