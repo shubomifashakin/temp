@@ -99,6 +99,8 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
           paths: [
             'req.headers.authorization',
             'req.headers.x-api-key',
+            'res.headers.set-cookie',
+            'res.headers["set-cookie"]',
             'token',
             '**.token',
             'accessToken',
