@@ -606,6 +606,7 @@ describe('FilesController (e2e)', () => {
         },
         select: {
           id: true,
+
           deletedAt: true,
         },
       });
@@ -634,8 +635,7 @@ describe('FilesController (e2e)', () => {
         },
       });
 
-      expect(fileId.deletedAt).toBeNull();
-      expect(file?.deletedAt).toEqual(expect.any(Date));
+      expect(file).toBeNull();
     });
 
     it('should not delete the file if the file does not exist', async () => {
