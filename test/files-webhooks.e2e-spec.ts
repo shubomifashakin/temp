@@ -324,15 +324,13 @@ describe('FilesWebhooksController (e2e)', () => {
 
       expect(response.status).toBe(201);
 
-      const updatedFile = await databaseService.file.findUnique({
+      const deletedFile = await databaseService.file.findUnique({
         where: {
           id: file.id,
         },
       });
 
-      expect(file.deletedAt).toBe(null);
-
-      expect(updatedFile?.deletedAt).toEqual(body.data.deletedAt);
+      expect(deletedFile).toBeNull();
     });
 
     it('should return 400 for invalid deleted file event', async () => {

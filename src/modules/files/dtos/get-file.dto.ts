@@ -4,7 +4,6 @@ import {
   IsEnum,
   IsNumber,
   IsString,
-  IsOptional,
   MinLength,
   MaxLength,
   Matches,
@@ -78,16 +77,6 @@ export class GetFileDto {
   @ApiProperty({ description: 'the content type of the file' })
   @IsString()
   contentType: string;
-
-  @ApiProperty({
-    required: false,
-    example: new Date().toISOString(),
-    description: 'The date the file was deleted',
-  })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  deletedAt: Date | null;
 
   @ApiProperty({ description: 'The status of the file' })
   @IsEnum(FileStatus, { message: 'Invalid file status' })

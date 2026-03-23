@@ -110,13 +110,6 @@ export class LinkDetailsDto {
 
   @ApiProperty({
     type: 'boolean',
-    description: 'File deleted',
-  })
-  @IsBoolean()
-  fileDeleted: boolean;
-
-  @ApiProperty({
-    type: 'boolean',
     description: 'The date the file was uploaded',
   })
   @IsBoolean()

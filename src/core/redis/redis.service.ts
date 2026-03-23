@@ -93,8 +93,11 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
       };
 
       return obj;
-    } catch (error) {
-      console.error('Redis error in increment:', error);
+    } catch (error: unknown) {
+      this.logger.error({
+        message: 'Failed to increment rate limit',
+        error,
+      });
       //dont let redis issues block users from using the app
 
       return {

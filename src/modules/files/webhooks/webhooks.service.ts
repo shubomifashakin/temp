@@ -81,22 +81,18 @@ export class WebhooksService {
         select: { lastEventAt: true, s3Key: true },
       });
 
-      const keysToUpdate = deletedData.keys.filter((key) => {
+      const filesToDelete = deletedData.keys.filter((key) => {
         const file = oldFiles.find((f) => f.s3Key === key);
         return (
           !file?.lastEventAt || file.lastEventAt <= new Date(dto.timestamp)
         );
       });
 
-      if (!keysToUpdate.length) return { message: 'success' };
+      if (!filesToDelete.length) return { message: 'success' };
 
-      await this.databaseService.file.updateMany({
+      await this.databaseService.file.deleteMany({
         where: {
-          s3Key: { in: keysToUpdate },
-        },
-        data: {
-          deletedAt: deletedData.deletedAt,
-          lastEventAt: new Date(dto.timestamp),
+          s3Key: { in: filesToDelete },
         },
       });
 
