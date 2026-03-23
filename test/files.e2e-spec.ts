@@ -606,8 +606,6 @@ describe('FilesController (e2e)', () => {
         },
         select: {
           id: true,
-
-          deletedAt: true,
         },
       });
 
@@ -687,7 +685,6 @@ describe('FilesController (e2e)', () => {
         },
         select: {
           id: true,
-          deletedAt: true,
         },
       });
 
@@ -1025,12 +1022,17 @@ describe('FilesController (e2e)', () => {
           size: 1024,
           userId: userId.id,
           status: 'safe',
-          deletedAt: new Date(),
           name: 'Test File',
           contentType: 'text/plain',
         },
         select: {
           id: true,
+        },
+      });
+
+      await databaseService.file.delete({
+        where: {
+          id: fileId.id,
         },
       });
 

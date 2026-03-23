@@ -455,7 +455,6 @@ describe('FilesService', () => {
       id: testFileId,
       size: 200,
       status: 'pending',
-      deletedAt: null,
       expiresAt: new Date(Date.now() * 100),
       password: null,
     });
@@ -472,14 +471,9 @@ describe('FilesService', () => {
   it('should not create link for file that is deleted', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
-    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
-      id: testFileId,
-      size: 200,
-      status: 'safe',
-      deletedAt: new Date(),
-      expiresAt: new Date(Date.now() * 100),
-      password: null,
-    });
+    mockDatabaseService.file.findUniqueOrThrow.mockRejectedValue(
+      new NotFoundException('This file does not exist'),
+    );
 
     await expect(
       service.createLink(testUserId, testFileId, {
@@ -497,7 +491,6 @@ describe('FilesService', () => {
       id: testFileId,
       size: 200,
       status: 'safe',
-      deletedAt: null,
       expiresAt: new Date(Date.now() - 100000),
       password: null,
     });

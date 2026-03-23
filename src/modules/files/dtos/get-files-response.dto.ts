@@ -37,15 +37,6 @@ class File {
   createdAt: Date;
 
   @ApiProperty({
-    description: 'Date and time the file was deleted',
-    example: '2025-01-01T00:00:00.000Z',
-    nullable: true,
-  })
-  @IsDate({ message: 'deletedAt must be a date' })
-  @Type(() => Date)
-  deletedAt: Date | null;
-
-  @ApiProperty({
     description: 'Size of the file in bytes',
     example: 1024,
   })

@@ -1,6 +1,10 @@
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { LinksService } from './links.service';
 import { makePresignedUrlCacheKey } from '../common/utils';
@@ -145,7 +149,7 @@ describe('LinksService', () => {
       file: {
         name: 'file name',
         status: 'file status',
-        deletedAt: new Date(),
+
         description: 'test description',
         contentType: 'application/json',
         expiresAt: new Date(100),
@@ -176,7 +180,6 @@ describe('LinksService', () => {
       fileSize: resolvedValue.file.size,
       fileDescription: resolvedValue.file.description,
       fileCreatorPicture: resolvedValue.file.user.picture,
-      fileDeleted: resolvedValue.file.deletedAt !== null,
       fileContentType: resolvedValue.file.contentType,
       fileUploadedAt: resolvedValue.file.createdAt,
       fileExpired: true,
@@ -186,11 +189,9 @@ describe('LinksService', () => {
   it('should generate the presigned url for the file', async () => {
     const resolvedValue = {
       expiresAt: new Date(Date.now() + 100000),
-      deletedAt: null,
       password: null,
       file: {
         s3Key: 'test-s3-key',
-        deletedAt: null,
         expiresAt: new Date(Date.now() + 100000),
       },
     };
@@ -234,7 +235,6 @@ describe('LinksService', () => {
       password: null,
       file: {
         s3Key: 'test-s3-key',
-        deletedAt: null,
         expiresAt: new Date(Date.now() + 100000),
       },
     };
@@ -276,7 +276,6 @@ describe('LinksService', () => {
       password: null,
       file: {
         s3Key: 'test-s3-key',
-        deletedAt: null,
         expiresAt: new Date(Date.now() + 100000),
       },
     };
@@ -299,7 +298,6 @@ describe('LinksService', () => {
       revokedAt: new Date(),
       file: {
         s3Key: 'test-s3-key',
-        deletedAt: null,
         expiresAt: new Date(Date.now() + 100000),
       },
     };
@@ -315,25 +313,16 @@ describe('LinksService', () => {
   });
 
   it('should not generate the presigned url for the file since file has been deleted', async () => {
-    const resolvedValue = {
-      expiresAt: new Date(Date.now() + 100000),
-      deletedAt: null,
-      password: null,
-      file: {
-        s3Key: 'test-s3-key',
-        deletedAt: new Date(),
-        expiresAt: new Date(Date.now() + 100000),
-      },
-    };
-
-    mockDatabaseService.link.findUniqueOrThrow.mockResolvedValue(resolvedValue);
+    mockDatabaseService.link.findUniqueOrThrow.mockRejectedValue(
+      new NotFoundException('This link does not exist'),
+    );
 
     const testShareId = 'test-link-id';
     await expect(
       service.getLinkFile(testShareId, {
         password: undefined,
       }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should not generate the presigned url for the file since file has expired', async () => {
@@ -343,7 +332,6 @@ describe('LinksService', () => {
       password: null,
       file: {
         s3Key: 'test-s3-key',
-        deletedAt: null,
         expiresAt: new Date(Date.now() - 100000),
       },
     };
@@ -355,7 +343,7 @@ describe('LinksService', () => {
       service.getLinkFile(testShareId, {
         password: undefined,
       }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should not generate the presigned url for the file since password supplied is incorrect', async () => {
@@ -365,7 +353,6 @@ describe('LinksService', () => {
       password: 'test-password',
       file: {
         s3Key: 'test-s3-key',
-        deletedAt: null,
         expiresAt: new Date(Date.now() + 100000),
       },
     };

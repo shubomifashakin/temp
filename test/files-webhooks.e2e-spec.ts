@@ -330,8 +330,6 @@ describe('FilesWebhooksController (e2e)', () => {
         },
       });
 
-      expect(file.deletedAt).toBe(null);
-
       expect(deletedFile).toBeNull();
     });
 

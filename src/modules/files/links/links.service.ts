@@ -1,6 +1,7 @@
 import {
   Logger,
   Injectable,
+  NotFoundException,
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
@@ -45,7 +46,6 @@ export class LinksService {
           select: {
             name: true,
             status: true,
-            deletedAt: true,
             description: true,
             contentType: true,
             expiresAt: true,
@@ -74,7 +74,6 @@ export class LinksService {
       fileSize: link.file.size,
       fileDescription: link.file.description,
       fileCreatorPicture: link.file.user.picture,
-      fileDeleted: link.file.deletedAt !== null,
       fileContentType: link.file.contentType,
       fileExpired: new Date() > link.file.expiresAt,
     };
@@ -93,7 +92,6 @@ export class LinksService {
         file: {
           select: {
             s3Key: true,
-            deletedAt: true,
             expiresAt: true,
           },
         },
@@ -109,10 +107,10 @@ export class LinksService {
     }
 
     if (
-      linkFound.file.deletedAt ||
+      !linkFound.file ||
       (linkFound.file.expiresAt && new Date() > linkFound.file.expiresAt)
     ) {
-      throw new BadRequestException('This file no longer exists');
+      throw new NotFoundException('This file no longer exists');
     }
 
     if (linkFound.password) {

@@ -163,7 +163,6 @@ export class FilesService {
         size: true,
         status: true,
         expiresAt: true,
-        deletedAt: true,
         createdAt: true,
         contentType: true,
         description: true,
@@ -203,7 +202,6 @@ export class FilesService {
       description: file.description,
       createdAt: file.createdAt,
       name: file.name,
-      deletedAt: file.deletedAt,
       totalLinks: file._count.links,
       totalClicks: file.links.reduce((sum, link) => sum + link.clickCount, 0),
     }));
@@ -243,7 +241,6 @@ export class FilesService {
         size: true,
         status: true,
         userId: true,
-        deletedAt: true,
         description: true,
         createdAt: true,
         updatedAt: true,
@@ -337,7 +334,6 @@ export class FilesService {
         name: true,
         status: true,
         userId: true,
-        deletedAt: true,
         description: true,
         createdAt: true,
         updatedAt: true,
@@ -376,10 +372,6 @@ export class FilesService {
 
     if (file.status !== 'safe') {
       throw new BadRequestException('File is not safe');
-    }
-
-    if (file.deletedAt) {
-      throw new NotFoundException('File has been deleted');
     }
 
     if (new Date() > file.expiresAt) {
