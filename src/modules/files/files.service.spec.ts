@@ -316,6 +316,7 @@ describe('FilesService', () => {
     });
 
     mockDatabaseService.$transaction.mockImplementation((callback) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
       return callback(mockDatabaseService);
     });
 
