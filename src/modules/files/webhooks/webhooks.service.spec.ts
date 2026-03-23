@@ -6,7 +6,7 @@ import { DatabaseService } from '../../../core/database/database.service';
 
 const mockDatabaseService = {
   file: {
-    updateMany: jest.fn(),
+    deleteMany: jest.fn(),
     update: jest.fn(),
     findFirst: jest.fn(),
     findMany: jest.fn(),
@@ -143,13 +143,9 @@ describe('WebhooksService', () => {
       timestamp,
     });
 
-    expect(mockDatabaseService.file.updateMany).toHaveBeenCalledWith({
+    expect(mockDatabaseService.file.deleteMany).toHaveBeenCalledWith({
       where: {
         s3Key: { in: ['test-key-1', 'test-key-2'] },
-      },
-      data: {
-        deletedAt: dto.data.deletedAt,
-        lastEventAt: timestamp,
       },
     });
   });

@@ -42,6 +42,11 @@ const mockDatabaseService = {
     findMany: jest.fn(),
     findUniqueOrThrow: jest.fn(),
   },
+  $transaction: jest.fn().mockImplementation((callback) => {
+    // Simulate transaction by executing callback with mock transaction object
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+    return callback(mockDatabaseService);
+  }),
 };
 
 const mockAppConfigService = {
@@ -310,6 +315,10 @@ describe('FilesService', () => {
       s3Key: testS3Key,
     });
 
+    mockDatabaseService.$transaction.mockImplementation((callback) => {
+      return callback(mockDatabaseService);
+    });
+
     mockSqsService.pushMessage.mockResolvedValue({
       success: true,
       error: null,
@@ -320,11 +329,11 @@ describe('FilesService', () => {
       error: null,
     });
 
-    mockDatabaseService.file.update.mockResolvedValue(true);
-
     const res = await service.deleteSingleFile('test-user-id', '1');
 
     expect(res).toEqual({ message: 'success' });
+    expect(mockDatabaseService.$transaction).toHaveBeenCalledTimes(1);
+    expect(mockDatabaseService.file.delete).toHaveBeenCalled();
     expect(mockSqsService.pushMessage).toHaveBeenCalledWith({
       message: { s3Key: testS3Key },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

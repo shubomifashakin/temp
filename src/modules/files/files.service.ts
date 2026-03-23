@@ -270,43 +270,37 @@ export class FilesService {
   }
 
   async deleteSingleFile(userId: string, fileId: string) {
-    const s3Key = await this.databaseService.file.findUniqueOrThrow({
+    const fileExists = await this.databaseService.file.findUniqueOrThrow({
       where: {
         id: fileId,
         userId: userId,
       },
       select: {
         s3Key: true,
-        deletedAt: true,
       },
     });
 
-    if (s3Key.deletedAt) {
-      return { message: 'success' };
-    }
-
-    const queued = await this.sqsService.pushMessage({
-      message: { s3Key: s3Key.s3Key },
-      queueUrl: this.configService.SqsQueueUrl.data!,
-    });
-
-    if (!queued.success) {
-      this.logger.error({
-        error: queued.error,
-        message: 'Failed to queue file for deletion',
+    await this.databaseService.$transaction(async (tx) => {
+      await tx.file.delete({
+        where: {
+          id: fileId,
+          userId: userId,
+        },
       });
 
-      throw new InternalServerErrorException();
-    }
+      const queued = await this.sqsService.pushMessage({
+        message: { s3Key: fileExists.s3Key },
+        queueUrl: this.configService.SqsQueueUrl.data!,
+      });
 
-    await this.databaseService.file.update({
-      where: {
-        id: fileId,
-        userId: userId,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
+      if (!queued.success) {
+        this.logger.error({
+          error: queued.error,
+          message: 'Failed to queue file for deletion',
+        });
+
+        throw new InternalServerErrorException();
+      }
     });
 
     const { success, error } = await this.redisService.delete(
