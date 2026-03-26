@@ -1,4 +1,4 @@
-# Presigned POST URL
+# ADR-001: Presigned POST URL
 
 ## Status
 
@@ -27,16 +27,18 @@ We will use AWS S3's presigned POST URL functionality to generate temporary uplo
 
 ## Consequences
 
-- **Pros:**
-  - Reduced server load (files go directly to S3)
-  - Better upload performance for large files
-  - Automatic file size validation via S3
-  - Built-in security through expiration
+### Positive Outcomes
 
-- **Cons:**
-  - Additional complexity in URL generation
-  - URLs expire in 30minutes, requiring users to restart the upload process if the file failed to be uploaded during that window.
-  - Files may fail to upload after file metadata has already been created in db
+- Reduced server load (files go directly to S3)
+- Better upload performance for large files
+- Automatic file size validation via S3
+- Built-in security through expiration
+
+### Negative Outcomes
+
+- Additional complexity in URL generation
+- URLs expire in 30minutes, requiring users to restart the upload process if the file failed to be uploaded during that window.
+- Files may fail to upload after file metadata has already been created in db
 
 ## Alternatives
 
