@@ -67,7 +67,7 @@ export class FilesService {
   }
 
   async generateUploadUrl(dto: UploadFileDto, userId: string) {
-    let key = `${userId}/${uuid()}`;
+    let key = `uploads/${userId}/${uuid()}`;
 
     const fileWithNameeExist = await this.databaseService.file.findUnique({
       where: {
