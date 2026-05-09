@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 
 import { LinksModule } from './links/links.module';
-import { WebhooksModule } from './webhooks/webhooks.module';
 
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
@@ -24,7 +23,6 @@ import { PrometheusModule } from '../../core/prometheus/prometheus.module';
     S3Module,
     SqsModule,
     HasherModule,
-    WebhooksModule,
     PrometheusModule,
     LinksModule,
   ],

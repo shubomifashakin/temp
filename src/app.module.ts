@@ -17,6 +17,7 @@ import { FilesModule } from './modules/files/files.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { HealthModule } from './modules/health/health.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 
 import { S3Module } from './core/s3/s3.module';
@@ -197,6 +198,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
     MetricsModule,
     HealthModule,
     UsersModule,
+    WebhooksModule,
     FilesModule,
     SubscriptionsModule,
   ],
