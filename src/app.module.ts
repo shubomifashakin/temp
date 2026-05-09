@@ -14,6 +14,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { FilesModule } from './modules/files/files.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { HealthModule } from './modules/health/health.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
@@ -188,10 +189,10 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
     DatabaseModule,
     SqsModule,
     HasherModule,
-    SqsModule,
     PolarModule,
     S3Module,
     AuthModule,
+    SchedulerModule,
     PrometheusModule,
     MetricsModule,
     HealthModule,
