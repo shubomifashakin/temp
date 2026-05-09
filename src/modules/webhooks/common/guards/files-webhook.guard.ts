@@ -15,8 +15,8 @@ import { AppConfigService } from '../../../../core/app-config/app-config.service
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class WebhooksGuard implements CanActivate {
-  logger = new Logger(WebhooksGuard.name);
+export class FilesWebhooksGuard implements CanActivate {
+  logger = new Logger(FilesWebhooksGuard.name);
 
   constructor(private readonly configService: AppConfigService) {}
 
