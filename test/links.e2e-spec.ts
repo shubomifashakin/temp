@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import request from 'supertest';
 import { App } from 'supertest/types';
 
@@ -23,7 +24,7 @@ import { SqsService } from '../src/core/sqs/sqs.service';
 import { DatabaseService } from '../src/core/database/database.service';
 import { PrismaClientKnownRequestFilterFilter } from '../src/common/filters/prisma-client-known-request.filter';
 import { PrismaClientUnknownRequestFilterFilter } from '../src/common/filters/prisma-client-unknown-request.filter';
-import { createHmac } from 'node:crypto';
+import { RedisService } from '../src/core/redis/redis.service';
 
 const mockLogger = {
   error: jest.fn(),
@@ -35,7 +36,7 @@ const mockLogger = {
 
 const mockS3Service = {
   uploadToS3: jest.fn(),
-  generatePresignedGetUrl: jest.fn(),
+  generateCloudFrontSignedUrl: jest.fn(),
 };
 
 const mockSqsService = {
@@ -55,10 +56,11 @@ global.fetch = mockFetch;
 
 const testEmail = 'test@example.com';
 
-describe('FilesWebhooksController (e2e)', () => {
+describe('LinksController (e2e)', () => {
   let app: INestApplication<App>;
 
   let databaseService: DatabaseService;
+  let redisService: RedisService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -74,7 +76,7 @@ describe('FilesWebhooksController (e2e)', () => {
       .useValue(mockSqsService)
       .compile();
 
-    app = moduleFixture.createNestApplication({ rawBody: true });
+    app = moduleFixture.createNestApplication();
 
     app.useLogger(mockLogger);
     app.useGlobalPipes(
@@ -106,9 +108,11 @@ describe('FilesWebhooksController (e2e)', () => {
     await app.init();
 
     databaseService = moduleFixture.get(DatabaseService);
+    redisService = moduleFixture.get(RedisService);
 
     jest.clearAllMocks();
 
+    await redisService.flushAll();
     await databaseService.user.deleteMany();
     await databaseService.refreshToken.deleteMany();
   });
@@ -117,24 +121,127 @@ describe('FilesWebhooksController (e2e)', () => {
     await app.close();
   });
 
-  describe('POST /webhooks/files', () => {
+  describe('GET links/:shareId', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
+      await redisService.flushAll();
       await databaseService.user.deleteMany();
       await databaseService.refreshToken.deleteMany();
       await databaseService.file.deleteMany();
       await databaseService.link.deleteMany();
     });
 
-    it('should return 401 for missing signature', async () => {
-      const response = await request(app.getHttpServer()).post(
-        '/webhooks/files',
+    it('should return 404 for non-existent link', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/links/non-existent-link-id',
       );
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should get link details successfully', async () => {
+      const user = await databaseService.user.create({
+        data: {
+          id: 'test-user-id',
+          email: testEmail,
+          name: 'Test User',
+        },
+      });
+
+      const file = await databaseService.file.create({
+        data: {
+          id: 'test-file-id',
+          name: 'Test file',
+          userId: user.id,
+          s3Key: 'test-key',
+          contentType: 'text/plain',
+          size: 100,
+          description: 'Test file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        },
+      });
+
+      const link = await databaseService.link.create({
+        data: {
+          id: 'test-link-id',
+          fileId: file.id,
+          description: 'Test link',
+        },
+        select: {
+          shareId: true,
+        },
+      });
+
+      const response = await request(app.getHttpServer()).get(
+        `/links/${link.shareId}`,
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('description', 'Test link');
+      expect(response.body).toHaveProperty('fileCreator', 'Test User');
+    });
+  });
+
+  describe('POST /links/:shareId', () => {
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      await redisService.flushAll();
+      await databaseService.user.deleteMany();
+      await databaseService.refreshToken.deleteMany();
+      await databaseService.file.deleteMany();
+      await databaseService.link.deleteMany();
+    });
+
+    it('should return 404 for non-existent link', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/links/non-existent-link-id')
+        .send({});
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 401 for password-protected link without password', async () => {
+      const user = await databaseService.user.create({
+        data: {
+          id: 'test-user-id',
+          email: testEmail,
+          name: 'Test User',
+        },
+      });
+
+      const file = await databaseService.file.create({
+        data: {
+          id: 'test-file-id',
+          name: 'Test file',
+          userId: user.id,
+          s3Key: 'test-key',
+          contentType: 'text/plain',
+          size: 100,
+          description: 'Test file',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        },
+      });
+
+      const link = await databaseService.link.create({
+        data: {
+          id: 'test-link-id',
+          fileId: file.id,
+          password: 'hashed-password',
+          description: 'Test link',
+        },
+        select: {
+          shareId: true,
+        },
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/links/${link.shareId}`)
+        .send({});
 
       expect(response.status).toBe(401);
     });
 
-    it('should return 400 for invalid event', async () => {
+    it('should get file URL successfully', async () => {
       const user = await databaseService.user.create({
         data: {
           id: 'test-user-id',
@@ -156,224 +263,28 @@ describe('FilesWebhooksController (e2e)', () => {
         },
       });
 
-      const body = {
-        type: 'file:invalid',
+      const link = await databaseService.link.create({
         data: {
-          key: file.s3Key,
-          infected: false,
-        },
-        timestamp: new Date(),
-      };
-
-      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
-        .update(JSON.stringify(body))
-        .digest('hex');
-
-      const response = await request(app.getHttpServer())
-        .post(`/webhooks/files`)
-        .send(body)
-        .set('x-signature', signature);
-
-      expect(response.status).toBe(400);
-    });
-
-    it('should return 200 for validated file', async () => {
-      const user = await databaseService.user.create({
-        data: {
-          id: 'test-user-id',
-          email: testEmail,
-          name: 'Test User',
+          id: 'test-link-id',
+          fileId: file.id,
+          description: 'Test link',
         },
       });
 
-      const file = await databaseService.file.create({
-        data: {
-          id: 'test-file-id',
-          userId: user.id,
-          contentType: 'text/plain',
-          name: 'Test file',
-          s3Key: 'test-key',
-          size: 100,
-          description: 'Test file',
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        },
+      const presignedUrl = 'https://test-s3-url.com/file';
+      mockS3Service.generateCloudFrontSignedUrl.mockReturnValue({
+        success: true,
+        data: presignedUrl,
       });
 
-      const body = {
-        type: 'file:validated',
-        data: {
-          key: file.s3Key,
-          infected: false,
-        },
-        timestamp: new Date(),
-      };
-
-      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
-        .update(JSON.stringify(body))
-        .digest('hex');
-
       const response = await request(app.getHttpServer())
-        .post(`/webhooks/files`)
-        .send(body)
-        .set('x-signature', signature);
+        .post(`/links/${link.shareId}`)
+        .send({});
 
       expect(response.status).toBe(201);
-
-      const updatedFile = await databaseService.file.findUnique({
-        where: {
-          id: file.id,
-        },
-      });
-
-      expect(file.status).toBe('pending');
-
-      expect(updatedFile?.status).toBe('safe');
-    });
-
-    it('should ignore an old event', async () => {
-      const user = await databaseService.user.create({
-        data: {
-          id: 'test-user-id',
-          email: testEmail,
-          name: 'Test User',
-        },
-      });
-
-      const file = await databaseService.file.create({
-        data: {
-          id: 'test-file-id',
-          userId: user.id,
-          contentType: 'text/plain',
-          name: 'Test file',
-          s3Key: 'test-key',
-          size: 100,
-          description: 'Test file',
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-          lastEventAt: new Date(),
-        },
-      });
-
-      const body = {
-        type: 'file:validated',
-        data: {
-          key: file.s3Key,
-          infected: false,
-        },
-        timestamp: new Date(100),
-      };
-
-      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
-        .update(JSON.stringify(body))
-        .digest('hex');
-
-      const response = await request(app.getHttpServer())
-        .post(`/webhooks/files`)
-        .send(body)
-        .set('x-signature', signature);
-
-      expect(response.status).toBe(201);
-
-      const updatedFile = await databaseService.file.findUnique({
-        where: {
-          id: file.id,
-        },
-      });
-
-      expect(updatedFile?.lastEventAt).toEqual(file.lastEventAt);
-    });
-
-    it('should return 200 for deleted file', async () => {
-      const user = await databaseService.user.create({
-        data: {
-          id: 'test-user-id',
-          email: testEmail,
-          name: 'Test User',
-        },
-      });
-
-      const file = await databaseService.file.create({
-        data: {
-          id: 'test-file-id',
-          name: 'Test file',
-          userId: user.id,
-          s3Key: 'test-key',
-          contentType: 'text/plain',
-          size: 100,
-          description: 'Test file',
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        },
-      });
-
-      const body = {
-        type: 'file:deleted',
-        data: {
-          keys: [file.s3Key],
-          deletedAt: new Date(),
-        },
-        timestamp: new Date(),
-      };
-
-      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
-        .update(JSON.stringify(body))
-        .digest('hex');
-
-      const response = await request(app.getHttpServer())
-        .post(`/webhooks/files`)
-        .send(body)
-        .set('x-signature', signature);
-
-      expect(response.status).toBe(201);
-
-      const deletedFile = await databaseService.file.findUnique({
-        where: {
-          id: file.id,
-        },
-      });
-
-      expect(deletedFile).toBeNull();
-    });
-
-    it('should return 400 for invalid deleted file event', async () => {
-      const user = await databaseService.user.create({
-        data: {
-          id: 'test-user-id',
-          email: testEmail,
-          name: 'Test User',
-        },
-      });
-
-      const file = await databaseService.file.create({
-        data: {
-          id: 'test-file-id',
-          name: 'Test file',
-          userId: user.id,
-          s3Key: 'test-key',
-          contentType: 'text/plain',
-          size: 100,
-          description: 'Test file',
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        },
-      });
-
-      const body = {
-        type: 'file:deleted',
-        data: {
-          invalid: [file.s3Key],
-          deletedAt: new Date(),
-        },
-        timestamp: new Date(),
-      };
-
-      const signature = createHmac('sha256', process.env.FILES_WEBHOOKS_SECRET!)
-        .update(JSON.stringify(body))
-        .digest('hex');
-
-      const response = await request(app.getHttpServer())
-        .post(`/webhooks/files`)
-        .send(body)
-        .set('x-signature', signature);
-
-      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('url');
+      expect(response.body.url).toEqual(presignedUrl);
+      expect(mockS3Service.generateCloudFrontSignedUrl).toHaveBeenCalled();
     });
   });
 });
