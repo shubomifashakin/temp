@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 
-import { WebhooksModule } from './webhooks/webhooks.module';
-
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionsController } from './subscriptions.controller';
 
@@ -12,6 +10,6 @@ import { DatabaseModule } from '../../core/database/database.module';
 @Module({
   providers: [SubscriptionsService],
   controllers: [SubscriptionsController],
-  imports: [WebhooksModule, DatabaseModule, PolarModule, RedisModule],
+  imports: [DatabaseModule, PolarModule, RedisModule],
 })
 export class SubscriptionsModule {}
