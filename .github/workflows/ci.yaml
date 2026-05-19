@@ -113,7 +113,7 @@ jobs:
 
           AWS_REGION: us-east-1
           S3_BUCKET_NAME: test-bucket
-          SQS_QUEUE_URL: http://amazonawsqueue.com/queue/test
+          FILE_DELETION_QUEUE_URL: http://amazonawsqueue.com/queue/test
           AWS_SECRET_KEY: dummy-aws-secret-key
           AWS_ACCESS_KEY: dummy-aws-access-key
 

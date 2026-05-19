@@ -209,9 +209,11 @@ export class AppConfigService {
     }
   }
 
-  get SqsQueueUrl(): FnResult<string> {
+  get FileDeletionQueueUrl(): FnResult<string> {
     try {
-      const url = this.configService.getOrThrow<string>('SQS_QUEUE_URL');
+      const url = this.configService.getOrThrow<string>(
+        'FILE_DELETION_QUEUE_URL',
+      );
 
       return { success: true, data: url, error: null };
     } catch (error) {

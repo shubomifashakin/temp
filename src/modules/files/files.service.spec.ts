@@ -55,7 +55,7 @@ const mockAppConfigService = {
     success: true,
     error: null,
   },
-  SqsQueueUrl: {
+  FileDeletionQueueUrl: {
     data: 'test-value',
     success: true,
     error: null,

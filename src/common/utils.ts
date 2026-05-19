@@ -104,7 +104,7 @@ class EnvConfig {
   S3_BUCKET_NAME: string;
 
   @IsUrl()
-  SQS_QUEUE_URL: string;
+  FILE_DELETION_QUEUE_URL: string;
 
   @IsString()
   @IsNotEmpty()
