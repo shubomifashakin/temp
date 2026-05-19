@@ -287,7 +287,7 @@ export class FilesService {
 
       const queued = await this.sqsService.pushMessage({
         message: { s3Key: fileExists.s3Key },
-        queueUrl: this.configService.SqsQueueUrl.data!,
+        queueUrl: this.configService.FileDeletionQueueUrl.data!,
       });
 
       if (!queued.success) {
