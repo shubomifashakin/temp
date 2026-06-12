@@ -25,6 +25,9 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
     this.client = createClient({
       name: configService.ServiceName.data!,
       url: configService.RedisUrl.data,
+      commandOptions: { timeout: 10000 },
+      socket: { keepAliveInitialDelay: 5000 },
+      maintNotifications: 'disabled',
     });
   }
 
