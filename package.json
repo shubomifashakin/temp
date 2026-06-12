@@ -21,11 +21,11 @@
     "update:nest": "npx npm-check-updates \"@nestjs/*\" -u && npm install"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1032.0",
-    "@aws-sdk/client-sqs": "^3.1032.0",
-    "@aws-sdk/cloudfront-signer": "^3.1031.0",
-    "@aws-sdk/s3-presigned-post": "^3.1032.0",
-    "@aws-sdk/s3-request-presigner": "^3.1032.0",
+    "@aws-sdk/client-s3": "^3.1067.0",
+    "@aws-sdk/client-sqs": "^3.1067.0",
+    "@aws-sdk/cloudfront-signer": "^3.1064.0",
+    "@aws-sdk/s3-presigned-post": "^3.1067.0",
+    "@aws-sdk/s3-request-presigner": "^3.1067.0",
     "@nestjs/common": "^11.1.26",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.26",
