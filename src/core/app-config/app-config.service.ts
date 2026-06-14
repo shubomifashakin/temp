@@ -42,10 +42,12 @@ export class AppConfigService {
   get CloudfrontPrivateKey(): FnResult<string> {
     try {
       const key = this.configService.getOrThrow<string>(
-        'CLOUDFRONT_PRIVATE_KEY',
+        'CLOUDFRONT_PRIVATE_KEY_BASE64',
       );
 
-      return { success: true, data: key, error: null };
+      const decodedKey = Buffer.from(key, 'base64').toString('utf-8');
+
+      return { success: true, data: decodedKey, error: null };
     } catch (error) {
       return { success: false, data: null, error: makeError(error) };
     }
@@ -171,9 +173,13 @@ export class AppConfigService {
 
   get JwtPrivateKey(): FnResult<string> {
     try {
-      const key = this.configService.getOrThrow<string>('JWT_PRIVATE_KEY');
+      const key = this.configService.getOrThrow<string>(
+        'JWT_PRIVATE_KEY_BASE64',
+      );
 
-      return { success: true, data: key, error: null };
+      const decodedKey = Buffer.from(key, 'base64').toString('utf-8');
+
+      return { success: true, data: decodedKey, error: null };
     } catch (error) {
       return { success: false, data: null, error: makeError(error) };
     }
@@ -181,9 +187,13 @@ export class AppConfigService {
 
   get JwtPublicKey(): FnResult<string> {
     try {
-      const key = this.configService.getOrThrow<string>('JWT_PUBLIC_KEY');
+      const key = this.configService.getOrThrow<string>(
+        'JWT_PUBLIC_KEY_BASE64',
+      );
 
-      return { success: true, data: key, error: null };
+      const decodedKey = Buffer.from(key, 'base64').toString('utf-8');
+
+      return { success: true, data: decodedKey, error: null };
     } catch (error) {
       return { success: false, data: null, error: makeError(error) };
     }

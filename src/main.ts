@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -16,6 +15,7 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { PrismaClientKnownRequestFilterFilter } from './common/filters/prisma-client-known-request.filter';
 import { PrismaClientUnknownRequestFilterFilter } from './common/filters/prisma-client-unknown-request.filter';
+import { AppConfigService } from './core/app-config/app-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -23,18 +23,18 @@ async function bootstrap() {
     bufferLogs: true,
   });
 
-  const config = app.get(ConfigService);
+  const configService = app.get(AppConfigService);
   app.enableCors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     origin: [
       'http://localhost:3000',
       'http://localhost:3001',
-      config.get('FRONTEND_URL')!,
+      configService.FrontendUrl.data!,
     ],
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (configService.NodeEnv.data !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Temp Api Docs')
       .setDescription('The Temp api documentation')

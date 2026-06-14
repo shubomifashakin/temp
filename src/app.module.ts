@@ -1,10 +1,10 @@
 import { Request } from 'express';
 
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Module, RequestMethod } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { v4 as uuid } from 'uuid';
@@ -30,6 +30,7 @@ import { HasherModule } from './core/hasher/hasher.module';
 import { DatabaseModule } from './core/database/database.module';
 import { PrometheusModule } from './core/prometheus/prometheus.module';
 import { AppConfigModule } from './core/app-config/app-config.module';
+import { AppConfigService } from './core/app-config/app-config.service';
 
 import { validateConfig } from './common/utils';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
@@ -46,8 +47,8 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
     }),
     JwtModule.registerAsync({
       global: true,
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
+      imports: [AppConfigModule],
+      useFactory: (configService: AppConfigService) => {
         return {
           signOptions: {
             expiresIn: '10m',
@@ -57,14 +58,14 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
             algorithms: ['RS256'],
           },
           secretOrKeyProvider() {
-            return configService.get<string>('JWT_PRIVATE_KEY')!;
+            return configService.JwtPrivateKey.data!;
           },
-          secret: configService.get<string>('JWT_SECRET')!,
-          privateKey: configService.get<string>('JWT_PRIVATE_KEY')!,
-          publicKey: configService.get<string>('JWT_PUBLIC_KEY')!,
+          secret: configService.JwtPrivateKey.data!,
+          privateKey: configService.JwtPrivateKey.data!,
+          publicKey: configService.JwtPublicKey.data!,
         };
       },
-      inject: [ConfigService],
+      inject: [AppConfigService],
     }),
     LoggerModule.forRoot({
       pinoHttp: {
