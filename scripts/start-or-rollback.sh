@@ -8,8 +8,9 @@ echo "Pulling latest images..."
 cd "$PROJECT_DIR"
 docker compose pull
 
-echo "Starting containers..."
-docker compose up -d --force-recreate --wait --wait-timeout=120
+echo "Starting containers with Doppler secrets..."
+doppler run --token "$DOPPLER_TOKEN" -- \
+  docker compose up -d --force-recreate --wait --wait-timeout=120
 EXIT_CODE=$?
 
 docker compose logs --tail=50
@@ -46,9 +47,10 @@ if [ -n "$LAST_SHA" ]; then
   sed -i "s|$DOCKER_USERNAME/temp:latest|$DOCKER_USERNAME/temp:$LAST_SHA|g" "$PROJECT_DIR/docker-compose.yml"
 fi
 
-echo "Starting previous deployment.."
-docker compose pull
-docker compose up -d --force-recreate --wait --wait-timeout=120
+echo "Starting previous deployment with Doppler secrets..."
+doppler run --token "$DOPPLER_TOKEN" -- \
+  docker compose pull && \
+  docker compose up -d --force-recreate --wait --wait-timeout=120
 ROLLBACK_EXIT_CODE=$?
 
 docker compose logs --tail=50
