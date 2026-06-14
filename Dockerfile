@@ -18,6 +18,10 @@ RUN npm prune --omit=dev
 
 FROM node:24-slim
 
+RUN apt-get update -y \
+  && apt-get upgrade -y \
+  && rm -rf /var/lib/apt/lists/*
+  
 WORKDIR /app
 
 COPY --from=builder /app/package*.json ./
