@@ -75,12 +75,13 @@ jobs:
           host: ${{ secrets.HOSTNAME }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKER_USERNAME,CURRENT_SHA,REMOTE_USER
+          envs: DOCKER_USERNAME,CURRENT_SHA,REMOTE_USER,DOPPLER_TOKEN
           script_path: ./scripts/migrate.sh
         env:
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
           CURRENT_SHA: ${{ github.sha }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -118,11 +119,12 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_path: ./scripts/start-or-rollback.sh
-          envs: REMOTE_USER,CURRENT_SHA,DOCKER_USERNAME
+          envs: REMOTE_USER,CURRENT_SHA,DOCKER_USERNAME,DOPPLER_TOKEN
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           CURRENT_SHA: ${{ github.sha }}
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
   notify:
     name: Notify Discord

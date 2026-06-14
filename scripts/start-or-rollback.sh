@@ -3,13 +3,30 @@
 PROJECT_DIR="/home/$REMOTE_USER/projects/temp"
 BACKUP_DIR="$PROJECT_DIR/backup"
 SHA_FILE="$PROJECT_DIR/.last_deployment_sha"
+ENV_FILE="$PROJECT_DIR/.env"
 
-echo "Pulling latest images..."
+trap 'rm -f "$ENV_FILE"' EXIT
+
+echo "Generating .env from Doppler..."
+
+doppler secrets download \
+  --token "$DOPPLER_TOKEN" \
+  --format env \
+  --no-file \
+  > "$ENV_FILE"
+
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "Failed to generate .env from Doppler"
+  exit 1
+fi
+
+chmod 600 "$ENV_FILE"
+
 cd "$PROJECT_DIR"
-docker compose pull
 
-echo "Starting containers..."
-docker compose up -d --force-recreate --wait --wait-timeout=120
+echo "Starting containers"
+docker compose up --pull always -d --force-recreate --wait --wait-timeout=180
 EXIT_CODE=$?
 
 docker compose logs --tail=50
@@ -46,9 +63,9 @@ if [ -n "$LAST_SHA" ]; then
   sed -i "s|$DOCKER_USERNAME/temp:latest|$DOCKER_USERNAME/temp:$LAST_SHA|g" "$PROJECT_DIR/docker-compose.yml"
 fi
 
-echo "Starting previous deployment.."
-docker compose pull
-docker compose up -d --force-recreate --wait --wait-timeout=120
+echo "Starting previous deployment with Doppler secrets..."
+
+docker compose up --pull always -d --force-recreate --wait --wait-timeout=180
 ROLLBACK_EXIT_CODE=$?
 
 docker compose logs --tail=50
