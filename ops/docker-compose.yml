@@ -39,22 +39,6 @@ services:
     restart: unless-stopped
     networks:
       - system_wide_network
-
-  migrations-temp:
-    image: 545plea/temp:latest
-    container_name: temp_migrations
-    env_file:
-      - ./.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: npx prisma migrate deploy
-    restart: no
-    networks:
-      - system_wide_network
-
   temp:
     image: 545plea/temp:latest
     container_name: temp
@@ -68,8 +52,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      migrations-temp:
-        condition: service_completed_successfully
     healthcheck:
       test:
         [

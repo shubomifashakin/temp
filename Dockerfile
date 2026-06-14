@@ -1,6 +1,8 @@
 FROM node:24-slim AS builder
 
-RUN apt-get update -y && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y \
+  && apt-get install -y openssl wget \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -20,8 +22,9 @@ FROM node:24-slim
 
 RUN apt-get update -y \
   && apt-get upgrade -y \
+  && apt-get install -y openssl wget \
   && rm -rf /var/lib/apt/lists/*
-  
+
 WORKDIR /app
 
 COPY --from=builder /app/package*.json ./
@@ -29,6 +32,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./ 
+
+# Fix permissions before switching to node user
+RUN chown -R node:node /app
 
 USER node
 
