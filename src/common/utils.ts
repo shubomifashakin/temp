@@ -25,13 +25,11 @@ class EnvConfig {
 
   @IsString()
   @IsNotEmpty()
-  @Transform(({ value }: { value: string }) => value.replace(/\n/g, ''))
-  JWT_PRIVATE_KEY: string;
+  JWT_PRIVATE_KEY_BASE64: string;
 
   @IsString()
   @IsNotEmpty()
-  @Transform(({ value }: { value: string }) => value.replace(/\n/g, ''))
-  JWT_PUBLIC_KEY: string;
+  JWT_PUBLIC_KEY_BASE64: string;
 
   @IsString()
   @IsNotEmpty()
@@ -117,8 +115,7 @@ class EnvConfig {
 
   @IsString()
   @IsNotEmpty()
-  @Transform(({ value }: { value: string }) => value.replace(/\n/g, ''))
-  CLOUDFRONT_PRIVATE_KEY: string;
+  CLOUDFRONT_PRIVATE_KEY_BASE64: string;
 
   @IsNumber()
   @Min(1)
