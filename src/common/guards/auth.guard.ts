@@ -8,6 +8,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
@@ -112,12 +113,16 @@ export class AuthGuard implements CanActivate {
 
         return true;
       } catch (error: unknown) {
+        if (error instanceof UnauthorizedException) {
+          throw error;
+        }
+
         this.logger.error({
           message: 'Failed to verify access token',
           error,
         });
 
-        throw new UnauthorizedException('Unauthorized');
+        throw new InternalServerErrorException();
       }
     }
 
