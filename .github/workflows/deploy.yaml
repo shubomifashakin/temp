@@ -54,14 +54,15 @@ jobs:
           image-ref: ${{ vars.DOCKER_USERNAME }}/temp:${{ github.sha }}
           scan-type: 'image'
           ignore-unfixed: true
-          format: sarif
-          output: 'trivy-results.sarif'
+          format: table
+          scanners: 'vuln'
+          # output: 'trivy-results.sarif'
 
-      - name: Upload Image Scan Results to Github Secutity
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: trivy-results.sarif
+      # - name: Upload Image Scan Results to Github Secutity
+      #   uses: github/codeql-action/upload-sarif@v4
+      # if: always()
+      #   with:
+      #     sarif_file: trivy-results.sarif
 
       - name: Push Docker Image
         run: |
