@@ -23,49 +23,65 @@ export class FilesWebhooksGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const rawBody = request.rawBody;
+    try {
+      const request = context.switchToHttp().getRequest<Request>();
+      const rawBody = request.rawBody;
 
-    const incomingSignature = Array.isArray(request.headers['x-signature'])
-      ? request.headers['x-signature']?.[0]
-      : request.headers['x-signature'];
+      const incomingSignature = Array.isArray(request.headers['x-signature'])
+        ? request.headers['x-signature']?.[0]
+        : request.headers['x-signature'];
 
-    if (!incomingSignature) {
-      throw new UnauthorizedException('Missing signature');
-    }
+      if (!incomingSignature) {
+        throw new UnauthorizedException('Missing signature');
+      }
 
-    if (!rawBody) {
+      if (!rawBody) {
+        this.logger.error({
+          message: 'Raw body not available',
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      const secret = this.configService.FilesWebhooksSecret;
+
+      if (!secret.success) {
+        this.logger.error({
+          message: 'Webhooks secret not configured',
+          error: secret.error,
+        });
+
+        throw new InternalServerErrorException();
+      }
+
+      const expectedSignature = createHmac('sha256', secret.data)
+        .update(rawBody)
+        .digest('hex');
+
+      const isValid = timingSafeEqual(
+        Buffer.from(expectedSignature),
+        Buffer.from(incomingSignature),
+      );
+
+      if (!isValid) {
+        throw new UnauthorizedException('Invalid webhook signature');
+      }
+
+      return true;
+    } catch (error: unknown) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+
       this.logger.error({
-        message: 'Raw body not available',
+        message: 'Failed to validate files webhook signature',
+        error,
       });
 
       throw new InternalServerErrorException();
     }
-
-    const secret = this.configService.FilesWebhooksSecret;
-
-    if (!secret.success) {
-      this.logger.error({
-        message: 'Webhooks secret not configured',
-        error: secret.error,
-      });
-
-      throw new InternalServerErrorException();
-    }
-
-    const expectedSignature = createHmac('sha256', secret.data)
-      .update(rawBody)
-      .digest('hex');
-
-    const isValid = timingSafeEqual(
-      Buffer.from(expectedSignature),
-      Buffer.from(incomingSignature),
-    );
-
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid webhook signature');
-    }
-
-    return true;
   }
 }
