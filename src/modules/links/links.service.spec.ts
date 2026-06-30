@@ -1,10 +1,6 @@
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  BadRequestException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { LinksService } from './links.service';
 import { makePresignedUrlCacheKey } from '../files/common/utils';
@@ -287,7 +283,7 @@ describe('LinksService', () => {
       service.getLinkFile(testShareId, {
         password: undefined,
       }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should not generate the presigned url for the file since link has been revoked', async () => {
@@ -309,7 +305,7 @@ describe('LinksService', () => {
       service.getLinkFile(testShareId, {
         password: undefined,
       }),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should not generate the presigned url for the file since file has been deleted', async () => {

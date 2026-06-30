@@ -28,7 +28,10 @@ export class LinksController {
   @ApiResponse({ status: 200, type: GetLinkFileResponse })
   @ApiResponse({ status: 401, description: 'Invalid password' })
   @ApiResponse({ status: 400, description: 'Link has been revoked' })
-  @ApiResponse({ status: 404, description: 'Link does not exist' })
+  @ApiResponse({
+    status: 404,
+    description: 'Link does not exist, has been revoked or has expired',
+  })
   @Post(':shareId')
   async getLinkFile(
     @Body() dto: GetLinkFileDto,

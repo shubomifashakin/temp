@@ -2,7 +2,6 @@ import {
   Logger,
   Injectable,
   NotFoundException,
-  BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -99,13 +98,12 @@ export class LinksService {
     });
 
     if (linkFound.expiresAt && new Date() > linkFound.expiresAt) {
-      throw new BadRequestException('This link has expired');
+      throw new NotFoundException('This link has expired');
     }
 
     if (linkFound.revokedAt) {
-      throw new BadRequestException('This link has been revoked');
+      throw new NotFoundException('This link has been revoked');
     }
-
     if (
       !linkFound.file ||
       (linkFound.file.expiresAt && new Date() > linkFound.file.expiresAt)
