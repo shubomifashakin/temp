@@ -1,0 +1,13 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Allow dummy test secrets in CI workflow"
+commits = [
+  "efee421d8d60fd80b932a4025e914382509c704b",
+  "dd9f809f1fb202cd659c2f2a39a447a0a72bb035"
+]
+
+[[allowlists]]
+description = "Allow empty placeholders in .env.example"
+paths = ['''\.env\.example''']
