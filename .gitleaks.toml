@@ -12,4 +12,6 @@ commits = [
 
 [[allowlists]]
 description = "Allow empty placeholders in .env.example"
-paths = ['''\.env\.example''']
+commits = [
+  "76d36b2860f96e5ee5e8dc1fc4783bd47f5639d6"
+]
