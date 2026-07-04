@@ -18,14 +18,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "update:nest": "npx npm-check-updates \"@nestjs/*\" -u && npm install"
+    "update:nest": "npx npm-check-updates \"@nestjs/*\" -u && npm install",
+    "update:aws": "npx npm-check-updates \"@aws-sdk/*\" -u && npm install"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1067.0",
-    "@aws-sdk/client-sqs": "^3.1067.0",
-    "@aws-sdk/cloudfront-signer": "^3.1064.0",
-    "@aws-sdk/s3-presigned-post": "^3.1067.0",
-    "@aws-sdk/s3-request-presigner": "^3.1067.0",
+    "@aws-sdk/client-s3": "^3.1079.0",
+    "@aws-sdk/client-sqs": "^3.1079.0",
+    "@aws-sdk/cloudfront-signer": "^3.1078.0",
+    "@aws-sdk/s3-presigned-post": "^3.1079.0",
+    "@aws-sdk/s3-request-presigner": "^3.1079.0",
     "@nestjs/common": "^11.1.27",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.27",
@@ -51,7 +52,7 @@
     "redis": "^6.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
@@ -66,7 +67,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^24.13.2",
     "@types/pg": "^8.20.0",
-    "@types/supertest": "^6.0.3",
+    "@types/supertest": "^7.2.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
