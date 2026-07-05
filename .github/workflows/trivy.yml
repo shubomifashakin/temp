@@ -29,6 +29,7 @@ jobs:
           exit-code: '1'
           scanners: 'vuln'
           severity: 'HIGH,CRITICAL'
+          cache: false
 
       - name: Upload to security tab
         uses: github/codeql-action/upload-sarif@v3
