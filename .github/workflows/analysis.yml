@@ -27,6 +27,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           exit-code: '1'
+          scanners: 'vuln'
           severity: 'HIGH,CRITICAL'
 
       - name: Upload to security tab
