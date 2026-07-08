@@ -36,10 +36,23 @@ if [ $EXIT_CODE -eq 0 ]; then
   echo "Backing up sha..."
   echo "$CURRENT_SHA" > "$SHA_FILE"
   echo "Backup complete"
-  exit 0
-fi
+  
+  echo "Reloading nginx configuration..."
+  docker exec nginx -t
 
-echo "Deployment failed, attempting rollback..."
+  if [ $? -eq 0 ]; then
+    echo "Nginx config test passed, reloading..."
+    docker exec nginx -s reload
+  fi
+
+  if [ $? -ne 0 ]; then
+    echo "Failed to reload nginx"
+    exit 1
+  else
+    echo "Nginx reloaded successfully"
+    exit 0
+  fi
+fi
 
 if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A $BACKUP_DIR 2>/dev/null)" ]; then
   echo "No backup found, first deployment. Exiting."
