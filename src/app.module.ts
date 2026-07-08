@@ -80,25 +80,11 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
           environment: process.env.NODE_ENV,
         },
         timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
-        transport: {
-          targets:
-            process.env.NODE_ENV !== 'production'
-              ? [{ target: 'pino-pretty' }]
-              : [
-                  {
-                    target: 'pino-roll',
-                    level: 'info',
-                    options: {
-                      file: './logs/combined.log',
-                      mkdir: true,
-                      size: '2m',
-                      frequency: 'daily',
-                      limit: { count: 1 },
-                      dateFormat: 'dd-MM-yyyy',
-                    },
-                  },
-                ],
-        },
+        ...(process.env.NODE_ENV !== 'production' && {
+          transport: {
+            targets: [{ target: 'pino-pretty' }],
+          },
+        }),
         redact: {
           paths: [
             'req.headers.authorization',
