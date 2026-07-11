@@ -1,12 +1,3 @@
-# CVE-2026-5079 - multer 2.1.1, transitive dep via @nestjs/platform-express
-# Waiting for @nestjs/platform-express to ship with multer 2.2.0+
-# Remove once nestjs updates their multer dependency
-CVE-2026-5079
-
-# CVE-2026-5038 - multer 2.1.1, transitive dep via @nestjs/platform-express
-# Same as above
-CVE-2026-5038
-
 # CVE-2026-12151 - undici bundled in node:24-slim, not yet patched upstream
 # Temp is a WS server not client, low risk
 # Remove once node:24-slim ships with undici 6.27.0+
