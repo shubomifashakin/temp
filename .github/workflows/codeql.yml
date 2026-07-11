@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - dev
-  schedule:
-    - cron: '0 0 * * *' # Run daily at midnight
   workflow_dispatch:
 
 permissions:
