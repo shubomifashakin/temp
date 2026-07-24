@@ -30,7 +30,7 @@ export class SchedulerService {
       where: {
         status: 'pending',
         createdAt: {
-          lt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+          lt: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
       },
       limit: 100,
