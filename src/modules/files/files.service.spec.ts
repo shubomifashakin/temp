@@ -77,6 +77,10 @@ const mockS3Service = {
   uploadToS3: jest.fn(),
   generatePresignedPostUrl: jest.fn(),
   generatePresignedGetUrl: jest.fn(),
+  createMultipartUpload: jest.fn(),
+  signUploadPart: jest.fn(),
+  completeMultipartUpload: jest.fn(),
+  abortMultipartUpload: jest.fn(),
 };
 
 const mockSqsService = {
@@ -178,7 +182,7 @@ describe('FilesService', () => {
       testUserId,
     );
 
-    expect(res).toEqual({ url: 'test-url', fields: {} });
+    expect(res).toEqual({ type: 'presigned-post', url: 'test-url', fields: {} });
     expect(mockIncrement).toHaveBeenCalledWith({ lifetime: 'short' }, 1);
     expect(mockObserve).toHaveBeenCalledWith({ lifetime: 'short' }, 200);
   });
@@ -260,7 +264,7 @@ describe('FilesService', () => {
     );
 
     expect(mockDatabaseService.file.create).not.toHaveBeenCalled();
-    expect(res).toEqual({ url: 'test-url', fields: {} });
+    expect(res).toEqual({ type: 'presigned-post', url: 'test-url', fields: {} });
   });
 
   it('should get all files', async () => {
@@ -510,6 +514,284 @@ describe('FilesService', () => {
     const res = await service.getFileLinks('test-user-id', 'test-file-id');
 
     expect(res).toEqual({ data: [], hasNextPage: false, cursor: null });
+  });
+
+  const LARGE_FILE_SIZE = 600 * 1024 * 1024; // above 500MB MULTIPART_THRESHOLD_BYTES
+
+  describe('initiateMultipartUpload', () => {
+    it('should initiate a multipart upload for files above the threshold', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue(null);
+      mockS3Service.createMultipartUpload.mockResolvedValue({
+        success: true,
+        data: 'test-upload-id',
+        error: null,
+      });
+      mockDatabaseService.file.create.mockResolvedValue({ id: 'test-file-id' });
+
+      const res = await service.generateUploadUrl(
+        {
+          description: 'Large file',
+          lifetime: 'short',
+          name: 'large-video.mp4',
+          contentType: 'video/mp4',
+          fileSizeBytes: LARGE_FILE_SIZE,
+        },
+        'test-user-id',
+      );
+
+      expect(res).toMatchObject({
+        type: 'multipart',
+        fileId: 'test-file-id',
+        uploadId: 'test-upload-id',
+      });
+      expect(mockS3Service.createMultipartUpload).toHaveBeenCalled();
+      expect(mockS3Service.generatePresignedPostUrl).not.toHaveBeenCalled();
+    });
+
+    it('should reuse existing pending file and update its multipartUploadId', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        id: 'existing-file-id',
+        s3Key: 'uploads/user/existing-key',
+        status: 'pending',
+      });
+      mockS3Service.createMultipartUpload.mockResolvedValue({
+        success: true,
+        data: 'new-upload-id',
+        error: null,
+      });
+      mockDatabaseService.file.update.mockResolvedValue({});
+
+      const res = await service.generateUploadUrl(
+        {
+          description: 'Large file',
+          lifetime: 'short',
+          name: 'large-video.mp4',
+          contentType: 'video/mp4',
+          fileSizeBytes: LARGE_FILE_SIZE,
+        },
+        'test-user-id',
+      );
+
+      expect(mockDatabaseService.file.create).not.toHaveBeenCalled();
+      expect(mockDatabaseService.file.update).toHaveBeenCalledWith({
+        where: { id: 'existing-file-id' },
+        data: { multipartUploadId: 'new-upload-id' },
+      });
+      expect(res).toMatchObject({ type: 'multipart', fileId: 'existing-file-id' });
+    });
+
+    it('should throw BadRequestException if a non-pending file with the same name exists', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        id: 'existing-file-id',
+        status: 'safe',
+      });
+
+      await expect(
+        service.generateUploadUrl(
+          {
+            description: 'Large file',
+            lifetime: 'short',
+            name: 'large-video.mp4',
+            contentType: 'video/mp4',
+            fileSizeBytes: LARGE_FILE_SIZE,
+          },
+          'test-user-id',
+        ),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw InternalServerErrorException if S3 multipart creation fails', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue(null);
+      mockS3Service.createMultipartUpload.mockResolvedValue({
+        success: false,
+        data: null,
+        error: new Error('S3 error'),
+      });
+
+      await expect(
+        service.generateUploadUrl(
+          {
+            description: 'Large file',
+            lifetime: 'short',
+            name: 'large-video.mp4',
+            contentType: 'video/mp4',
+            fileSizeBytes: LARGE_FILE_SIZE,
+          },
+          'test-user-id',
+        ),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('signMultipartPart', () => {
+    it('should return a presigned URL for an upload part', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+        status: 'pending',
+      });
+      mockS3Service.signUploadPart.mockResolvedValue({
+        success: true,
+        data: 'https://s3.amazonaws.com/presigned',
+        error: null,
+      });
+
+      const res = await service.signMultipartPart('test-user-id', 'test-file-id', 1);
+
+      expect(res).toEqual({ url: 'https://s3.amazonaws.com/presigned' });
+      expect(mockS3Service.signUploadPart).toHaveBeenCalledWith(
+        expect.objectContaining({ partNumber: 1, uploadId: 'test-upload-id' }),
+      );
+    });
+
+    it('should throw NotFoundException when file is not found', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.signMultipartPart('test-user-id', 'test-file-id', 1),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException when file has no multipartUploadId', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: null,
+        status: 'safe',
+      });
+
+      await expect(
+        service.signMultipartPart('test-user-id', 'test-file-id', 1),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when file is not in pending state', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+        status: 'unscanned',
+      });
+
+      await expect(
+        service.signMultipartPart('test-user-id', 'test-file-id', 1),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw InternalServerErrorException if S3 signing fails', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+        status: 'pending',
+      });
+      mockS3Service.signUploadPart.mockResolvedValue({
+        success: false,
+        data: null,
+        error: new Error('S3 error'),
+      });
+
+      await expect(
+        service.signMultipartPart('test-user-id', 'test-file-id', 1),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('completeMultipartUpload', () => {
+    const parts = [
+      { partNumber: 1, etag: 'etag-1' },
+      { partNumber: 2, etag: 'etag-2' },
+    ];
+
+    it('should complete the upload and set file status to unscanned', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+        status: 'pending',
+      });
+      mockS3Service.completeMultipartUpload.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+      mockDatabaseService.file.update.mockResolvedValue({});
+
+      const res = await service.completeMultipartUpload(
+        'test-user-id',
+        'test-file-id',
+        parts,
+      );
+
+      expect(res).toEqual({ message: 'success' });
+      expect(mockDatabaseService.file.update).toHaveBeenCalledWith({
+        where: { id: 'test-file-id' },
+        data: { multipartUploadId: null, status: 'unscanned' },
+      });
+    });
+
+    it('should throw NotFoundException when multipart upload does not exist', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.completeMultipartUpload('test-user-id', 'test-file-id', parts),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw InternalServerErrorException if S3 complete fails', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+        status: 'pending',
+      });
+      mockS3Service.completeMultipartUpload.mockResolvedValue({
+        success: false,
+        error: new Error('S3 error'),
+      });
+
+      await expect(
+        service.completeMultipartUpload('test-user-id', 'test-file-id', parts),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('abortMultipartUpload', () => {
+    it('should abort the upload and delete the file record', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+      });
+      mockS3Service.abortMultipartUpload.mockResolvedValue({
+        success: true,
+        error: null,
+      });
+      mockDatabaseService.file.delete.mockResolvedValue({});
+
+      const res = await service.abortMultipartUpload('test-user-id', 'test-file-id');
+
+      expect(res).toEqual({ message: 'success' });
+      expect(mockDatabaseService.file.delete).toHaveBeenCalledWith({
+        where: { id: 'test-file-id' },
+      });
+    });
+
+    it('should throw NotFoundException when multipart upload does not exist', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.abortMultipartUpload('test-user-id', 'test-file-id'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw InternalServerErrorException if S3 abort fails', async () => {
+      mockDatabaseService.file.findUnique.mockResolvedValue({
+        s3Key: 'uploads/user/file',
+        multipartUploadId: 'test-upload-id',
+      });
+      mockS3Service.abortMultipartUpload.mockResolvedValue({
+        success: false,
+        error: new Error('S3 error'),
+      });
+
+      await expect(
+        service.abortMultipartUpload('test-user-id', 'test-file-id'),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
   });
 
   it('should revoke link', async () => {

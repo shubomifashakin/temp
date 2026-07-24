@@ -46,7 +46,12 @@ import { GetFilesResponseDto } from './dtos/get-files-response.dto';
 import { CreateLinkResponseDto } from './dtos/create-link-response.dto';
 import { GetFileLinksResponseDto } from './dtos/get-file-links-response.dto';
 import { CreateLinkGuard } from './common/guards/create-link.guard';
-import { UploadFileResponseDto } from './dtos/upload-file-response.dto';
+import {
+  PresignedPostResponseDto,
+  MultipartInitiatedResponseDto,
+} from './dtos/upload-file-response.dto';
+import { SignPartDto } from './dtos/sign-part.dto';
+import { CompleteMultipartUploadDto } from './dtos/complete-multipart-upload.dto';
 
 @ApiCookieAuth('access_token')
 @UseGuards(AuthGuard)
@@ -57,11 +62,20 @@ export class FilesController {
 
   @Throttle({ default: { limit: 10, ttl: 60 } })
   @UseInterceptors(SubscriptionPlanInterceptor)
-  @ApiOperation({ summary: 'Request a presigned url for upload' })
+  @ApiOperation({
+    summary: 'Request an upload URL',
+    description:
+      'Returns a presigned POST URL for files ≤500MB, or a multipart upload initiation response for larger files. Check the `type` field to determine which flow to use.',
+  })
   @ApiResponse({
     status: 201,
-    description: 'File upload link was successfully generated.',
-    type: UploadFileResponseDto,
+    description: 'Presigned POST upload URL (files ≤500MB)',
+    type: PresignedPostResponseDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Multipart upload initiated (files >500MB)',
+    type: MultipartInitiatedResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiPayloadTooLargeResponse({
@@ -75,7 +89,7 @@ export class FilesController {
   async generateUploadUrl(
     @Req() req: Request,
     @Body() body: UploadFileDto,
-  ): Promise<UploadFileResponseDto> {
+  ): Promise<MultipartInitiatedResponseDto | PresignedPostResponseDto> {
     if (!req.user.plan) {
       this.logger.error({
         message: 'User plan is undefined',
@@ -261,5 +275,55 @@ export class FilesController {
     @Param('linkId') linkId: string,
   ) {
     return this.filesService.updateLink(req.user.id, fileId, linkId, dto);
+  }
+
+  @ApiOperation({ summary: 'Sign a presigned URL for a single multipart part' })
+  @ApiParam({
+    name: 'id',
+    description: 'File id returned from upload initiation',
+  })
+  @ApiBody({ type: SignPartDto })
+  @ApiResponse({ status: 201, description: 'Presigned URL for the part' })
+  @ApiResponse({ status: 404, description: 'Multipart upload not found' })
+  @Post(':id/parts')
+  async signMultipartPart(
+    @Req() req: Request,
+    @Param('id') fileId: string,
+    @Body() dto: SignPartDto,
+  ) {
+    return this.filesService.signMultipartPart(
+      req.user.id,
+      fileId,
+      dto.partNumber,
+    );
+  }
+
+  @ApiOperation({ summary: 'Complete a multipart upload' })
+  @ApiParam({ name: 'id', description: 'File id' })
+  @ApiBody({ type: CompleteMultipartUploadDto })
+  @ApiResponse({ status: 201, description: 'Upload completed' })
+  @ApiResponse({ status: 404, description: 'Multipart upload not found' })
+  @Post(':id/complete')
+  async completeMultipartUpload(
+    @Req() req: Request,
+    @Param('id') fileId: string,
+    @Body() dto: CompleteMultipartUploadDto,
+  ) {
+    return this.filesService.completeMultipartUpload(
+      req.user.id,
+      fileId,
+      dto.parts,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Abort a multipart upload and delete the file record',
+  })
+  @ApiParam({ name: 'id', description: 'File id' })
+  @ApiResponse({ status: 200, description: 'Upload aborted' })
+  @ApiResponse({ status: 404, description: 'Multipart upload not found' })
+  @Delete(':id/multipart')
+  async abortMultipartUpload(@Req() req: Request, @Param('id') fileId: string) {
+    return this.filesService.abortMultipartUpload(req.user.id, fileId);
   }
 }
