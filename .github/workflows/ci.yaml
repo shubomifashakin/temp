@@ -68,6 +68,20 @@ jobs:
         ports:
           - 6379:6379
 
+      clamd:
+        image: clamav/clamav:1.5-debian
+        ports:
+          - 3310:3310
+        env:
+          CLAMD_CONF_MaxFileSize: 0
+          CLAMD_CONF_StreamMaxLength: 0
+        options: >-
+          --health-cmd clamdcheck.sh
+          --health-interval 30s
+          --health-timeout 25s
+          --health-retries 5
+          --health-start-period 120s
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -89,52 +103,14 @@ jobs:
       - name: Run prisma generate
         run: npx prisma generate
 
+      - name: Load test environment
+        run: cat .env.test >> $GITHUB_ENV
+
       - name: Run e2e tests
         run: npm run test:e2e
         env:
           DATABASE_URL: postgres://postgres:postgres_123@localhost:5432/postgres
           REDIS_URL: redis://localhost:6379
-          NODE_ENV: test
-
-          SERVICE_NAME: test-service
-          BASE_URL: http://localhost:3000
-          FRONTEND_URL: http://localhost:3001
-          LOG_LEVEL: info
-          DOMAIN: localhost
-
-          GOOGLE_CLIENT_ID: dummy-google-client-id
-          GOOGLE_CLIENT_SECRET: dummy-google-client-secret
-          JWT_PRIVATE_KEY_BASE64: dGVzdC1wcml2YXRlLWtleQ==
-          JWT_PUBLIC_KEY_BASE64: dGVzdC1wdWJsaWMta2V5
-
-          AWS_REGION: us-east-1
-          S3_BUCKET_NAME: test-bucket
-          FILE_DELETION_QUEUE_URL: http://amazonawsqueue.com/queue/test
-          SCAN_QUEUE_URL: http://amazonawsqueue.com/queue/test
-          INFECTED_FILES_QUEUE_URL: http://amazonawsqueue.com/queue/test
-          AWS_SECRET_KEY: dummy-aws-secret-key
-          AWS_ACCESS_KEY: dummy-aws-access-key
-
-          METRICS_BEARER_TOKEN: dummy-metrics-token
-          FILES_WEBHOOKS_SECRET: dummy-files-webhook-secret
-
-          POLAR_WEBHOOK_SECRET: dummy-polar-webhook-secret
-          POLAR_PRODUCT_PRO: dummy-product-id
-          POLAR_ACCESS_TOKEN: dummy-polar-access-token
-          POLAR_ORGANIZATION_ID: dummy-org-id
-
-          CHECKOUT_RETURN_URL: http://localhost:3001/checkout/return
-          CHECKOUT_SUCCESS_URL: http://localhost:3001/checkout/success
-
-          CLOUDFRONT_PUBLIC_KEY_ID: dummy-cloudfront-public-key-id
-          CLOUDFRONT_DISTRIBUTION_DOMAIN: https://dummy-cloudfront-distribution-domain.com
-          CLOUDFRONT_PRIVATE_KEY_BASE64: dGVzdC1jbG91ZGZyb250LXByaXZhdGUta2V5
-
-          UPLOAD_PRESIGNED_POST_URL_TTL_SECONDS: 1800
-          LINKS_PRESIGNED_GET_URL_TTL_SECONDS: 1800
-
-          CLAMAV_HOST: localhost
-          CLAMAV_PORT: 3310
 
   notify:
     name: Notify Discord
