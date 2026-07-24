@@ -70,7 +70,7 @@ export class LinksService {
       fileCreator: link.file.user.name,
       fileStatus: link.file.status,
       fileUploadedAt: link.file.createdAt,
-      fileSize: link.file.size,
+      fileSize: Number(link.file.size),
       fileDescription: link.file.description,
       fileCreatorPicture: link.file.user.picture,
       fileContentType: link.file.contentType,

@@ -104,6 +104,12 @@ class EnvConfig {
   @IsUrl()
   FILE_DELETION_QUEUE_URL: string;
 
+  @IsUrl()
+  SCAN_QUEUE_URL: string;
+
+  @IsUrl()
+  INFECTED_FILES_QUEUE_URL: string;
+
   @IsString()
   @IsNotEmpty()
   @IsUrl()
