@@ -554,7 +554,7 @@ export class FilesService {
       where: { id: fileId, userId },
     });
 
-    if (file.status !== 'safe') {
+    if (file.status !== 'safe' && file.status !== 'unscanned') {
       throw new BadRequestException('File is not safe');
     }
 

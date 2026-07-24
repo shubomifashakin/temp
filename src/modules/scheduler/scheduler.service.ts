@@ -98,13 +98,23 @@ export class SchedulerService {
       return;
     }
 
-    const { success, data: stream } = await this.s3Service.getObjectStream({
+    const { data: stream, error } = await this.s3Service.getObjectStream({
       key: s3Key,
       bucket,
     });
 
-    if (!success || !stream) {
-      this.logger.error({ message: 'Failed to stream S3 object', s3Key });
+    if (error) {
+      this.logger.error({
+        message: 'Failed to stream S3 object',
+        s3Key,
+        error,
+      });
+
+      return;
+    }
+
+    if (!stream) {
+      this.logger.warn({ message: 'No stream exists for key', s3Key });
       return;
     }
 

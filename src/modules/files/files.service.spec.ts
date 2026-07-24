@@ -182,7 +182,11 @@ describe('FilesService', () => {
       testUserId,
     );
 
-    expect(res).toEqual({ type: 'presigned-post', url: 'test-url', fields: {} });
+    expect(res).toEqual({
+      type: 'presigned-post',
+      url: 'test-url',
+      fields: {},
+    });
     expect(mockIncrement).toHaveBeenCalledWith({ lifetime: 'short' }, 1);
     expect(mockObserve).toHaveBeenCalledWith({ lifetime: 'short' }, 200);
   });
@@ -264,7 +268,11 @@ describe('FilesService', () => {
     );
 
     expect(mockDatabaseService.file.create).not.toHaveBeenCalled();
-    expect(res).toEqual({ type: 'presigned-post', url: 'test-url', fields: {} });
+    expect(res).toEqual({
+      type: 'presigned-post',
+      url: 'test-url',
+      fields: {},
+    });
   });
 
   it('should get all files', async () => {
@@ -452,13 +460,57 @@ describe('FilesService', () => {
     );
   });
 
-  it('should not generate link for file that is not safe', async () => {
+  it('should generate link for an unscanned file', async () => {
+    const testFileId = 'test-file-id';
+    const testUserId = 'test-user-id';
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
+      id: testFileId,
+      size: 200,
+      status: 'unscanned',
+      deleted_at: null,
+      expires_at: new Date(Date.now() * 100),
+      password: null,
+    });
+
+    const testLinkId = 'test-link-id';
+    mockDatabaseService.link.create.mockResolvedValue({ id: testLinkId });
+
+    const res = await service.createLink(testUserId, testFileId, {
+      description: 'Test file',
+      expiresAt: new Date(),
+      password: undefined,
+    });
+
+    expect(res).toEqual({ id: testLinkId });
+  });
+
+  it('should not generate link for file that is pending', async () => {
     const testFileId = 'test-file-id';
     const testUserId = 'test-user-id';
     mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
       id: testFileId,
       size: 200,
       status: 'pending',
+      expiresAt: new Date(Date.now() * 100),
+      password: null,
+    });
+
+    await expect(
+      service.createLink(testUserId, testFileId, {
+        description: 'Test file',
+        expiresAt: new Date(),
+        password: 'test-password',
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('should not generate link for file that is unsafe', async () => {
+    const testFileId = 'test-file-id';
+    const testUserId = 'test-user-id';
+    mockDatabaseService.file.findUniqueOrThrow.mockResolvedValue({
+      id: testFileId,
+      size: 200,
+      status: 'unsafe',
       expiresAt: new Date(Date.now() * 100),
       password: null,
     });
@@ -577,7 +629,10 @@ describe('FilesService', () => {
         where: { id: 'existing-file-id' },
         data: { multipartUploadId: 'new-upload-id' },
       });
-      expect(res).toMatchObject({ type: 'multipart', fileId: 'existing-file-id' });
+      expect(res).toMatchObject({
+        type: 'multipart',
+        fileId: 'existing-file-id',
+      });
     });
 
     it('should throw BadRequestException if a non-pending file with the same name exists', async () => {
@@ -636,7 +691,11 @@ describe('FilesService', () => {
         error: null,
       });
 
-      const res = await service.signMultipartPart('test-user-id', 'test-file-id', 1);
+      const res = await service.signMultipartPart(
+        'test-user-id',
+        'test-file-id',
+        1,
+      );
 
       expect(res).toEqual({ url: 'https://s3.amazonaws.com/presigned' });
       expect(mockS3Service.signUploadPart).toHaveBeenCalledWith(
@@ -762,7 +821,10 @@ describe('FilesService', () => {
       });
       mockDatabaseService.file.delete.mockResolvedValue({});
 
-      const res = await service.abortMultipartUpload('test-user-id', 'test-file-id');
+      const res = await service.abortMultipartUpload(
+        'test-user-id',
+        'test-file-id',
+      );
 
       expect(res).toEqual({ message: 'success' });
       expect(mockDatabaseService.file.delete).toHaveBeenCalledWith({
