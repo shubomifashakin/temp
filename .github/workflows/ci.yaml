@@ -133,6 +133,9 @@ jobs:
           UPLOAD_PRESIGNED_POST_URL_TTL_SECONDS: 1800
           LINKS_PRESIGNED_GET_URL_TTL_SECONDS: 1800
 
+          CLAMAV_HOST: localhost
+          CLAMAV_PORT: 3310
+
   notify:
     name: Notify Discord
     runs-on: ubuntu-latest
