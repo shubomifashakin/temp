@@ -339,4 +339,46 @@ export class AppConfigService {
       return { success: false, data: null, error: makeError(error) };
     }
   }
+
+  get ScanQueueUrl(): FnResult<string> {
+    try {
+      const url = this.configService.getOrThrow<string>('SCAN_QUEUE_URL');
+
+      return { success: true, data: url, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  get InfectedFilesQueueUrl(): FnResult<string> {
+    try {
+      const url = this.configService.getOrThrow<string>(
+        'INFECTED_FILES_QUEUE_URL',
+      );
+
+      return { success: true, data: url, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  get ClamavHost(): FnResult<string> {
+    try {
+      const url = this.configService.getOrThrow<string>('CLAMAV_HOST');
+
+      return { success: true, data: url, error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
+
+  get ClamavPort(): FnResult<number> {
+    try {
+      const port = this.configService.getOrThrow<string>('CLAMAV_PORT');
+
+      return { success: true, data: Number.parseInt(port), error: null };
+    } catch (error) {
+      return { success: false, data: null, error: makeError(error) };
+    }
+  }
 }

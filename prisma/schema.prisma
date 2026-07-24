@@ -17,6 +17,7 @@ enum FileStatus {
   safe
   unsafe
   pending
+  unscanned
 }
 
 model User {
@@ -73,10 +74,11 @@ model File {
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
   expiresAt DateTime   @map("expires_at")
-  size      Int
+  size      BigInt
   status    FileStatus @default(pending)
 
-  lastEventAt DateTime? @map("last_event_at")
+  lastEventAt       DateTime? @map("last_event_at")
+  multipartUploadId String?   @map("multipart_upload_id")
 
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

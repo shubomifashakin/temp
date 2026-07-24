@@ -15,3 +15,9 @@ description = "Allow empty placeholders in .env.example"
 commits = [
   "76d36b2860f96e5ee5e8dc1fc4783bd47f5639d6"
 ]
+
+[[allowlists]]
+description = "Allow dummy test values in .env.test"
+paths = [
+  '''.env\.test'''
+]

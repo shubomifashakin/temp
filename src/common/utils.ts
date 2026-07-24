@@ -57,6 +57,14 @@ class EnvConfig {
 
   @IsString()
   @IsNotEmpty()
+  CLAMAV_HOST: string;
+
+  @IsString()
+  @IsNotEmpty()
+  CLAMAV_PORT: string;
+
+  @IsString()
+  @IsNotEmpty()
   FILES_WEBHOOKS_SECRET: string;
 
   @IsString()
@@ -103,6 +111,12 @@ class EnvConfig {
 
   @IsUrl()
   FILE_DELETION_QUEUE_URL: string;
+
+  @IsUrl()
+  SCAN_QUEUE_URL: string;
+
+  @IsUrl()
+  INFECTED_FILES_QUEUE_URL: string;
 
   @IsString()
   @IsNotEmpty()

@@ -2,3 +2,12 @@
 # Temp is a WS server not client, low risk
 # Remove once node:24-slim ships with undici 6.27.0+
 CVE-2026-12151
+
+# fast-uri - transitive dep via ajv (pulled in by @nestjs/cli, @nestjs/schematics, prisma)
+# Remove once upstream packages update their ajv dependency
+CVE-2026-13676
+CVE-2026-16221
+
+# js-yaml 5.2.1 - nested under @nestjs/swagger/node_modules/js-yaml
+# Remove once @nestjs/swagger updates its js-yaml dependency
+GHSA-pm4m-ph32-ghv5
