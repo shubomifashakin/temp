@@ -34,6 +34,26 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  clamd:
+    container_name: clamd
+    image: clamav/clamav:1.5-debian
+    mem_limit: 1g
+    ports:
+      - 3310:3310
+    environment:
+      - CLAMD_CONF_MaxFileSize=0
+      - CLAMD_CONF_StreamMaxLength=0
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ['CMD', 'clamdcheck.sh']
+      interval: 30s
+      timeout: 25s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
+  clamav_data:

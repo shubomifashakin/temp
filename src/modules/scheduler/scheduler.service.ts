@@ -1,26 +1,50 @@
-import { spawn } from 'child_process';
-
 import { Cron, Interval } from '@nestjs/schedule';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+
+import NodeClam from 'clamscan';
+
+import Stream from 'node:stream';
 
 import { S3Service } from '../../core/s3/s3.service';
 import { SqsService } from '../../core/sqs/sqs.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { AppConfigService } from '../../core/app-config/app-config.service';
 
-const CLAMAV_BIN = '/usr/bin/clamscan';
-
 @Injectable()
-export class SchedulerService {
+export class SchedulerService implements OnModuleInit {
   private readonly logger = new Logger(SchedulerService.name);
   private isScanning = false;
+  private readonly clamscan: NodeClam;
 
   constructor(
     private readonly s3Service: S3Service,
     private readonly sqsService: SqsService,
     private readonly configService: AppConfigService,
     private readonly databaseService: DatabaseService,
-  ) {}
+  ) {
+    if (
+      !this.configService.ClamavHost.data ||
+      !this.configService.ClamavPort.data
+    ) {
+      throw new Error('Clamav not configured');
+    }
+
+    this.clamscan = new NodeClam();
+  }
+
+  async onModuleInit() {
+    await this.clamscan.init({
+      removeInfected: false,
+      clamdscan: {
+        host: this.configService.ClamavHost.data!,
+        port: this.configService.ClamavPort.data!,
+        timeout: 600_000,
+        localFallback: false,
+        multiscan: true,
+      },
+      preference: 'clamdscan',
+    });
+  }
 
   @Cron('0 0 * * *', { name: 'metadata-cleanup', waitForCompletion: true })
   async handleMetadataCleanup() {
@@ -193,25 +217,17 @@ export class SchedulerService {
         Records?: Array<{ s3?: { object?: { key?: string } } }>;
       };
       const key = parsed.Records?.[0]?.s3?.object?.key;
-      return key ? decodeURIComponent(key) : null;
+      return key ? decodeURIComponent(key.replace(/\+/g, ' ')) : null;
     } catch {
       return null;
     }
   }
 
-  private scanStream(stream: NodeJS.ReadableStream): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const clamscan = spawn(CLAMAV_BIN, [
-        '--no-summary',
-        '--max-filesize=0',
-        '--max-scansize=0',
-        '-',
-      ]);
+  private async scanStream(stream: NodeJS.ReadableStream): Promise<boolean> {
+    const { isInfected } = await this.clamscan.scanStream(
+      stream as Stream.Readable,
+    );
 
-      stream.pipe(clamscan.stdin);
-
-      clamscan.on('close', (code) => resolve(code === 1));
-      clamscan.on('error', reject);
-    });
+    return isInfected;
   }
 }

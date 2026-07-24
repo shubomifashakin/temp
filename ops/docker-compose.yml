@@ -52,6 +52,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      clamd:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -70,9 +72,30 @@ services:
     networks:
       - system_wide_network
 
+  clamd:
+    container_name: clamd
+    image: clamav/clamav:1.5-debian
+    mem_limit: 2g
+    environment:
+      - CLAMD_CONF_MaxFileSize=0
+      - CLAMD_CONF_StreamMaxLength=0
+      - FRESHCLAM_CONF_Checks=1
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ['CMD', 'clamdcheck.sh']
+      interval: 30s
+      timeout: 25s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - system_wide_network
+
 volumes:
   postgres_18_data_temp:
   redis_data_temp:
+  clamav_data:
 
 networks:
   system_wide_network:
