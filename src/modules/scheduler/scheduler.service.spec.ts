@@ -23,6 +23,7 @@ const mockDatabaseService = {
   file: {
     deleteMany: jest.fn(),
     updateMany: jest.fn(),
+    findFirst: jest.fn(),
   },
 };
 
@@ -185,6 +186,10 @@ describe('SchedulerService', () => {
         success: true,
         data: [{ body: makeSqsBody(key), receiptHandle: 'rh-1' }],
       });
+      mockDatabaseService.file.findFirst.mockResolvedValueOnce({
+        s3Key: key,
+        status: 'pending',
+      });
       mockS3Service.getObjectStream.mockResolvedValueOnce({
         success: true,
         data: createMockStream(),
@@ -211,6 +216,10 @@ describe('SchedulerService', () => {
         success: true,
         data: [{ body: makeSqsBody(key), receiptHandle: 'rh-2' }],
       });
+      mockDatabaseService.file.findFirst.mockResolvedValueOnce({
+        s3Key: key,
+        status: 'pending',
+      });
       mockS3Service.getObjectStream.mockResolvedValueOnce({
         success: true,
         data: createMockStream(),
@@ -230,6 +239,24 @@ describe('SchedulerService', () => {
         message: { s3Key: key },
       });
       expect(mockSqsService.deleteMessage).toHaveBeenCalled();
+    });
+
+    it('should skip and delete message when file is not found in the database', async () => {
+      const key = 'uploads/user/ghost.png';
+      mockSqsService.receiveMessages.mockResolvedValueOnce({
+        success: true,
+        data: [{ body: makeSqsBody(key), receiptHandle: 'rh-ghost' }],
+      });
+      mockDatabaseService.file.findFirst.mockResolvedValueOnce(null);
+      mockSqsService.deleteMessage.mockResolvedValue({ success: true });
+
+      await service.handleFileScan();
+
+      expect(mockS3Service.getObjectStream).not.toHaveBeenCalled();
+      expect(mockSqsService.deleteMessage).toHaveBeenCalledWith({
+        queueUrl: mockAppConfigService.ScanQueueUrl.data,
+        receiptHandle: 'rh-ghost',
+      });
     });
 
     it('should discard a message with an invalid body and delete it from the queue', async () => {
@@ -254,6 +281,10 @@ describe('SchedulerService', () => {
       mockSqsService.receiveMessages.mockResolvedValueOnce({
         success: true,
         data: [{ body: makeSqsBody(encoded), receiptHandle: 'rh-4' }],
+      });
+      mockDatabaseService.file.findFirst.mockResolvedValueOnce({
+        s3Key: decoded,
+        status: 'pending',
       });
       mockS3Service.getObjectStream.mockResolvedValueOnce({
         success: true,
@@ -284,6 +315,9 @@ describe('SchedulerService', () => {
           receiptHandle: `rh-${i}`,
         })),
       });
+      mockDatabaseService.file.findFirst.mockResolvedValue({
+        status: 'pending',
+      });
       mockS3Service.getObjectStream.mockResolvedValue({
         success: true,
         data: createMockStream(),
@@ -306,6 +340,34 @@ describe('SchedulerService', () => {
       await service.handleFileScan().catch(() => {});
 
       expect((service as any).isScanning).toBe(false);
+    });
+
+    it('should skip processing if file is not in pending state', async () => {
+      const key = 'uploads/user/already-processed.png';
+      mockSqsService.receiveMessages.mockResolvedValueOnce({
+        success: true,
+        data: [{ body: makeSqsBody(key), receiptHandle: 'rh-5' }],
+      });
+      mockS3Service.getObjectStream.mockResolvedValueOnce({
+        success: true,
+        data: createMockStream(),
+      });
+      mockDatabaseService.file.findFirst.mockResolvedValueOnce({
+        s3Key: key,
+        status: 'safe',
+      });
+      mockSqsService.deleteMessage.mockResolvedValue({ success: true });
+
+      await service.handleFileScan();
+
+      expect(mockDatabaseService.file.findFirst).toHaveBeenCalledWith({
+        where: { s3Key: key },
+      });
+      expect(mockS3Service.getObjectStream).not.toHaveBeenCalled();
+      expect(mockSqsService.deleteMessage).toHaveBeenCalledWith({
+        queueUrl: mockAppConfigService.ScanQueueUrl.data,
+        receiptHandle: 'rh-5',
+      });
     });
   });
 });

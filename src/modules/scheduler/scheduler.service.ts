@@ -83,12 +83,48 @@ export class SchedulerService {
 
     if (!s3Key) {
       this.logger.warn({
-        message: 'Could not extract S3 key from SQS message, discarding',
+        message:
+          'Could not extract S3 key from SQS message, invalid message, discarding',
       });
+
       await this.sqsService.deleteMessage({
         queueUrl: scanQueueUrl,
         receiptHandle: message.receiptHandle,
       });
+
+      return;
+    }
+
+    const file = await this.databaseService.file.findFirst({
+      where: { s3Key },
+    });
+
+    if (!file) {
+      this.logger.warn({
+        message: 'File does not exist in db, skipping',
+        s3Key,
+      });
+
+      await this.sqsService.deleteMessage({
+        queueUrl: scanQueueUrl,
+        receiptHandle: message.receiptHandle,
+      });
+
+      return;
+    }
+
+    if (file.status !== 'pending') {
+      this.logger.log({
+        message: 'File already processed, skipping',
+        s3Key,
+        status: file.status,
+      });
+
+      await this.sqsService.deleteMessage({
+        queueUrl: scanQueueUrl,
+        receiptHandle: message.receiptHandle,
+      });
+
       return;
     }
 
