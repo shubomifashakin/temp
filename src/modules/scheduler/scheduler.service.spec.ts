@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call */
-import { EventEmitter } from 'events';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import { Readable } from 'stream';
 
 import { ConfigModule } from '@nestjs/config';
@@ -12,12 +11,14 @@ import { SqsService } from '../../core/sqs/sqs.service';
 import { DatabaseService } from '../../core/database/database.service';
 import { AppConfigService } from '../../core/app-config/app-config.service';
 
-jest.mock('child_process', () => ({
-  spawn: jest.fn(),
-}));
+const mockScanStream = jest.fn();
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { spawn } = require('child_process') as { spawn: jest.Mock };
+jest.mock('clamscan', () => {
+  return jest.fn().mockImplementation(() => ({
+    init: jest.fn().mockResolvedValue(undefined),
+    scanStream: mockScanStream,
+  }));
+});
 
 const mockDatabaseService = {
   file: {
@@ -54,6 +55,8 @@ const mockAppConfigService = {
     success: true,
     error: null,
   },
+  ClamavHost: { data: '127.0.0.1', success: true, error: null },
+  ClamavPort: { data: 3310, success: true, error: null },
 };
 
 const makeSqsBody = (key: string) =>
@@ -65,19 +68,6 @@ const createMockStream = () =>
       this.push(null);
     },
   });
-
-const makeProc = (exitCode: number) => {
-  const proc = new EventEmitter() as any;
-  const stdin = new EventEmitter() as any;
-  stdin.write = jest.fn().mockReturnValue(true);
-  stdin.end = jest.fn();
-  proc.stdin = stdin;
-  setImmediate(() => proc.emit('close', exitCode));
-  return proc;
-};
-
-const makeCleanProc = () => makeProc(0);
-const makeInfectedProc = () => makeProc(1);
 
 describe('SchedulerService', () => {
   let service: SchedulerService;
@@ -196,7 +186,7 @@ describe('SchedulerService', () => {
       });
       mockDatabaseService.file.updateMany.mockResolvedValueOnce({ count: 1 });
       mockSqsService.deleteMessage.mockResolvedValue({ success: true });
-      spawn.mockReturnValue(makeCleanProc());
+      mockScanStream.mockResolvedValueOnce({ isInfected: false });
 
       await service.handleFileScan();
 
@@ -227,7 +217,7 @@ describe('SchedulerService', () => {
       mockDatabaseService.file.deleteMany.mockResolvedValueOnce({ count: 1 });
       mockSqsService.pushMessage.mockResolvedValue({ success: true });
       mockSqsService.deleteMessage.mockResolvedValue({ success: true });
-      spawn.mockReturnValue(makeInfectedProc());
+      mockScanStream.mockResolvedValueOnce({ isInfected: true });
 
       await service.handleFileScan();
 
@@ -292,7 +282,7 @@ describe('SchedulerService', () => {
       });
       mockDatabaseService.file.updateMany.mockResolvedValueOnce({ count: 1 });
       mockSqsService.deleteMessage.mockResolvedValue({ success: true });
-      spawn.mockReturnValue(makeCleanProc());
+      mockScanStream.mockResolvedValueOnce({ isInfected: false });
 
       await service.handleFileScan();
 
@@ -324,7 +314,7 @@ describe('SchedulerService', () => {
       });
       mockDatabaseService.file.updateMany.mockResolvedValue({ count: 1 });
       mockSqsService.deleteMessage.mockResolvedValue({ success: true });
-      spawn.mockImplementation(() => makeCleanProc());
+      mockScanStream.mockResolvedValue({ isInfected: false });
 
       await service.handleFileScan();
 
