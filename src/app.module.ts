@@ -157,7 +157,10 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
             const req = ctx.switchToHttp().getRequest<Request>();
 
             const key =
-              req?.user?.id || req?.ip || req?.ips?.[0] || 'unknown-ip';
+              req?.user?.id ||
+              (req.headers['cf-connecting-ip'] as string) ||
+              req?.ip ||
+              'unknown-ip';
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const route = req.route?.path || req.path;
