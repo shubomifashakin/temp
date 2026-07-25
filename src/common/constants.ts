@@ -57,7 +57,7 @@ export const mappedPolarIntervals: Record<
 
 export const benefits = {
   [Plan.free]: [
-    'Max file size of 25mb',
+    'Max file size of 500mb',
     '7 day retention',
     '1 link per file',
     'Virus Scanning',
@@ -67,7 +67,7 @@ export const benefits = {
     'Everything in free',
     '14 & 31 day retention',
     'Unlimited links',
-    'Max file size of 150mb',
-    'All new features',
+    'Resumable Uploads',
+    'Max file size of 150GB',
   ],
 };
