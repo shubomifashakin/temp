@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -20,6 +21,7 @@ export class LinksController {
     return this.linksService.getLinkDetails(shareId);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60 } })
   @ApiOperation({
     summary: 'Get linked file',
     description: 'Returns the file URL',
