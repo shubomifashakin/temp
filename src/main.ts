@@ -49,7 +49,7 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   app.use(cookieParser());
-  app.set('trust proxy', true);
+  app.set('trust proxy', 1);
 
   app.enableVersioning({
     defaultVersion: '1',
