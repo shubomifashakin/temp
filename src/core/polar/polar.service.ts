@@ -19,7 +19,6 @@ import { EventType } from '@polar-sh/sdk/models/operations/webhookslistwebhookde
 
 import { makeError } from '../../common/utils';
 import { FnResult } from '../../types/common.types';
-import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval';
 
 import { AppConfigService } from '../app-config/app-config.service';
 import { BillingInterval, Plan } from '../../../generated/prisma/enums';
@@ -195,7 +194,7 @@ export class PolarService {
 
   polarProductIdToPlan(
     productId: string,
-    interval: SubscriptionRecurringInterval,
+    interval: string,
   ): FnResult<{ plan: Plan; benefits: string[]; interval: BillingInterval }> {
     const polarProId = this.configService.PolarProductIdPro.data;
 

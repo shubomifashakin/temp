@@ -1,8 +1,6 @@
 import { Algorithm } from 'jsonwebtoken';
 import { BillingInterval, Plan } from '../../generated/prisma/enums';
 
-import { SubscriptionRecurringInterval } from '@polar-sh/sdk/models/components/subscriptionrecurringinterval.js';
-
 export const DAYS_1 = 60 * 60 * 24;
 export const DAYS_1_MS = DAYS_1 * 1000;
 export const DAYS_7 = 60 * 60 * 24 * 7;
@@ -45,14 +43,11 @@ export const MESSAGES = {
 
 export const DEFAULT_JWT_ALG: Algorithm = 'RS256';
 
-export const mappedPolarIntervals: Record<
-  SubscriptionRecurringInterval,
-  BillingInterval
-> = {
-  [SubscriptionRecurringInterval.Day]: BillingInterval.day,
-  [SubscriptionRecurringInterval.Year]: BillingInterval.year,
-  [SubscriptionRecurringInterval.Week]: BillingInterval.week,
-  [SubscriptionRecurringInterval.Month]: BillingInterval.month,
+export const mappedPolarIntervals: Record<string, BillingInterval> = {
+  day: BillingInterval.day,
+  year: BillingInterval.year,
+  week: BillingInterval.week,
+  month: BillingInterval.month,
 };
 
 export const benefits = {
