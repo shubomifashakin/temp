@@ -7,6 +7,14 @@ CVE-2026-12151
 # Remove once upstream packages update their ajv dependency
 CVE-2026-13676
 CVE-2026-16221
+CVE-2026-18446
+
+# brace-expansion / ip-address - dev-only transitive deps (jest, @nestjs/cli)
+# confirmed not in prod tree via npm ls --omit=dev
+# Remove once upstream packages update their dependencies
+CVE-2026-14257
+CVE-2026-69152
+CVE-2026-69192
 
 # js-yaml 5.2.1 - nested under @nestjs/swagger/node_modules/js-yaml
 # Remove once @nestjs/swagger updates its js-yaml dependency
