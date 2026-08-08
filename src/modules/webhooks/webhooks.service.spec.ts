@@ -238,6 +238,11 @@ describe('WebhooksService', () => {
         trialEnd: null,
         endsAt: null,
         discountId: null,
+        currentMeterPeriodStart: null,
+        currentMeterPeriodEnd: null,
+        pauseAtPeriodEnd: false,
+        pausedAt: null,
+        resumesAt: null,
       };
 
       const res = await service.handlePolarEvent(
@@ -309,6 +314,11 @@ describe('WebhooksService', () => {
         trialEnd: null,
         endsAt: null,
         discountId: null,
+        currentMeterPeriodStart: null,
+        currentMeterPeriodEnd: null,
+        pauseAtPeriodEnd: false,
+        pausedAt: null,
+        resumesAt: null,
       };
 
       const timestamp = new Date();
@@ -417,6 +427,11 @@ describe('WebhooksService', () => {
         trialEnd: null,
         endsAt: null,
         discountId: null,
+        currentMeterPeriodStart: null,
+        currentMeterPeriodEnd: null,
+        pauseAtPeriodEnd: false,
+        pausedAt: null,
+        resumesAt: null,
       };
 
       const timestamp = new Date();
@@ -531,6 +546,11 @@ describe('WebhooksService', () => {
         trialEnd: null,
         endsAt: null,
         discountId: null,
+        currentMeterPeriodStart: null,
+        currentMeterPeriodEnd: null,
+        pauseAtPeriodEnd: false,
+        pausedAt: null,
+        resumesAt: null,
       };
 
       const timestamp = new Date();
@@ -584,6 +604,11 @@ describe('WebhooksService', () => {
           endsAt: date,
           customerCancellationComment: '',
           customerCancellationReason: null,
+          currentMeterPeriodStart: null,
+          currentMeterPeriodEnd: null,
+          pauseAtPeriodEnd: false,
+          pausedAt: null,
+          resumesAt: null,
         },
         status: 'paid',
         billingReason: 'subscription_cycle',
