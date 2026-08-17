@@ -2,6 +2,21 @@ services:
   postgres:
     container_name: temp_postgres
     image: postgres:18.1
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:3100/loki/api/v1/push'
+        loki-external-labels: 'container={{.Name}}'
+        loki-pipeline-stages: |
+          - regex:
+              expression: '(?i)\[?\d+\]?\s+(?P<level>LOG|INFO|WARNING|ERROR|FATAL|PANIC|DEBUG):'
+          - template:
+              source: level
+              template: '{{ ToLower .Value }}'
+          - labels:
+              level:
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - postgres_18_data_temp:/var/lib/postgresql
       - ./postgres.conf:/etc/postgresql/postgresql.conf
@@ -27,6 +42,13 @@ services:
     container_name: temp_redis
     image: redis:8.4
     mem_limit: 256m
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:3100/loki/api/v1/push'
+        loki-external-labels: 'container={{.Name}}'
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - redis_data_temp:/data
       - ./redis.conf:/etc/redis/redis.conf
@@ -43,8 +65,31 @@ services:
     image: 545plea/temp:latest
     container_name: temp
     mem_limit: 512m
-    volumes:
-      - ./logs:/app/logs
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:3100/loki/api/v1/push'
+        loki-external-labels: 'container={{.Name}}'
+        loki-pipeline-stages: |
+          - json:
+              expressions:
+                level: level_label
+                timestamp: timestamp
+                message: message
+                environment: environment
+                service: service
+          - labels:
+              level:
+              service:
+              environment:
+          - timestamp:
+              source: timestamp
+              format: "2006-01-02T15:04:05.000Z"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     env_file:
       - ./.env
     depends_on:
@@ -76,6 +121,13 @@ services:
     container_name: clamd
     image: clamav/clamav:1.5-debian
     mem_limit: 2g
+    logging:
+      driver: loki
+      options:
+        loki-url: 'http://loki:3100/loki/api/v1/push'
+        loki-external-labels: 'container={{.Name}}'
+    security_opt:
+      - no-new-privileges:true
     environment:
       - CLAMD_CONF_MaxFileSize=0
       - CLAMD_CONF_StreamMaxLength=0
