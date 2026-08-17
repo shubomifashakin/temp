@@ -7,6 +7,8 @@ services:
       options:
         loki-url: 'http://loki:3100/loki/api/v1/push'
         loki-external-labels: 'container={{.Name}}'
+        mode: non-blocking
+        max-buffer-size: 4m
         loki-pipeline-stages: |
           - regex:
               expression: '(?i)\[?\d+\]?\s+(?P<level>LOG|INFO|WARNING|ERROR|FATAL|PANIC|DEBUG):'
@@ -47,6 +49,8 @@ services:
       options:
         loki-url: 'http://loki:3100/loki/api/v1/push'
         loki-external-labels: 'container={{.Name}}'
+        mode: non-blocking
+        max-buffer-size: 4m
     security_opt:
       - no-new-privileges:true
     volumes:
@@ -70,6 +74,8 @@ services:
       options:
         loki-url: 'http://loki:3100/loki/api/v1/push'
         loki-external-labels: 'container={{.Name}}'
+        mode: non-blocking
+        max-buffer-size: 4m
         loki-pipeline-stages: |
           - json:
               expressions:
@@ -126,6 +132,8 @@ services:
       options:
         loki-url: 'http://loki:3100/loki/api/v1/push'
         loki-external-labels: 'container={{.Name}}'
+        mode: non-blocking
+        max-buffer-size: 4m
     security_opt:
       - no-new-privileges:true
     environment:
