@@ -3,6 +3,10 @@
 # Remove once node:24-slim ships with undici 6.27.0+
 CVE-2026-12151
 
+# Ignore DeepmergeTS vulnerability from Prisma chain
+# Transitive dep, not directly installed. No npm override possible without risking breakage.
+CVE-2026-40345 expiry:2026-08-24
+
 # fast-uri - transitive dep via ajv (pulled in by @nestjs/cli, @nestjs/schematics, prisma)
 # Remove once upstream packages update their ajv dependency
 CVE-2026-13676
