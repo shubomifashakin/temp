@@ -1,7 +1,7 @@
 # CVE-2026-12151 - undici bundled in node:24-slim, not yet patched upstream
 # Temp is a WS server not client, low risk
 # Remove once node:24-slim ships with undici 6.27.0+
-CVE-2026-12151
+CVE-2026-12151 expiry:2026-08-31
 
 # Ignore DeepmergeTS vulnerability from Prisma chain
 # Transitive dep, not directly installed. No npm override possible without risking breakage.
@@ -9,21 +9,21 @@ CVE-2026-40345 expiry:2026-08-24
 
 # fast-uri - transitive dep via ajv (pulled in by @nestjs/cli, @nestjs/schematics, prisma)
 # Remove once upstream packages update their ajv dependency
-CVE-2026-13676
-CVE-2026-16221
-CVE-2026-18446
+CVE-2026-13676 expiry:2026-08-31
+CVE-2026-16221 expiry:2026-08-31
+CVE-2026-18446 expiry:2026-08-31
 
 # brace-expansion / ip-address - dev-only transitive deps (jest, @nestjs/cli)
 # confirmed not in prod tree via npm ls --omit=dev
 # Remove once upstream packages update their dependencies
-CVE-2026-14257
-CVE-2026-69152
-CVE-2026-69192
+CVE-2026-14257 expiry:2026-08-31
+CVE-2026-69152 expiry:2026-08-31
+CVE-2026-69192 expiry:2026-08-31
 
 
 # npm CLI's own bundled dependencies inside node:24-slim base image.
 # Not used by our application at runtime (app never invokes npm in the container).
 # Remove this ignore once node:24-slim ships a patched npm version.
-CVE-2026-13149
-CVE-2026-59873
-CVE-2026-59874
+CVE-2026-13149 expiry:2026-08-31
+CVE-2026-59873 expiry:2026-08-31
+CVE-2026-59874 expiry:2026-08-31
