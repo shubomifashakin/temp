@@ -2,16 +2,6 @@ services:
   postgres:
     container_name: temp_postgres
     image: postgres:18.1
-    cpus: 1
-    mem_limit: 2g
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - FOWNER
-      - DAC_OVERRIDE
-      - SETUID
-      - SETGID
     logging:
       driver: loki
       options:
@@ -31,8 +21,8 @@ services:
       - no-new-privileges:true
     volumes:
       - postgres_18_data_temp:/var/lib/postgresql
-      - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
-      - ./init-exporter.sh:/docker-entrypoint-initdb.d/init-exporter.sh:ro
+      - ./postgres.conf:/etc/postgresql/postgresql.conf
+      - ./init-exporter.sh:/docker-entrypoint-initdb.d/init-exporter.sh
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -54,12 +44,6 @@ services:
     container_name: temp_redis
     image: redis:8.4
     mem_limit: 256m
-    cpus: 1
-    read_only: true
-    tmpfs:
-      - /tmp
-    cap_drop:
-      - ALL
     logging:
       driver: loki
       options:
@@ -71,7 +55,7 @@ services:
       - no-new-privileges:true
     volumes:
       - redis_data_temp:/data
-      - ./redis.conf:/etc/redis/redis.conf:ro
+      - ./redis.conf:/etc/redis/redis.conf
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
@@ -84,10 +68,7 @@ services:
   temp:
     image: 545plea/temp:latest
     container_name: temp
-    cpus: 0.5
     mem_limit: 512m
-    cap_drop:
-      - ALL
     logging:
       driver: loki
       options:
@@ -145,15 +126,7 @@ services:
   clamd:
     container_name: clamd
     image: clamav/clamav:1.5-debian
-    cpus: 2
     mem_limit: 2g
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - SETUID
-      - SETGID
     logging:
       driver: loki
       options:
@@ -174,7 +147,7 @@ services:
       interval: 30s
       timeout: 25s
       retries: 5
-      start_period: 100s
+      start_period: 90s
     restart: unless-stopped
     networks:
       - system_wide_network
