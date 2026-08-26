@@ -66,19 +66,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6.0.2
 
-      - name: Run Database Migrations
-        uses: appleboy/ssh-action@v1.2.5
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4.1.2
         with:
-          host: ${{ secrets.HOSTNAME }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKER_USERNAME,CURRENT_SHA,REMOTE_USER,DOPPLER_TOKEN
-          script_path: ./scripts/migrate.sh
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+          version: latest
+
+      - name: Run Database Migrations
         env:
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
           CURRENT_SHA: ${{ github.sha }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.HOSTNAME }} \
+            "DOCKER_USERNAME='$DOCKER_USERNAME' CURRENT_SHA='$CURRENT_SHA' REMOTE_USER='$REMOTE_USER' DOPPLER_TOKEN='$DOPPLER_TOKEN' bash -s" < ./scripts/migrate.sh
 
   deploy:
     runs-on: ubuntu-latest
@@ -88,40 +93,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6.0.2
 
-      - name: Backup current deployment on VPS
-        uses: appleboy/ssh-action@v1.2.5
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4.1.2
         with:
-          host: ${{ secrets.HOSTNAME }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_path: ./scripts/backup-ops.sh
-          envs: REMOTE_USER
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+          version: latest
+
+      - name: Backup current deployment on VPS
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.HOSTNAME }} \
+            "REMOTE_USER='$REMOTE_USER' bash -s" < ./scripts/backup-ops.sh
 
       - name: Copy files to VPS
-        uses: Burnett01/rsync-deployments@v8
-        with:
-          switches: -avr --exclude=".git/*" --exclude=".env*" --exclude="backup/"
-          path: ./ops/
-          remote_host: ${{ secrets.HOSTNAME }}
-          remote_user: ${{ secrets.REMOTE_USER }}
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          remote_path: /home/${{ secrets.REMOTE_USER }}/projects/temp/
+        run: |
+          rsync -avr --exclude=".git/*" --exclude=".env*" --exclude="backup/" \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ops/ ${{ secrets.REMOTE_USER }}@${{ secrets.HOSTNAME }}:/home/${{ secrets.REMOTE_USER }}/projects/temp/
 
       - name: Start containers and rollback on failure
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.HOSTNAME }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_path: ./scripts/start-or-rollback.sh
-          envs: REMOTE_USER,CURRENT_SHA,DOCKER_USERNAME,DOPPLER_TOKEN
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           CURRENT_SHA: ${{ github.sha }}
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.REMOTE_USER }}@${{ secrets.HOSTNAME }} \
+            "REMOTE_USER='$REMOTE_USER' CURRENT_SHA='$CURRENT_SHA' DOCKER_USERNAME='$DOCKER_USERNAME' DOPPLER_TOKEN='$DOPPLER_TOKEN' bash -s" < ./scripts/start-or-rollback.sh
 
   notify:
     name: Notify Discord
