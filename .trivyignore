@@ -12,6 +12,13 @@ CVE-2026-40345 expiry:2026-08-24
 CVE-2026-13676 expiry:2026-08-31
 CVE-2026-16221 expiry:2026-08-31
 CVE-2026-18446 expiry:2026-08-31
+CVE-2026-75899 expiry:2026-10-01
+CVE-2026-75975 expiry:2026-10-01
+CVE-2026-76172 expiry:2026-10-01
+
+# mysql2 - transitive dep, project uses PostgreSQL exclusively
+# Not instantiated at runtime. Remove once upstream updates mysql2.
+GHSA-3f6p-5ww8-9rcr expiry:2026-10-01
 
 # brace-expansion / ip-address - dev-only transitive deps (jest, @nestjs/cli)
 # confirmed not in prod tree via npm ls --omit=dev
