@@ -8,16 +8,17 @@
       "ts-jest",
       {
         "tsconfig": {
-          "module": "commonjs",
-          "moduleResolution": "node",
+          "module": "nodenext",
+          "moduleResolution": "nodenext",
           "esModuleInterop": true,
           "allowSyntheticDefaultImports": true,
           "emitDecoratorMetadata": true,
           "experimentalDecorators": true,
           "target": "ES2023",
           "skipLibCheck": true,
+          "strict": false,
           "strictNullChecks": true,
-          "resolvePackageJsonExports": false
+          "resolvePackageJsonExports": true
         }
       }
     ]
@@ -25,7 +26,6 @@
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
-  "transformIgnorePatterns": ["/node_modules/(?!uuid)"],
   "maxWorkers": "1",
   "testTimeout": 30000
 }
